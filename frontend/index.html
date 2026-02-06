@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | ENSPY Portal</title>
+    <title>Accueil | ENSPY Portal</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="public/images/enspy-logo.png">
 </head>
@@ -14,72 +14,62 @@
         <div class="spinner"></div>
     </div>
 
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="public/images/enspy-logo.png" alt="ENSPY" class="sidebar-logo">
-                <span class="sidebar-title">Polytech Portal</span>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active">
-                    <span>Tableau de bord</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span>Explorer les cours</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span>Mes inscriptions</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span>Paramètres</span>
-                </a>
+    <!-- Navbar -->
+    <header class="header">
+        <div class="header-container container">
+            <a href="/" class="logo">
+                <img src="public/images/enspy-logo.png" alt="ENSPY" class="logo-img">
+                <span class="logo-text">ENSPY Portal</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="#" class="nav-item active">Accueil</a>
+                <a href="#" class="nav-item">Cours</a>
+                <a href="#" class="nav-item">Formateurs</a>
+                <a href="#" class="nav-item">À propos</a>
             </nav>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-wrapper">
-            <header class="header">
-                <div class="header-search">
-                    <!-- Search could go here -->
-                </div>
-                <div class="header-user">
-                    <button class="btn-primary" id="loginBtn">Se connecter</button>
-                    <div id="userProfile" style="display: none;" class="flex items-center gap-md">
-                        <span id="userName">Utilisateur</span>
-                        <img src="https://ui-avatars.com/api/?name=User&background=FF6B00&color=fff" alt="Avatar"
-                            style="width: 32px; border-radius: 50%;">
-                    </div>
-                </div>
-            </header>
-
-            <div class="content">
-                <!-- Hero Section style replica -->
-                <section class="hero fade-in">
-                    <h1>Maîtrisez votre avenir académique</h1>
-                    <p>Accédez aux cours officiels de l'École Nationale Supérieure Polytechnique de Yaoundé.</p>
-                </section>
-
-                <!-- Dynamic Courses Section -->
-                <section class="section">
-                    <div class="section-header">
-                        <h2 class="section-title">Cours recommandés</h2>
-                        <a href="#" style="color: var(--primary-500); font-weight: 500;">Voir tout</a>
-                    </div>
-
-                    <div id="coursesGrid" class="course-grid">
-                        <!-- Courses will be injected here -->
-                        <div class="loading-placeholder" style="grid-column: 1/-1; text-align: center; padding: 2rem;">
-                            <p style="color: var(--text-tertiary);">Chargement des cours depuis la base de données...
-                            </p>
-                        </div>
-                    </div>
-                </section>
+            <div class="header-actions">
+                <button class="btn-primary" id="loginBtn">Se connecter</button>
             </div>
-        </main>
-    </div>
+        </div>
+    </header>
 
-    <!-- Modules for services -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container fade-in">
+                <h1 class="hero-title">Maîtrisez votre avenir académique</h1>
+                <p class="hero-subtitle">Accédez aux ressources pédagogiques de l'École Nationale Supérieure
+                    Polytechnique de Yaoundé.</p>
+                <div class="hero-actions">
+                    <button class="btn-primary btn-lg">Explorer les cours</button>
+                    <button class="btn-outline btn-lg">S'inscrire</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Courses List -->
+        <section class="courses-section container">
+            <div class="section-header">
+                <h2 class="section-title">Cours à la une</h2>
+                <a href="#" class="view-all">Tout voir →</a>
+            </div>
+
+            <div id="coursesGrid" class="course-grid">
+                <div class="loading-placeholder">
+                    <p>Chargement des cours...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 École Nationale Supérieure Polytechnique de Yaoundé. Tous droits réservés.</p>
+        </div>
+    </footer>
+
     <script type="module" src="src/services/api.js"></script>
     <script type="module" src="src/services/courseService.js"></script>
     <script type="module" src="script.js"></script>
