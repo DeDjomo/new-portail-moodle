@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil | ENSPY TRAINING</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand">
+                <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link active">Accueil</a></li>
+                <li><a href="catalog.html" class="nav-link">Cours</a></li>
+                <li><a href="#" class="nav-link">Formateurs</a></li>
+                <li><a href="#" class="nav-link">À propos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Carousel -->
+    <section class="hero-carousel" id="carousel">
+        <div class="carousel-inner" id="carouselInner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active"
+                style="background-image: url('https://images.unsplash.com/photo-1595152452543-e5cca283f585?ixlib=rb-4.1.0&auto=format&fit=crop&w=2000&q=80'); background-color: #1a1a1a;">
+                <div class="carousel-overlay"></div>
+                <div class="container">
+                    <div class="carousel-content fade-up">
+                        <span class="carousel-tag">Excellence Académique</span>
+                        <h1 class="carousel-title">L'élite du <br>Génie au Cameroun</h1>
+                        <p class="carousel-desc">Rejoignez la plateforme officielle de formation continue de l'ENSPY.
+                        </p>
+                        <a href="catalog.html" class="btn-login"
+                            style="padding: 1rem 2.5rem; font-size: 1.1rem;">Découvrir
+                            les cours</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-item"
+                style="background-image: url('https://etudiantafricain.wordpress.com/wp-content/uploads/2020/10/studying-in-east-africa-for-both-local-and-international-students.jpg'); background-color: #1a1a1a;">
+                <div class="carousel-overlay"></div>
+                <div class="container">
+                    <div class="carousel-content focus-in">
+                        <span class="carousel-tag">Innovation Numérique</span>
+                        <h1 class="carousel-title">Apprenez avec <br>les Meilleurs Experts</h1>
+                        <p class="carousel-desc">Des contenus pédagogiques de haute qualité, accessibles partout, tout
+                            le temps.</p>
+                        <a href="catalog.html" class="btn-login"
+                            style="padding: 1rem 2.5rem; font-size: 1.1rem;">S'inscrire
+                            maintenant</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-item"
+                style="background-image: url('https://media.istockphoto.com/id/1334063560/fr/photo/les-%C3%A9tudiants-afro-am%C3%A9ricains-se-penchent-en-e-penchant-avec-leur-professeur-pendant-un-cours.jpg?s=612x612&w=0&k=20&c=i9p-JKYhMl6YHyi1-TK0gKqsrOwQ3GytLRbbKlui4vI='); background-color: #1a1a1a;">
+                <div class="carousel-overlay"></div>
+                <div class="container">
+                    <div class="carousel-content">
+                        <span class="carousel-tag">Réussite Étudiante</span>
+                        <h1 class="carousel-title">Bâtir un Avenir <br>Brillant</h1>
+                        <p class="carousel-desc">Formez-vous aux technologies de demain avec ENSPY Training.</p>
+                        <a href="catalog.html" class="btn-login"
+                            style="padding: 1rem 2.5rem; font-size: 1.1rem;">Explorer</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Clone of Slide 1 -->
+            <div class="carousel-item"
+                style="background-image: url('https://images.unsplash.com/photo-1595152452543-e5cca283f585?ixlib=rb-4.1.0&auto=format&fit=crop&w=2000&q=80'); background-color: #1a1a1a;">
+                <div class="carousel-overlay"></div>
+                <div class="container">
+                    <div class="carousel-content">
+                        <span class="carousel-tag">Excellence Académique</span>
+                        <h1 class="carousel-title">L'élite du <br>Génie au Cameroun</h1>
+                        <p class="carousel-desc">Rejoignez la plateforme officielle de formation continue de l'ENSPY.
+                        </p>
+                        <a href="catalog.html" class="btn-login"
+                            style="padding: 1rem 2.5rem; font-size: 1.1rem;">Découvrir
+                            les cours</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="carousel-dots" id="carouselDots">
+            <span class="dot active" data-index="0"></span>
+            <span class="dot" data-index="1"></span>
+            <span class="dot" data-index="2"></span>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="info-section">
+        <div class="container">
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-certificate info-icon"></i>
+                    <h3>Certifications Reconnues</h3>
+                    <p>Obtenez des certificats validés par l'ENSPY pour booster votre carrière.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-chalkboard-teacher info-icon"></i>
+                    <h3>Experts Qualifiés</h3>
+                    <p>Apprenez auprès des meilleurs professeurs et professionnels du secteur.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-laptop-code info-icon"></i>
+                    <h3>Flexibilité Totale</h3>
+                    <p>Formez-vous à votre rythme, où que vous soyez, sur tous vos appareils.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trending Courses Section -->
+    <section class="trending-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Formations à la Une</h2>
+                <p class="section-subtitle">Les cours les plus plébiscités par nos étudiants</p>
+            </div>
+
+            <div id="trendingGrid" class="grid-courses"
+                style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-bottom: 3rem;">
+                <!-- Top 3 courses injected here by script.js -->
+                <div class="loader-spinner" style="margin: 0 auto;"></div>
+            </div>
+
+            <div class="text-center">
+                <a href="catalog.html" class="btn-primary-outline"
+                    style="padding: 1rem 2rem; border: 2px solid var(--primary); border-radius: 50px; color: var(--primary); text-decoration: none; font-weight: 700; transition: all 0.3s;">Voir
+                    tout le catalogue</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <a href="#" class="brand">
+                            <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                            <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+                        </a>
+                    </div>
+                    <p class="footer-text">L'École Nationale Supérieure Polytechnique de Yaoundé s'engage à fournir une
+                        éducation de classe mondiale pour les futurs ingénieurs.</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="catalog.html">Cours</a></li>
+                        <li><a href="#">Formateurs</a></li>
+                        <li><a href="#">Catégories</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i> B.P. 8390,
+                                Yaoundé</a></li>
+                        <li><a href="#"><i class="fas fa-envelope" style="margin-right: 8px;"></i> info@enspy.cm</a>
+                        </li>
+                        <li><a href="#"><i class="fas fa-phone" style="margin-right: 8px;"></i> +237 222 23 40 40</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Administration</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.9rem;">Accès réservé.</p>
+                    <a href="login.html" class="btn-admin">Administrer un cours</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2026 ENSPY Training. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

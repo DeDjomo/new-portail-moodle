@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil | ENSPY TRAINING</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand">
+                <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link active">Accueil</a></li>
+                <li><a href="#courses" class="nav-link">Cours</a></li>
+                <li><a href="#" class="nav-link">Formateurs</a></li>
+                <li><a href="#" class="nav-link">À propos</a></li>
+            </ul>
+
+            <!-- Login button removed -->
+        </div>
+    </nav>
+
+
+    <!-- Main Content: Sidebar + Courses -->
+    <section class="main-content" id="courses">
+        <div class="container layout-grid">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar">
+                <div class="sidebar-sticky">
+                    <div class="filter-group search-group">
+                        <h3>Recherche</h3>
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" class="search-input" placeholder="Mots-clés...">
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h3>Catégories</h3>
+                        <div class="checkbox-list" id="categoryFilters">
+                            <!-- Categories injected here as checkboxes -->
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <h3>Filtres</h3>
+
+                        <div class="filter-section">
+                            <h4 class="filter-label">Langue</h4>
+                            <div class="checkbox-list">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="language" value="FR">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Français</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="language" value="EN">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Anglais</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-section" style="margin-top: 1.5rem;">
+                            <h4 class="filter-label">Niveau</h4>
+                            <div class="checkbox-list">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="level" value="BEGINNER">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Débutant</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="level" value="INTERMEDIATE">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Intermédiaire</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="level" value="ADVANCED">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Avancé</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Course Grid -->
+            <main class="courses-area">
+                <div class="courses-header">
+                    <h2 class="section-title">Catalogue des Cours</h2>
+                    <p class="section-subtitle">Découvrez nos formations d'excellence</p>
+                </div>
+
+                <div id="coursesGrid" class="grid-courses">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 5rem;">
+                        <div class="loader-spinner" style="margin: 0 auto 1.5rem;"></div>
+                        <p style="color: var(--text-dim);">Chargement en cours...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <a href="#" class="brand">
+                            <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                            <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+                        </a>
+                    </div>
+                    <p class="footer-text">L'École Nationale Supérieure Polytechnique de Yaoundé s'engage à fournir une
+                        éducation de classe mondiale pour les futurs ingénieurs.</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="#">Cours</a></li>
+                        <li><a href="#">Formateurs</a></li>
+                        <li><a href="#">Catégories</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i> B.P. 8390,
+                                Yaoundé</a></li>
+                        <li><a href="#"><i class="fas fa-envelope" style="margin-right: 8px;"></i> info@enspy.cm</a>
+                        </li>
+                        <li><a href="#"><i class="fas fa-phone" style="margin-right: 8px;"></i> +237 222 23 40 40</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Administration</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.9rem;">Accès réservé.</p>
+                    <a href="login.html" class="btn-admin">Administrer un cours</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2026 ENSPY Training. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>

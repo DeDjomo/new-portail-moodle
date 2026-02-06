@@ -2,7 +2,7 @@
  * Base API Service for handles all fetch requests to the backend.
  */
 
-const BASE_URL = 'http://localhost:8000/backend/public'; // Adjust port if necessary
+const BASE_URL = 'http://localhost:8000'; // Target the PHP local server
 
 const apiRequest = async (endpoint, method = 'GET', data = null, isMultipart = false) => {
     const url = `${BASE_URL}/${endpoint}`;
