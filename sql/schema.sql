@@ -45,6 +45,7 @@ CREATE TABLE `instructors` (
     `photo_url` VARCHAR(255),                   -- URL de la photo de l'instructeur
     `website` VARCHAR(255),                     -- Site web personnel
     `linkedin_url` VARCHAR(255),                -- Profil LinkedIn
+    `status` ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE', -- État pour suppression logique
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Table des profils instructeurs';
@@ -60,6 +61,7 @@ CREATE TABLE `categories` (
     `slug` VARCHAR(100) NOT NULL UNIQUE,        -- Identifiant URL (ex: "developpement-web")
     `description` TEXT,                         -- Description de la catégorie
     `parent_id` BIGINT NULL,                    -- ID de la catégorie parente (NULL si racine)
+    `status` ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE', -- État pour suppression logique
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     -- Clé étrangère auto-référencée pour la hiérarchie
@@ -81,6 +83,7 @@ CREATE TABLE `students` (
     `level` VARCHAR(50),                        -- Niveau d'études (ex: "Licence 3")
     `phone` VARCHAR(20),                        -- Téléphone de contact
     `password` VARCHAR(255) NOT NULL,           -- Mot de passe haché
+    `status` ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE', -- État pour suppression logique
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Table des étudiants inscrits';
 

@@ -4,6 +4,9 @@ namespace Models;
 
 require_once 'BaseModel.php';
 
+/**
+ * Model for the 'courses' table.
+ */
 class Course extends BaseModel {
     protected $table_name = "courses";
 
@@ -32,6 +35,9 @@ class Course extends BaseModel {
     public $video_url;
     public $moodle_url;
 
+    /**
+     * Create a new course
+     */
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                 (administrator_id, instructor_id, category_id, title, slug, short_synopsis, 
@@ -47,34 +53,85 @@ class Course extends BaseModel {
 
         $stmt = $this->db->prepare($query);
 
-        $stmt->bindParam(':administrator_id', $this->administrator_id);
-        $stmt->bindParam(':instructor_id', $this->instructor_id);
-        $stmt->bindParam(':category_id', $this->category_id);
-        $stmt->bindParam(':title', $this->title);
-        $stmt->bindParam(':slug', $this->slug);
-        $stmt->bindParam(':short_synopsis', $this->short_synopsis);
-        $stmt->bindParam(':full_description', $this->full_description);
-        $stmt->bindParam(':pedagogical_objectives', $this->pedagogical_objectives);
-        $stmt->bindParam(':target_audience', $this->target_audience);
-        $stmt->bindParam(':prerequisites', $this->prerequisites);
-        $stmt->bindParam(':total_duration_minutes', $this->total_duration_minutes);
-        $stmt->bindParam(':level', $this->level);
-        $stmt->bindParam(':language', $this->language);
-        $stmt->bindParam(':format', $this->format);
-        $stmt->bindParam(':is_certifying', $this->is_certifying);
-        $stmt->bindParam(':status', $this->status);
-        $stmt->bindParam(':published_at', $this->published_at);
-        $stmt->bindParam(':meta_title', $this->meta_title);
-        $stmt->bindParam(':meta_description', $this->meta_description);
-        $stmt->bindParam(':enrolled_count', $this->enrolled_count);
-        $stmt->bindParam(':image_url', $this->image_url);
-        $stmt->bindParam(':video_url', $this->video_url);
-        $stmt->bindParam(':moodle_url', $this->moodle_url);
+        $this->bindAllParams($stmt);
 
         if ($stmt->execute()) {
             $this->id = $this->db->lastInsertId();
             return true;
         }
         return false;
+    }
+
+    /**
+     * Update a course
+     */
+    public function update() {
+        $query = "UPDATE " . $this->table_name . " 
+                SET administrator_id = :administrator_id, instructor_id = :instructor_id, 
+                    category_id = :category_id, title = :title, slug = :slug, 
+                    short_synopsis = :short_synopsis, full_description = :full_description, 
+                    pedagogical_objectives = :pedagogical_objectives, target_audience = :target_audience, 
+                    prerequisites = :prerequisites, total_duration_minutes = :total_duration_minutes, 
+                    level = :level, language = :language, format = :format, 
+                    is_certifying = :is_certifying, status = :status, published_at = :published_at, 
+                    meta_title = :meta_title, meta_description = :meta_description, 
+                    enrolled_count = :enrolled_count, image_url = :image_url, 
+                    video_url = :video_url, moodle_url = :moodle_url
+                WHERE id = :id";
+
+        $stmt = $this->db->prepare($query);
+        $this->bindAllParams($stmt);
+        $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Increment the enrollment counter
+     */
+    public function incrementEnrollmentCount($id) {
+        $query = "UPDATE " . $this->table_name . " SET enrolled_count = enrolled_count + 1 WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$id]);
+    }
+
+    /**
+     * Find by Slug
+     */
+    public function findBySlug($slug) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE slug = ? AND status != 'DELETED' LIMIT 0,1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $slug);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Helper to bind all parameters with correct types
+     */
+    private function bindAllParams($stmt) {
+        $stmt->bindValue(':administrator_id', $this->administrator_id, \PDO::PARAM_INT);
+        $stmt->bindValue(':instructor_id', $this->instructor_id, \PDO::PARAM_INT);
+        $stmt->bindValue(':category_id', $this->category_id, \PDO::PARAM_INT);
+        $stmt->bindValue(':title', $this->title);
+        $stmt->bindValue(':slug', $this->slug);
+        $stmt->bindValue(':short_synopsis', $this->short_synopsis);
+        $stmt->bindValue(':full_description', $this->full_description);
+        $stmt->bindValue(':pedagogical_objectives', $this->pedagogical_objectives);
+        $stmt->bindValue(':target_audience', $this->target_audience);
+        $stmt->bindValue(':prerequisites', $this->prerequisites);
+        $stmt->bindValue(':total_duration_minutes', $this->total_duration_minutes, \PDO::PARAM_INT);
+        $stmt->bindValue(':level', $this->level);
+        $stmt->bindValue(':language', $this->language);
+        $stmt->bindValue(':format', $this->format);
+        $stmt->bindValue(':is_certifying', $this->is_certifying ? 1 : 0, \PDO::PARAM_INT);
+        $stmt->bindValue(':status', $this->status);
+        $stmt->bindValue(':published_at', $this->published_at);
+        $stmt->bindValue(':meta_title', $this->meta_title);
+        $stmt->bindValue(':meta_description', $this->meta_description);
+        $stmt->bindValue(':enrolled_count', $this->enrolled_count, \PDO::PARAM_INT);
+        $stmt->bindValue(':image_url', $this->image_url);
+        $stmt->bindValue(':video_url', $this->video_url);
+        $stmt->bindValue(':moodle_url', $this->moodle_url);
     }
 }

@@ -2,6 +2,10 @@
 
 namespace Models;
 
+/**
+ * Model for the 'enrollments' table.
+ * Association between Students and Courses.
+ */
 class Enrollment {
     private $db;
     private $table_name = "enrollments";
@@ -29,14 +33,21 @@ class Enrollment {
         $stmt->bindParam(':course_id', $this->course_id);
         $stmt->bindParam(':status', $this->status);
 
-        if ($stmt->execute()) {
-            return true;
-        }
-        return false;
+        return $stmt->execute();
     }
 
     /**
-     * Update enrollment status
+     * Check if an enrollment already exists
+     */
+    public function exists($student_id, $course_id) {
+        $query = "SELECT COUNT(*) FROM " . $this->table_name . " WHERE student_id = ? AND course_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$student_id, $course_id]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Update enrollment status for a specific student/course
      */
     public function updateStatus($student_id, $course_id, $status) {
         $query = "UPDATE " . $this->table_name . " SET status = :status WHERE student_id = :student_id AND course_id = :course_id";
@@ -48,7 +59,16 @@ class Enrollment {
     }
 
     /**
-     * Get enrollments by course ID
+     * Mark all pending enrollments as DONE for a course
+     */
+    public function markAllAsDone($course_id) {
+        $query = "UPDATE " . $this->table_name . " SET status = 'DONE' WHERE course_id = ? AND status = 'PENDING'";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([$course_id]);
+    }
+
+    /**
+     * Get enrollments with student details by course ID
      */
     public function getByCourse($course_id, $status = null) {
         $query = "SELECT e.*, s.first_name, s.last_name, s.email 

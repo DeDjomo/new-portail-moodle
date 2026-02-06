@@ -1,6 +1,155 @@
 <?php
 
-// Basic Router
-$request_uri = $_SERVER['REQUEST_URI'];
+/**
+ * Main Entry Point and Router for the Portal Backend.
+ */
 
-echo "Hello from PortalNew Backend!";
+// 1. Headers & CORS
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS");
+header("Access-Control-Max-Age: 3600");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
+// 2. Initializations
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../src/Controllers/AdminController.php';
+require_once __DIR__ . '/../src/Controllers/InstructorController.php';
+require_once __DIR__ . '/../src/Controllers/CategoryController.php';
+require_once __DIR__ . '/../src/Controllers/CourseController.php';
+require_once __DIR__ . '/../src/Controllers/StudentController.php';
+require_once __DIR__ . '/../src/Controllers/EnrollmentController.php';
+
+use Controllers\AdminController;
+use Controllers\InstructorController;
+use Controllers\CategoryController;
+use Controllers\CourseController;
+use Controllers\StudentController;
+use Controllers\EnrollmentController;
+
+$database = new Database();
+$db = $database->getConnection();
+
+// 3. Request Parsing
+$method = $_SERVER['REQUEST_METHOD'];
+$request_uri = $_SERVER['REQUEST_URI'];
+$script_name = $_SERVER['SCRIPT_NAME'];
+
+// Remove script name from URI to get clean path
+$base_path = str_replace('index.php', '', $script_name);
+$path = str_replace($base_path, '', $request_uri);
+$path = parse_url($path, PHP_URL_PATH);
+$path_parts = explode('/', trim($path, '/'));
+
+// Get Input Data
+$input_data = [];
+if ($method === 'POST' || $method === 'PUT') {
+    // Check for JSON
+    $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($content_type, 'application/json') !== false) {
+        $input_data = json_decode(file_get_contents("php://input"), true) ?? [];
+    } else {
+        // Fallback to $_POST for multipart or form-url-encoded
+        $input_data = $_POST;
+    }
+}
+
+// 4. Routing Table
+try {
+    $resource = $path_parts[0] ?? '';
+    $id = $path_parts[1] ?? null;
+
+    switch ($resource) {
+        case 'admins':
+            $controller = new AdminController($db);
+            if ($method === 'POST') {
+                if ($id === 'login') $controller->login($input_data);
+                else $controller->create($input_data);
+            } elseif ($method === 'GET') {
+                if ($id) $controller->show($id);
+                else $controller->index();
+            } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
+            elseif ($method === 'DELETE' && $id) $controller->delete($id);
+            else routeNotFound();
+            break;
+
+        case 'instructors':
+            $controller = new InstructorController($db);
+            if ($method === 'POST') $controller->create($input_data);
+            elseif ($method === 'GET') {
+                if ($id) $controller->show($id);
+                else $controller->index();
+            } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
+            elseif ($method === 'DELETE' && $id) $controller->delete($id);
+            else routeNotFound();
+            break;
+
+        case 'categories':
+            $controller = new CategoryController($db);
+            if ($method === 'POST') $controller->create($input_data);
+            elseif ($method === 'GET') {
+                if ($id) $controller->show($id);
+                else $controller->index();
+            } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
+            elseif ($method === 'DELETE' && $id) $controller->delete($id);
+            else routeNotFound();
+            break;
+
+        case 'courses':
+            $controller = new CourseController($db);
+            if ($method === 'POST') $controller->create($input_data);
+            elseif ($method === 'GET') {
+                if ($id) $controller->show($id);
+                else $controller->index();
+            } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
+            elseif ($method === 'DELETE' && $id) $controller->delete($id);
+            else routeNotFound();
+            break;
+
+        case 'students':
+            $controller = new StudentController($db);
+            if ($method === 'POST') {
+                if ($id === 'login') $controller->login($input_data);
+                else $controller->create($input_data);
+            } elseif ($method === 'GET') {
+                if ($id) $controller->show($id);
+                else $controller->index();
+            } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
+            elseif ($method === 'DELETE' && $id) $controller->delete($id);
+            else routeNotFound();
+            break;
+
+        case 'enrollments':
+            $controller = new EnrollmentController($db);
+            if ($method === 'POST') $controller->enroll($input_data);
+            elseif ($method === 'GET' && isset($path_parts[1]) && $path_parts[1] === 'course' && isset($path_parts[2])) {
+                $status = $_GET['status'] ?? null;
+                $controller->getCourseEnrollments($path_parts[2], $status);
+            } elseif ($method === 'PUT' && isset($path_parts[1]) && $path_parts[1] === 'mark-done' && isset($path_parts[2])) {
+                $controller->exportComplete($path_parts[2]);
+            } else routeNotFound();
+            break;
+
+        default:
+            routeNotFound();
+            break;
+    }
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['message' => 'Internal Server Error', 'error' => $e->getMessage()]);
+}
+
+/**
+ * Handle 404
+ */
+if (!function_exists('routeNotFound')) {
+    function routeNotFound() {
+        http_response_code(404);
+        echo json_encode(['message' => 'Resource not found or method not allowed']);
+    }
+}

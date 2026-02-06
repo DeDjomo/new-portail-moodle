@@ -4,6 +4,10 @@ namespace Models;
 
 require_once 'BaseModel.php';
 
+/**
+ * Model for the 'administrators' table.
+ * Implements persistent storage logic for admin accounts.
+ */
 class Administrator extends BaseModel {
     protected $table_name = "administrators";
 
@@ -64,6 +68,27 @@ class Administrator extends BaseModel {
         $stmt->bindParam(':phone', $this->phone);
         $stmt->bindParam(':id', $this->id);
 
+        return $stmt->execute();
+    }
+
+    /**
+     * Find administrator by email
+     */
+    public function findByEmail($email) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = ? AND status != 'DELETED' LIMIT 0,1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $email);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Update last login timestamp
+     */
+    public function updateLastLogin($id) {
+        $query = "UPDATE " . $this->table_name . " SET last_login = NOW() WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $id);
         return $stmt->execute();
     }
 }
