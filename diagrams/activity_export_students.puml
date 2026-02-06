@@ -1,0 +1,18 @@
+@startuml
+|Admin|
+start
+:Select Course;
+
+|System|
+:Load Enrollments with status "Pending"\nfor the selected Course;
+:Display Enrollment List\n(Student Details);
+
+|Admin|
+:Request Export;
+
+|System|
+:Update Status of displayed Enrollments\nto "Done";
+:Generate and Download Export File;
+
+stop
+@enduml

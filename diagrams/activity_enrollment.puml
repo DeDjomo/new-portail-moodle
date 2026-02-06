@@ -1,0 +1,41 @@
+@startuml
+|Student|
+start
+:Click on Course;
+
+|System|
+:Load Course & Instructor Details;
+
+|Student|
+:View Details;
+:Click "Enroll in Course";
+
+|System|
+:Request Email Address;
+
+|Student|
+:Enter Email;
+
+|System|
+:Check if Email Exists in DB;
+
+if (Email Exists?) then (No)
+  :Inform "No Account Found";
+  :Prompt to Create Account;
+  |Student|
+  :Create Account;
+  |System|
+  :Account Created;
+else (Yes)
+endif
+
+|System|
+:Load Student & Course Info;
+:Compose Email to Admin;
+:Send Email to Admin;
+:Increment Enrollment Count;
+:Create Enrollment Record\n(Student-Course Association);
+:Send Confirmation Message to Student;
+
+stop
+@enduml

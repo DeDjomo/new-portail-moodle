@@ -1,0 +1,17 @@
+@startuml
+
+state "Draft" as draft
+state "Published" as published
+state "Archived" as archived
+
+[*] --> published : Create (All Info Provided)
+[*] --> draft : Create (Missing Info)
+
+draft --> published : Update (Complete Info)
+draft --> archived : Archive (by Admin)
+
+published --> archived : Archive (by Admin)
+published --> draft : Unpublish (Edit)
+
+archived --> [*]
+@enduml

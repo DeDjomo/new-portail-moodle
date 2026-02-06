@@ -1,0 +1,79 @@
+@startuml
+left to right direction
+actor "Super Admin" as SA
+
+rectangle "Portal System" {
+    package "System Access" {
+      usecase "Login" as UC_Login
+    }
+
+    package "Administrator Management" {
+      usecase "Create Administrator" as UC_CreateAdmin
+      usecase "Suspend Administrator" as UC_SuspendAdmin
+      usecase "Delete Administrator" as UC_DeleteAdmin
+    }
+
+    package "Instructor Management" {
+      usecase "Create Instructor" as UC_CreateInst
+      usecase "View Instructors" as UC_ViewInst
+      usecase "Edit Instructor" as UC_EditInst
+
+    }
+
+    package "Category Management" {
+      usecase "Create Category" as UC_CreateCat
+      usecase "View Categories" as UC_ViewCat
+      usecase "Edit Category" as UC_EditCat
+
+    }
+
+    package "Course Management" {
+      usecase "View All Courses" as UC_ViewAllCourses
+      usecase "View Enrolled Students (Any Course)" as UC_ViewAllStudents
+      usecase "Create Course" as UC_CreateCourse
+      usecase "Archive Course" as UC_ArchiveCourse
+      usecase "Edit Course" as UC_EditCourse
+      usecase "Delete Course" as UC_DeleteCourse
+      usecase "View My Courses" as UC_ViewMyCourses
+      usecase "Export Student List" as UC_ExportStudents
+      usecase "Filter by Category" as UC_FilterCat
+      usecase "Filter by Status" as UC_FilterStatus
+      usecase "List All Courses by Enrollment (Desc)" as UC_SortEnroll
+      usecase "Filter by Standard Admin" as UC_FilterAdmin
+      usecase "Filter by Instructor" as UC_FilterInst
+      usecase "Sort Filtered Results by Enrollment" as UC_SortFiltered
+    }
+}
+
+SA --> UC_Login
+SA --> UC_CreateAdmin
+SA --> UC_SuspendAdmin
+SA --> UC_DeleteAdmin
+
+SA --> UC_CreateInst
+SA --> UC_ViewInst
+SA --> UC_EditInst
+
+
+SA --> UC_CreateCat
+SA --> UC_ViewCat
+SA --> UC_EditCat
+
+
+SA --> UC_ViewAllCourses
+SA --> UC_ViewAllStudents
+SA --> UC_CreateCourse
+SA --> UC_ArchiveCourse
+SA --> UC_EditCourse
+SA --> UC_DeleteCourse
+SA --> UC_ViewMyCourses
+SA --> UC_ViewMyCourses
+SA --> UC_ExportStudents
+SA --> UC_FilterCat
+SA --> UC_FilterStatus
+SA --> UC_SortEnroll
+SA --> UC_FilterAdmin
+SA --> UC_FilterInst
+SA --> UC_SortFiltered
+
+@enduml

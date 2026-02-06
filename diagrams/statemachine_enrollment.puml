@@ -1,0 +1,10 @@
+@startuml
+state "Pending" as pending
+state "Done" as done
+
+[*] --> pending : Create
+
+pending --> done : Export Student List (by Admin)
+
+done --> [*]
+@enduml

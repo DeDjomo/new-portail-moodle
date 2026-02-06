@@ -1,0 +1,126 @@
+@startuml
+top to bottom direction
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+
+enum AdminType {
+  SUPER_ADMIN
+  STANDARD_ADMIN
+}
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+class Administrator {
+  - Long id
+  - String lastName
+  - String firstName
+  - String email
+  - String passwordHash
+  - AdminType type
+  - AdminStatus status
+  - String avatarUrl
+  - String phone
+  - LocalDateTime lastLogin
+}
+
+class Instructor {
+  - Long id
+  - String fullName
+  - String professionalTitle
+  - String organization
+  - String shortBio
+  - String fullBio
+  - String photoUrl
+  - String website
+  - String linkedinUrl
+}
+
+class Category {
+  - Long id
+  - String name
+  - String slug
+  - String description
+  - Long parentId
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum CourseLanguage {
+  FR
+  EN
+}
+
+enum CourseFormat {
+  VIDEO
+  TEXT
+  MIXED
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  DELETED
+}
+
+enum EnrollmentStatus {
+  PENDING
+  DONE
+}
+
+class Course {
+  - Long id
+  - String title
+  - String slug
+  - String shortSynopsis
+  - String fullDescription
+  - String pedagogicalObjectives
+  - String targetAudience
+  - String prerequisites
+  - Integer totalDurationMinutes
+  - CourseLevel level
+  - CourseLanguage language
+  - CourseFormat format
+  - Boolean isCertifying
+  - CourseStatus status
+  - LocalDateTime publishedAt
+  - String metaTitle
+  - String metaDescription
+  - Integer enrolledCount
+  - String imageUrl
+  - String videoUrl
+  - String moodleUrl
+}
+
+class Student {
+  - Long id
+  - String lastName
+  - String firstName
+  - String email
+  - String major
+  - String level
+  - String phone
+  - String password
+}
+
+class Enrollment {
+  - EnrollmentStatus status
+}
+
+Administrator "1" -- "0..*" Course : creates >
+Instructor "1" -- "0..*" Course : presents >
+Category "1" -- "0..*" Course : contains >
+Category "1" -- "0..*" Category : parent >
+
+Student "0..*" -- "0..*" Course : enrolls >
+(Student, Course) .. Enrollment
+
+@enduml

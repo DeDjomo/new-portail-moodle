@@ -1,0 +1,16 @@
+@startuml
+
+state "Active" as active
+state "Suspended" as suspended
+state "Deleted" as deleted
+
+[*] --> active : Create (Default)
+
+active --> suspended : Suspend (by SuperAdmin)
+active --> deleted : Delete
+
+suspended --> active : Reactivate
+suspended --> deleted : Delete
+
+deleted --> [*]
+@enduml

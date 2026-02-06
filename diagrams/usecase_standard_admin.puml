@@ -1,0 +1,64 @@
+@startuml
+left to right direction
+actor "Standard Admin" as SA
+
+rectangle "Portal System" {
+    package "System Access" {
+      usecase "Login" as UC_Login
+    }
+
+    package "Course Management" {
+      usecase "Create Course" as UC_CreateCourse
+      usecase "Archive Course" as UC_ArchiveCourse
+      usecase "Edit Course" as UC_EditCourse
+      usecase "Delete Course" as UC_DeleteCourse
+      usecase "View My Courses" as UC_ViewMyCourses
+      usecase "Filter by Category" as UC_FilterCat
+      usecase "Filter by Status (Published/Draft/Archived)" as UC_FilterStatus
+      usecase "Sort My Courses by Enrollment (Desc)" as UC_SortEnroll
+    }
+
+    package "Instructor Management" {
+      usecase "Create Instructor" as UC_CreateInst
+      usecase "View Instructors" as UC_ViewInst
+      usecase "Edit Instructor" as UC_EditInst
+
+    }
+
+    package "Category Management" {
+      usecase "Create Category" as UC_CreateCat
+      usecase "View Categories" as UC_ViewCat
+      usecase "Edit Category" as UC_EditCat
+
+    }
+
+    package "Student Management" {
+      usecase "View Enrolled Students (My Course)" as UC_ViewMyStudents
+      usecase "Export Student List" as UC_ExportStudents
+    }
+}
+
+SA --> UC_Login
+SA --> UC_CreateCourse
+SA --> UC_ArchiveCourse
+SA --> UC_EditCourse
+SA --> UC_DeleteCourse
+SA --> UC_ViewMyCourses
+SA --> UC_FilterCat
+SA --> UC_FilterStatus
+SA --> UC_SortEnroll
+
+SA --> UC_CreateInst
+SA --> UC_ViewInst
+SA --> UC_EditInst
+
+
+SA --> UC_CreateCat
+SA --> UC_ViewCat
+SA --> UC_EditCat
+
+
+SA --> UC_ViewMyStudents
+SA --> UC_ExportStudents
+
+@enduml

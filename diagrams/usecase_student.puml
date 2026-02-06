@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+actor "Student" as S
+
+rectangle "Portal System" {
+    package "System Access" {
+      usecase "Register" as UC_Register
+    }
+
+    package "Course Enrollment" {
+      usecase "Enroll in Course" as UC_Enroll
+    }
+
+    package "Course Exploration" {
+      usecase "View Published Courses" as UC_ViewCourses
+      usecase "Filter by Category" as UC_FilterCat
+      usecase "Filter by Instructor" as UC_FilterInst
+      usecase "Filter by Enrollment Count" as UC_FilterViews
+    }
+}
+
+S --> UC_Register
+S --> UC_Enroll
+S --> UC_ViewCourses
+S --> UC_FilterCat
+S --> UC_FilterInst
+S --> UC_FilterViews
+
+@enduml

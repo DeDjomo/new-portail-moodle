@@ -1,0 +1,31 @@
+@startuml
+actor Student
+participant System
+
+Student -> System : selectCourse(courseId)
+activate System
+System --> Student : Displays course details
+deactivate System
+
+Student -> System : enrollInCourse()
+activate System
+System --> Student : Requests email address
+deactivate System
+
+Student -> System : submitEmail(email)
+activate System
+System -> System : checkEmailExists(email)
+
+alt Email Exists
+    System -> System : loadStudentInfo()
+    System -> System : createEnrollmentHeader()
+    System -> System : incrementEnrollmentCount()
+    System -> System : notifyAdminOfEnrollment()
+    System --> Student : Displays enrollment confirmation
+else Email Not Found
+    System --> Student : Displays "Account not found" message
+    System --> Student : Prompts to create account
+end
+
+deactivate System
+@enduml

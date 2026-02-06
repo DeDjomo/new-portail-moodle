@@ -1,0 +1,95 @@
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "Administrator" as admin {
+  *id : Long <<PK>>
+  --
+  last_name : String
+  first_name : String
+  email : String
+  password_hash : String
+  type : AdminType
+  status : AdminStatus
+  avatar_url : String
+  phone : String
+  last_login : LocalDateTime
+}
+
+entity "Instructor" as instructor {
+  *id : Long <<PK>>
+  --
+  full_name : String
+  professional_title : String
+  organization : String
+  short_bio : String
+  full_bio : String
+  photo_url : String
+  website : String
+  linkedin_url : String
+}
+
+entity "Category" as category {
+  *id : Long <<PK>>
+  --
+  name : String
+  slug : String
+  description : String
+  *parent_id : Long <<FK>>
+}
+
+entity "Student" as student {
+  *id : Long <<PK>>
+  --
+  last_name : String
+  first_name : String
+  email : String
+  major : String
+  level : String
+  phone : String
+  password : String
+}
+
+entity "Course" as course {
+  *id : Long <<PK>>
+  --
+  *administrator_id : Long <<FK>>
+  *instructor_id : Long <<FK>>
+  *category_id : Long <<FK>>
+  title : String
+  slug : String
+  short_synopsis : String
+  full_description : String
+  pedagogical_objectives : String
+  target_audience : String
+  prerequisites : String
+  total_duration_minutes : Integer
+  level : CourseLevel
+  language : CourseLanguage
+  format : CourseFormat
+  is_certifying : Boolean
+  status : CourseStatus
+  published_at : LocalDateTime
+  meta_title : String
+  meta_description : String
+  enrolled_count : Integer
+  image_url : String
+  video_url : String
+  moodle_url : String
+}
+
+entity "Enrollment" as enrollment {
+  *student_id : Long <<PK, FK>>
+  *course_id : Long <<PK, FK>>
+  --
+  status : EnrollmentStatus
+}
+
+admin ||..o{ course
+instructor ||..o{ course
+category ||..o{ course
+category ||..o{ category
+student ||..o{ enrollment
+course ||..o{ enrollment
+
+@enduml
