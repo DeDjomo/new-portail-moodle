@@ -1,36 +1,66 @@
+import CourseService from './src/services/courseService.js';
+
 /**
- * Frontend Interactivity for the Portal Landing Page
+ * Frontend Logic for ENSPY Portal
+ * Fetches data from PHP Backend and renders UI
  */
+document.addEventListener('DOMContentLoaded', async () => {
+    const loader = document.getElementById('loader');
+    const coursesGrid = document.getElementById('coursesGrid');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const header = document.querySelector('.header');
+    try {
+        console.log('Fetching courses...');
+        const response = await CourseService.getAll();
+        console.log('Courses received:', response);
 
-    // Add shadow and higher opacity to header on scroll
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            header.style.backgroundColor = 'rgba(15, 20, 25, 0.95)';
-            header.style.boxShadow = 'var(--shadow)';
+        const courses = response.data || response; // Handle different API response formats
+
+        if (Array.isArray(courses) && courses.length > 0) {
+            renderCourses(courses);
         } else {
-            header.style.backgroundColor = 'var(--glass)';
-            header.style.boxShadow = 'none';
+            coursesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-tertiary);">Aucun cours disponible pour le moment.</p>';
         }
-    });
-
-    // Smooth scroll for nav links
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            if (link.getAttribute('href').startsWith('#')) {
-                e.preventDefault();
-                const targetId = link.getAttribute('href');
-                if (targetId === '#') return;
-
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        });
-    });
-
-    console.log('ENSPY Portal Frontend Initialized');
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+        coursesGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--error);">Erreur lors du chargement des cours. Vérifiez la connexion au backend.</p>';
+    } finally {
+        // Hide loader with transition
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }
+    }
 });
+
+/**
+ * Renders course cards into the grid
+ * @param {Array} courses 
+ */
+function renderCourses(courses) {
+    const coursesGrid = document.getElementById('coursesGrid');
+    coursesGrid.innerHTML = ''; // Clear placeholders
+
+    courses.forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'course-card fade-in';
+
+        // Use a placeholder image if thumbnail is missing
+        const bannerUrl = course.thumbnail_url || `https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800`;
+
+        card.innerHTML = `
+            <div class="course-banner" style="background-image: url('${bannerUrl}')"></div>
+            <div class="course-body">
+                <div class="course-meta">${course.category_name || 'Général'}</div>
+                <h3 class="course-title">${course.title}</h3>
+                <div class="course-footer">
+                    <span class="course-stats">${course.enrolled_count || 0} inscrits</span>
+                    <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Détails</button>
+                </div>
+            </div>
+        `;
+
+        coursesGrid.appendChild(card);
+    });
+}
