@@ -1,0 +1,71 @@
+<?php
+
+namespace Models;
+
+class Enrollment {
+    private $db;
+    private $table_name = "enrollments";
+
+    public $student_id;
+    public $course_id;
+    public $status;
+    public $enrolled_at;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    /**
+     * Create enrollment record
+     */
+    public function create() {
+        $query = "INSERT INTO " . $this->table_name . " 
+                (student_id, course_id, status)
+                VALUES (:student_id, :course_id, :status)";
+
+        $stmt = $this->db->prepare($query);
+
+        $stmt->bindParam(':student_id', $this->student_id);
+        $stmt->bindParam(':course_id', $this->course_id);
+        $stmt->bindParam(':status', $this->status);
+
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Update enrollment status
+     */
+    public function updateStatus($student_id, $course_id, $status) {
+        $query = "UPDATE " . $this->table_name . " SET status = :status WHERE student_id = :student_id AND course_id = :course_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':student_id', $student_id);
+        $stmt->bindParam(':course_id', $course_id);
+        return $stmt->execute();
+    }
+
+    /**
+     * Get enrollments by course ID
+     */
+    public function getByCourse($course_id, $status = null) {
+        $query = "SELECT e.*, s.first_name, s.last_name, s.email 
+                FROM " . $this->table_name . " e
+                JOIN students s ON e.student_id = s.id
+                WHERE e.course_id = ?";
+        
+        if ($status) {
+            $query .= " AND e.status = ?";
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $course_id);
+        if ($status) {
+            $stmt->bindParam(2, $status);
+        }
+        $stmt->execute();
+        return $stmt;
+    }
+}
