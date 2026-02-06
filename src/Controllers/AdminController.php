@@ -4,9 +4,11 @@ namespace Controllers;
 
 require_once __DIR__ . '/../Models/Administrator.php';
 require_once __DIR__ . '/../Utils/FileUploader.php';
+require_once __DIR__ . '/../Utils/EmailService.php';
 
 use Models\Administrator;
 use Utils\FileUploader;
+use Utils\EmailService;
 
 /**
  * Controller for managing Administrators.
@@ -16,11 +18,13 @@ class AdminController {
     private $db;
     private $adminModel;
     private $uploader;
+    private $emailService;
 
     public function __construct($db) {
         $this->db = $db;
         $this->adminModel = new Administrator($db);
         $this->uploader = new FileUploader('avatars');
+        $this->emailService = new EmailService();
     }
 
     /**
@@ -100,7 +104,11 @@ class AdminController {
         $this->adminModel->phone = $data['phone'] ?? null;
 
         if ($this->adminModel->create()) {
-            // TODO: Trigger Welcome Email (action différée)
+            // Trigger Welcome Email with credentials
+            $fullName = $this->adminModel->first_name . ' ' . $this->adminModel->last_name;
+            $body = $this->emailService->getAdminWelcomeTemplate($fullName, $data['email'], $data['password']);
+            $this->emailService->send($this->adminModel->email, "Bienvenue sur le Portail Moodle", $body);
+            
             return $this->jsonResponse([
                 'message' => 'Administrator created successfully',
                 'id' => $this->adminModel->id

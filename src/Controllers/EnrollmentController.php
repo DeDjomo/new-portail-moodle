@@ -5,10 +5,14 @@ namespace Controllers;
 require_once __DIR__ . '/../Models/Enrollment.php';
 require_once __DIR__ . '/../Models/Course.php';
 require_once __DIR__ . '/../Models/Student.php';
+require_once __DIR__ . '/../Models/Administrator.php';
+require_once __DIR__ . '/../Utils/EmailService.php';
 
 use Models\Enrollment;
 use Models\Course;
 use Models\Student;
+use Models\Administrator;
+use Utils\EmailService;
 
 /**
  * Controller for managing Course Enrollments.
@@ -19,12 +23,16 @@ class EnrollmentController {
     private $enrollmentModel;
     private $courseModel;
     private $studentModel;
+    private $adminModel;
+    private $emailService;
 
     public function __construct($db) {
         $this->db = $db;
         $this->enrollmentModel = new Enrollment($db);
         $this->courseModel = new Course($db);
         $this->studentModel = new Student($db);
+        $this->adminModel = new Administrator($db);
+        $this->emailService = new EmailService();
     }
 
     /**
@@ -69,7 +77,7 @@ class EnrollmentController {
             // 6. Post-enrollment actions
             $this->courseModel->incrementEnrollmentCount($courseId);
             
-            // 7. Notification (Simulated)
+            // 7. Notification
             $this->notifyParties($student, $course);
 
             return $this->jsonResponse([
@@ -106,13 +114,22 @@ class EnrollmentController {
     }
 
     /**
-     * Simulated notification system
+     * Email notification system
      */
     private function notifyParties($student, $course) {
-        // In a real app, this would send an actual email.
-        // For this project, we log the intent.
+        // Fetch Admin of the course
+        $adminId = $course['administrator_id'];
+        $admin = $this->adminModel->getById($adminId);
+
+        if ($admin) {
+            $adminName = $admin['first_name'] . ' ' . $admin['last_name'];
+            $studentName = $student['first_name'] . ' ' . $student['last_name'];
+            
+            $body = $this->emailService->getNewEnrollmentTemplate($adminName, $studentName, $course['title']);
+            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $body);
+        }
+
         error_log("Enrollment Notification: Student {$student['email']} enrolled in Course '{$course['title']}'.");
-        error_log("Admin Notification: New enrollment for Course '{$course['title']}'.");
     }
 
     /**
