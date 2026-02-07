@@ -1,13 +1,23 @@
 #!/bin/bash
 
 # =============================================================================
-# 🎓 Portail de Formation ENSPY - Script de Démarrage
+# 🎓 Portail de Formation ENSPY - Script de Démarrage Automatique
 # =============================================================================
-# Ce script vérifie l'environnement, installe les dépendances manquantes
-# et lance les serveurs de développement.
+# Ce script:
+# 1. Clone le dépôt GitHub si nécessaire
+# 2. Vérifie l'environnement et installe les dépendances manquantes
+# 3. Configure la base de données
+# 4. Lance les serveurs de développement
+#
+# Usage: ./start.sh
 # =============================================================================
 
 set -e  # Arrêter en cas d'erreur
+
+# Configuration du dépôt
+REPO_URL="https://github.com/DeDjomo/new-portail-moodle.git"
+REPO_NAME="new-portail-moodle"
+BRANCH="develop"
 
 # Couleurs pour l'affichage
 RED='\033[0;31m'
@@ -20,9 +30,6 @@ NC='\033[0m' # No Color
 # Ports personnalisés (évite les ports communs)
 BACKEND_PORT=9080
 FRONTEND_PORT=9090
-
-# Répertoire du script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # =============================================================================
 # Fonctions utilitaires
@@ -59,6 +66,50 @@ check_command() {
         return 1
     fi
 }
+
+# =============================================================================
+# Clonage automatique du dépôt
+# =============================================================================
+
+# Vérifier si on est dans le bon répertoire (avec backend/frontend)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ ! -d "$SCRIPT_DIR/backend" ] || [ ! -d "$SCRIPT_DIR/frontend" ]; then
+    print_header "🚀 Installation du Portail ENSPY"
+    
+    # Vérifier si git est disponible
+    if ! check_command git; then
+        print_error "Git n'est pas installé. Veuillez l'installer d'abord:"
+        echo "  Ubuntu/Debian: sudo apt install git"
+        echo "  macOS: brew install git"
+        exit 1
+    fi
+    
+    # Vérifier si le dossier existe déjà
+    if [ -d "$SCRIPT_DIR/$REPO_NAME" ]; then
+        print_info "Le dépôt existe déjà dans $SCRIPT_DIR/$REPO_NAME"
+        cd "$SCRIPT_DIR/$REPO_NAME"
+        print_info "Mise à jour du code..."
+        git pull origin $BRANCH || true
+    else
+        print_info "Clonage du dépôt depuis GitHub..."
+        cd "$SCRIPT_DIR"
+        git clone -b $BRANCH "$REPO_URL"
+        cd "$REPO_NAME"
+        print_success "Dépôt cloné avec succès"
+    fi
+    
+    # Copier ce script dans le dépôt cloné si nécessaire
+    if [ ! -f "./start.sh" ]; then
+        cp "${BASH_SOURCE[0]}" ./start.sh
+        chmod +x ./start.sh
+    fi
+    
+    # Mettre à jour SCRIPT_DIR pour pointer vers le dépôt cloné
+    SCRIPT_DIR="$(pwd)"
+    print_success "Répertoire de travail: $SCRIPT_DIR"
+    echo ""
+fi
 
 # =============================================================================
 # Vérification du système d'exploitation
