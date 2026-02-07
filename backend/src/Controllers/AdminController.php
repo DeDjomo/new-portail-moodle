@@ -182,8 +182,21 @@ class AdminController {
         $this->adminModel->avatar_url = $avatarUrl;
         $this->adminModel->phone = $data['phone'] ?? $existing['phone'];
 
+        // Handle Password Update
+        if (!empty($data['password'])) {
+            $hash = password_hash($data['password'], PASSWORD_BCRYPT);
+            $this->adminModel->updatePassword($id, $hash);
+        }
+
         if ($this->adminModel->update()) {
-            return $this->jsonResponse(['message' => 'Administrator updated successfully'], 200);
+            // Fetch updated admin to return new avatar_url
+            $updatedAdmin = $this->adminModel->getById($id);
+            unset($updatedAdmin['password_hash']);
+            
+            return $this->jsonResponse([
+                'message' => 'Administrator updated successfully',
+                'admin' => $updatedAdmin
+            ], 200);
         }
 
         return $this->jsonResponse(['message' => 'Failed to update administrator'], 500);

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Cours | Administration ENSPY</title>
+    <title>Statistiques | Administration ENSPY</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,9 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -33,13 +36,13 @@
             <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
             </a>
-            <a href="courses.html" class="nav-item active">
+            <a href="courses.html" class="nav-item">
                 <i class="fas fa-book-open"></i> <span>Mes Cours</span>
             </a>
             <a href="students.html" class="nav-item">
                 <i class="fas fa-users"></i> <span>Étudiants</span>
             </a>
-            <a href="statistics.html" class="nav-item">
+            <a href="statistics.html" class="nav-item active">
                 <i class="fas fa-chart-pie"></i> <span>Statistiques</span>
             </a>
             <a href="settings.html" class="nav-item">
@@ -68,69 +71,70 @@
         <!-- TOP HEADER -->
         <header class="top-header">
             <div class="greeting">
-                <h1 id="welcomeTitle">Gestion des Cours</h1>
-                <p>Consultez, modifiez et créez vos contenus pédagogiques.</p>
-            </div>
-
-            <div class="header-actions">
-                <div class="search-box">
-                    <i class="fas fa-search" style="color: #9CA3AF"></i>
-                    <input type="text" id="searchInput" placeholder="Rechercher un cours...">
-                </div>
-
-                <div class="icon-btn">
-                    <div class="notification-dot"></div>
-                    <i class="far fa-bell"></i>
-                </div>
+                <h1 id="welcomeTitle">Statistiques</h1>
+                <p>Analysez les performances de vos formations.</p>
             </div>
         </header>
 
-        <!-- COURSES LIST -->
-        <div class="section-header">
-            <div class="section-title">
-                Tous les Cours
-                <div class="view-controls"
-                    style="display:inline-flex; margin-left:1.5rem; vertical-align:middle; font-size: 1rem;">
-                    <button class="view-btn active" id="btnListView" title="Vue Liste"><i
-                            class="fas fa-list"></i></button>
-                    <button class="view-btn" id="btnGridView" title="Vue Grille"><i
-                            class="fas fa-th-large"></i></button>
+        <!-- STATS GRID -->
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="statTotalStudents">0</h3>
+                    <p>Étudiants Uniques</p>
+                </div>
+                <div class="stat-icon-wrapper bg-blue-soft">
+                    <i class="fas fa-users"></i>
                 </div>
             </div>
-            <a href="create-course.html" class="btn-primary">
-                <i class="fas fa-plus"></i> Nouveau Cours
-            </a>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="statPending">0</h3>
+                    <p>Inscriptions en Attente</p>
+                </div>
+                <div class="stat-icon-wrapper bg-orange-soft">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3 id="statTotal">0</h3>
+                    <p>Total Inscriptions</p>
+                </div>
+                <div class="stat-icon-wrapper bg-green-soft">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+            </div>
         </div>
 
-        <div class="table-container" id="coursesTableContainer">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Titre du cours</th>
-                        <th>Catégorie</th>
-                        <th>Inscrits</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="coursesList">
-                    <tr>
-                        <td colspan="5" style="text-align:center; padding:40px; color:#9CA3AF;">
-                            <i class="fas fa-spinner fa-spin"></i> Chargement des données...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <!-- CHARTS SECTION -->
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2rem;">
 
-        <!-- Grid Container (Hidden by default) -->
-        <div id="coursesGrid" class="grid-courses" style="display:none;">
-            <!-- Cards will be injected here -->
+            <!-- Pie Chart -->
+            <div
+                style="background: white; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <h3 style="margin-bottom: 1rem; color: #111827;">Répartition des Status</h3>
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart -->
+            <div
+                style="background: white; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <h3 style="margin-bottom: 1rem; color: #111827;">Top 5 Cours Populaires</h3>
+                <div style="height: 300px;">
+                    <canvas id="coursesChart"></canvas>
+                </div>
+            </div>
+
         </div>
 
     </main>
 
-    <script type="module" src="../src/views/admin/courses.js"></script>
+    <script type="module" src="../src/views/admin/statistics.js"></script>
 </body>
 
 </html>

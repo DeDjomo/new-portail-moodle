@@ -91,6 +91,7 @@ try {
             $controller = new AdminController($db);
             if ($method === 'POST') {
                 if ($id === 'login') $controller->login($input_data);
+                elseif ($id) $controller->update($id, $_POST); // Allow POST update for file uploads
                 else $controller->create($input_data);
             } elseif ($method === 'GET') {
                 if ($id) $controller->show($id);
@@ -158,6 +159,8 @@ try {
             elseif ($method === 'GET') {
                 if (isset($_GET['action']) && $_GET['action'] === 'getAdminEnrollments' && isset($_GET['admin_id'])) {
                     $controller->getAdminEnrollments($_GET['admin_id']);
+                } elseif (isset($_GET['action']) && $_GET['action'] === 'getAdminStats' && isset($_GET['admin_id'])) {
+                    $controller->getAdminStats($_GET['admin_id']);
                 } elseif (isset($path_parts[1]) && $path_parts[1] === 'course' && isset($path_parts[2])) {
                     $status = $_GET['status'] ?? null;
                     $controller->getCourseEnrollments($path_parts[2], $status);

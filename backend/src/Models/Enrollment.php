@@ -104,4 +104,52 @@ class Enrollment {
         $stmt->execute();
         return $stmt;
     }
+
+    /**
+     * Get aggregated statistics for an admin
+     */
+    public function getAdminStats($admin_id) {
+        $stats = [];
+
+        // 1. Total & Status Distribution
+        $query = "SELECT e.status, COUNT(*) as count 
+                  FROM " . $this->table_name . " e
+                  JOIN courses c ON e.course_id = c.id
+                  WHERE c.administrator_id = ?
+                  GROUP BY e.status";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$admin_id]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        $stats['total_enrollments'] = 0;
+        $stats['status_distribution'] = ['PENDING' => 0, 'DONE' => 0];
+
+        foreach($rows as $row) {
+            $stats['total_enrollments'] += $row['count'];
+            $stats['status_distribution'][$row['status']] = (int)$row['count'];
+        }
+
+        // 2. Top 5 Courses
+        $query = "SELECT c.title, COUNT(*) as enrollment_count
+                  FROM " . $this->table_name . " e
+                  JOIN courses c ON e.course_id = c.id
+                  WHERE c.administrator_id = ?
+                  GROUP BY c.id, c.title
+                  ORDER BY enrollment_count DESC
+                  LIMIT 5";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$admin_id]);
+        $stats['top_courses'] = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        // 3. Total Unique Students
+         $query = "SELECT COUNT(DISTINCT e.student_id)
+                  FROM " . $this->table_name . " e
+                  JOIN courses c ON e.course_id = c.id
+                  WHERE c.administrator_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$admin_id]);
+        $stats['total_students'] = $stmt->fetchColumn();
+
+        return $stats;
+    }
 }

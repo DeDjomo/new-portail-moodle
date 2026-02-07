@@ -91,4 +91,15 @@ class Administrator extends BaseModel {
         $stmt->bindParam(1, $id);
         return $stmt->execute();
     }
+
+    /**
+     * Update password
+     */
+    public function updatePassword($id, $hash) {
+        $query = "UPDATE " . $this->table_name . " SET password_hash = :hash WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':hash', $hash);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
+    }
 }

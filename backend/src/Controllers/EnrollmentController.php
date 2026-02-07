@@ -121,6 +121,14 @@ class EnrollmentController {
         $stmt = $this->enrollmentModel->getByAdmin($adminId);
         return $this->jsonResponse($stmt->fetchAll(\PDO::FETCH_ASSOC), 200);
     }
+    
+    /**
+     * Return aggregated statistics for an admin
+     */
+    public function getAdminStats($adminId) {
+        $stats = $this->enrollmentModel->getAdminStats($adminId);
+        return $this->jsonResponse($stats, 200);
+    }
 
     /**
      * Email notification system

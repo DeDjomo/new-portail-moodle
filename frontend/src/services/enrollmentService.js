@@ -19,6 +19,14 @@ const EnrollmentService = {
     },
 
     /**
+     * Get aggregated statistics for an admin
+     * @param {number} adminId 
+     */
+    getAdminStats: async (adminId) => {
+        return await apiRequest(`enrollments?action=getAdminStats&admin_id=${adminId}`, 'GET');
+    },
+
+    /**
      * Mark all pending enrollments as DONE for a course
      * @param {number} courseId 
      */
