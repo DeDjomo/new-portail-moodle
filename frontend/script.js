@@ -313,9 +313,11 @@ function renderCourseDetails(course) {
 
         // Check for Embed (YouTube/Vimeo)
         const embedUrl = getEmbedUrl(videoUrl);
+        console.log('[DEBUG] Processing Video URL:', videoUrl, 'Embed:', embedUrl);
 
         if (embedUrl) {
             // Render Iframe
+            console.log('[DEBUG] Embedding Video:', embedUrl);
             videoContainer.innerHTML = `
                 <iframe 
                     src="${embedUrl}" 
@@ -326,26 +328,15 @@ function renderCourseDetails(course) {
                     allowfullscreen>
                 </iframe>`;
             videoSection.style.display = 'block';
-            console.log('[DEBUG] Video Embed found:', embedUrl);
         } else {
             // Standard Video File
             if (videoPlayer) {
                 videoPlayer.src = videoUrl;
                 videoPlayer.poster = banner;
                 videoSection.style.display = 'block';
-                console.log('[DEBUG] Video File found:', videoUrl);
+                console.log('[DEBUG] Video File set:', videoUrl);
             }
         }
-    }
-
-    // Helper: duplicate from create-course (should be in utils but inline for speed)
-    function getEmbedUrl(url) {
-        if (!url) return null;
-        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-        if (ytMatch && ytMatch[1]) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-        const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
-        if (vimeoMatch && vimeoMatch[1]) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-        return null;
     }
 
     // 2. Main Content
@@ -567,4 +558,14 @@ function setupEnrollment(course) {
             }
         });
     }
+}
+
+// --- Helper Functions ---
+function getEmbedUrl(url) {
+    if (!url) return null;
+    const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (ytMatch && ytMatch[1]) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+    const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+    if (vimeoMatch && vimeoMatch[1]) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    return null;
 }
