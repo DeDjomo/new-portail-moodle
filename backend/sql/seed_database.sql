@@ -17,10 +17,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. ADMINISTRATORS
 INSERT INTO administrators (last_name, first_name, email, password_hash, type, status) VALUES
-('Atangana', 'Roger', 'atangana.roger@portal.com', '$2y$10$abcdefg1234567890', 'SUPER_ADMIN', 'ACTIVE'),
-('Kamdem', 'Sylvain', 'kamdem.sylvain@portal.com', '$2y$10$abcdefg1234567890', 'STANDARD_ADMIN', 'ACTIVE'),
-('Ewane', 'Thérèse', 'ewane.therese@portal.com', '$2y$10$abcdefg1234567890', 'STANDARD_ADMIN', 'SUSPENDED'),
-('Ndjomo', 'Patrick', 'ndjomo.patrick@portal.com', '$2y$10$abcdefg1234567890', 'STANDARD_ADMIN', 'ACTIVE');
+('Atangana', 'Roger', 'atangana.roger@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'SUPER_ADMIN', 'ACTIVE'),
+('Kamdem', 'Sylvain', 'kamdem.sylvain@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'STANDARD_ADMIN', 'ACTIVE'),
+('Ewane', 'Thérèse', 'ewane.therese@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'STANDARD_ADMIN', 'SUSPENDED'),
+('Ndjomo', 'Patrick', 'ndjomo.patrick@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'STANDARD_ADMIN', 'ACTIVE');
 
 -- 2. INSTRUCTORS
 INSERT INTO instructors (full_name, professional_title, organization, short_bio, full_bio) VALUES

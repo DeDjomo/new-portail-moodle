@@ -80,8 +80,12 @@
                 // Store token/user info
                 localStorage.setItem('admin', JSON.stringify(response.admin));
 
-                // Redirect to Dashboard
-                window.location.href = 'admin/dashboard.html';
+                // Redirect based on admin type
+                if (response.admin.type === 'SUPER_ADMIN') {
+                    window.location.href = 'superadmin/dashboard.html';
+                } else {
+                    window.location.href = 'admin/dashboard.html';
+                }
 
             } catch (error) {
                 console.error(error);

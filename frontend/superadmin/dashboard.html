@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord | Super Administration ENSPY</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../public/images/enspy-logo.png">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../admin/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <img src="../public/images/enspy-logo.png" alt="Logo">
+            <span>SUPER ADMIN</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item active">
+                <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
+            </a>
+
+            <!-- Separator: Global Management -->
+            <div
+                style="padding: 12px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Gestion Globale</div>
+
+            <a href="administrators.html" class="nav-item">
+                <i class="fas fa-user-shield"></i> <span>Administrateurs</span>
+            </a>
+            <a href="instructors.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i> <span>Instructeurs</span>
+            </a>
+            <a href="categories.html" class="nav-item">
+                <i class="fas fa-folder-open"></i> <span>Catégories</span>
+            </a>
+            <a href="courses.html" class="nav-item">
+                <i class="fas fa-book-open"></i> <span>Tous les Cours</span>
+            </a>
+
+            <!-- Separator: My Space -->
+            <div
+                style="padding: 16px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Mon Espace</div>
+
+            <a href="my-courses.html" class="nav-item">
+                <i class="fas fa-graduation-cap"></i> <span>Mes Cours</span>
+            </a>
+            <a href="students.html" class="nav-item">
+                <i class="fas fa-users"></i> <span>Étudiants</span>
+            </a>
+            <a href="statistics.html" class="nav-item">
+                <i class="fas fa-chart-pie"></i> <span>Statistiques</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i> <span>Paramètres</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <img src="https://ui-avatars.com/api/?name=SA&background=111827&color=fff" alt="Admin"
+                    class="user-avatar" id="sidebarAvatar">
+                <div class="user-info">
+                    <h4 id="sidebarName">Chargement...</h4>
+                    <p>Super Admin</p>
+                </div>
+                <div class="btn-logout" id="btnLogout" title="Se déconnecter">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <div class="greeting">
+                <h1>Bonjour, <span id="welcomeName">Admin</span> 👋</h1>
+                <p>Vue globale de la plateforme.</p>
+            </div>
+
+            <div class="header-actions">
+                <div class="notification-bell" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- STATS GRID -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #EDE9FE; color: #7C3AED;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalAdmins">0</h3>
+                    <p>Administrateurs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #FEF3C7; color: #D97706;">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalInstructors">0</h3>
+                    <p>Instructeurs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #DBEAFE; color: #2563EB;">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalCourses">0</h3>
+                    <p>Cours</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #D1FAE5; color: #059669;">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Étudiants</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUICK ACTIONS -->
+        <section class="section-block" style="margin-bottom: 24px;">
+            <h2 class="section-title"><i class="fas fa-bolt"></i> Actions Rapides</h2>
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+                <a href="administrators.html?action=create" class="btn-primary"
+                    style="text-align:center; text-decoration:none; padding: 16px;">
+                    <i class="fas fa-user-plus"></i> Créer un Admin
+                </a>
+                <a href="instructors.html?action=create" class="btn-primary"
+                    style="text-align:center; text-decoration:none; padding: 16px; background: #D97706;">
+                    <i class="fas fa-user-tie"></i> Ajouter un Instructeur
+                </a>
+                <a href="categories.html?action=create" class="btn-primary"
+                    style="text-align:center; text-decoration:none; padding: 16px; background: #059669;">
+                    <i class="fas fa-folder-plus"></i> Créer une Catégorie
+                </a>
+            </div>
+        </section>
+
+        <!-- RECENT ENROLLMENTS -->
+        <section class="section-block">
+            <h2 class="section-title"><i class="fas fa-history"></i> Inscriptions Récentes</h2>
+            <div class="table-responsive" style="margin-top: 16px;">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Cours</th>
+                            <th>Admin</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentEnrollments">
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#6B7280;">Chargement...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module" src="../src/views/superadmin/dashboard.js"></script>
+</body>
+
+</html>

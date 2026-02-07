@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catégories | Super Administration ENSPY</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../public/images/enspy-logo.png">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../admin/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <img src="../public/images/enspy-logo.png" alt="Logo">
+            <span>SUPER ADMIN</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
+            </a>
+
+            <!-- Separator: Global Management -->
+            <div
+                style="padding: 12px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Gestion Globale</div>
+
+            <a href="administrators.html" class="nav-item">
+                <i class="fas fa-user-shield"></i> <span>Administrateurs</span>
+            </a>
+            <a href="instructors.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i> <span>Instructeurs</span>
+            </a>
+            <a href="categories.html" class="nav-item active">
+                <i class="fas fa-folder-open"></i> <span>Catégories</span>
+            </a>
+            <a href="courses.html" class="nav-item">
+                <i class="fas fa-book-open"></i> <span>Tous les Cours</span>
+            </a>
+
+            <!-- Separator: My Space -->
+            <div
+                style="padding: 16px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Mon Espace</div>
+
+            <a href="my-courses.html" class="nav-item">
+                <i class="fas fa-graduation-cap"></i> <span>Mes Cours</span>
+            </a>
+            <a href="students.html" class="nav-item">
+                <i class="fas fa-users"></i> <span>Étudiants</span>
+            </a>
+            <a href="statistics.html" class="nav-item">
+                <i class="fas fa-chart-pie"></i> <span>Statistiques</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i> <span>Paramètres</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <img src="https://ui-avatars.com/api/?name=SA&background=111827&color=fff" alt="Admin"
+                    class="user-avatar" id="sidebarAvatar">
+                <div class="user-info">
+                    <h4 id="sidebarName">Chargement...</h4>
+                    <p>Super Admin</p>
+                </div>
+                <div class="btn-logout" id="btnLogout" title="Se déconnecter">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <div class="greeting">
+                <h1><i class="fas fa-folder-open"></i> Catégories</h1>
+                <p>Gérez les catégories de cours de la plateforme.</p>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn-primary" id="btnCreateCategory">
+                    <i class="fas fa-plus"></i> Nouvelle Catégorie
+                </button>
+            </div>
+        </header>
+
+        <!-- TABLE -->
+        <section class="section-block">
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Catégorie</th>
+                            <th>Slug</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody">
+                        <tr>
+                            <td colspan="4" style="text-align:center; color:#6B7280; padding: 2rem;">Chargement...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CREATE/EDIT MODAL -->
+    <div id="categoryModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; backdrop-filter: blur(4px);">
+        <div
+            style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:white; border-radius:20px; padding:32px; width:90%; max-width:480px; max-height:90vh; overflow-y:auto;">
+            <h2 style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-folder-plus"></i>
+                <span id="modalTitle">Nouvelle Catégorie</span>
+            </h2>
+
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId">
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Nom *</label>
+                    <input type="text" id="categoryName" required
+                        style="width:100%; padding:12px; border:1px solid #E5E7EB; border-radius:10px;">
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label
+                        style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Description</label>
+                    <textarea id="categoryDescription" rows="3" placeholder="Description de la catégorie..."
+                        style="width:100%; padding:12px; border:1px solid #E5E7EB; border-radius:10px; resize:vertical;"></textarea>
+                </div>
+
+                <div style="display:flex; gap:12px; justify-content:flex-end;">
+                    <button type="button" id="btnCancelModal"
+                        style="padding:12px 24px; border-radius:10px; border:1px solid #E5E7EB; background:white; cursor:pointer; font-weight:500;">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="../src/views/superadmin/categories.js"></script>
+</body>
+
+</html>
