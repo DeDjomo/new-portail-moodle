@@ -97,7 +97,12 @@ class CourseController {
         if (isset($_FILES['video'])) {
             $videoUrl = $this->uploader->upload($_FILES['video']);
         } elseif (!empty($data['video_url'])) {
-            $videoUrl = $this->uploader->uploadFromUrl($data['video_url']);
+            // Check for embeddable links (YouTube/Vimeo) first
+            if (preg_match('/(?:youtube\.com|youtu\.be|vimeo\.com)/', $data['video_url'])) {
+                 $videoUrl = $data['video_url']; // Save directly without download
+            } else {
+                 $videoUrl = $this->uploader->uploadFromUrl($data['video_url']);
+            }
         }
 
         // 4. State Determination (Draft vs Published)

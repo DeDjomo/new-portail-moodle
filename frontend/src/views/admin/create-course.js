@@ -47,6 +47,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error loading form data:', error);
     }
 
+
+    // --- Helper: Get Embed URL ---
+    function getEmbedUrl(url) {
+        if (!url) return null;
+
+        // YouTube
+        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+        if (ytMatch && ytMatch[1]) {
+            return `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+
+        // Vimeo
+        const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+        if (vimeoMatch && vimeoMatch[1]) {
+            return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        }
+
+        return null;
+    }
+
     // --- Helper: Fetch URL to File Object ---
     // DISABLED: Moving download logic to backend to bypass CORS
     /*
@@ -110,16 +130,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const imageUrlInput = document.getElementById('image_url_input');
+    const imageStatus = document.createElement('small');
+    imageUrlInput.parentNode.appendChild(imageStatus);
+
     imageUrlInput.addEventListener('input', (e) => {
         const url = e.target.value.trim();
         if (url && (url.startsWith('http'))) {
             imagePreviewImg.src = url;
             imagePreview.style.display = 'block';
+            imageStatus.textContent = 'Chargement de l\'aperçu...';
+            imageStatus.style.color = 'blue';
+
+            imagePreviewImg.onload = () => {
+                imageStatus.textContent = 'Image chargée avec succès';
+                imageStatus.style.color = 'green';
+            };
+
             imagePreviewImg.onerror = () => {
                 console.warn('[DEBUG] Image URL failed to load:', url);
+                imageStatus.textContent = 'Impossible de charger l\'image (CORS ou lien invalide)';
+                imageStatus.style.color = 'red';
             };
         } else {
             imagePreview.style.display = 'none';
+            imageStatus.textContent = '';
         }
     });
 
@@ -151,17 +185,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const videoUrlInput = document.getElementById('video_url_input');
+    const videoStatus = document.createElement('small');
+    videoUrlInput.parentNode.appendChild(videoStatus);
+
     videoUrlInput.addEventListener('input', (e) => {
         const url = e.target.value.trim();
+
+        // 1. Check for Embeddable Links (YouTube/Vimeo)
+        const embedUrl = getEmbedUrl(url);
+        if (embedUrl) {
+            // Hide standard video, show iframe
+            videoPreviewVid.style.display = 'none';
+
+            let iframe = videoPreview.querySelector('iframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.width = '100%';
+                iframe.height = '300';
+                iframe.frameBorder = '0';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                iframe.allowFullscreen = true;
+                videoPreview.appendChild(iframe);
+            }
+            iframe.style.display = 'block';
+            iframe.src = embedUrl;
+
+            videoPreview.style.display = 'block';
+            videoStatus.textContent = 'Vidéo prête (Lien Streaming détecté)';
+            videoStatus.style.color = 'green';
+            return;
+        }
+
+        // Reset iframe if exists
+        const iframe = videoPreview.querySelector('iframe');
+        if (iframe) iframe.style.display = 'none';
+        videoPreviewVid.style.display = 'block';
+
+        // 2. Standard Direct File Logic
         if (url && (url.startsWith('http'))) {
             videoPreviewVid.src = url;
+            videoPreviewVid.controls = true; // Enable controls for playback
             videoPreviewVid.load(); // Force load for video
             videoPreview.style.display = 'block';
+
+            videoStatus.textContent = 'Chargement de la vidéo...';
+            videoStatus.style.color = 'blue';
+
+            // When video metadata is loaded
+            videoPreviewVid.onloadedmetadata = () => {
+                videoStatus.textContent = 'Vidéo prête à être jouée (Durée: ' + Math.round(videoPreviewVid.duration) + 's)';
+                videoStatus.style.color = 'green';
+            };
+
             videoPreviewVid.onerror = () => {
                 console.warn('[DEBUG] Video URL failed to load:', url);
+                // Distinguish generic error vs likely CORS
+                videoStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Échec de l\'aperçu (Format ou CORS). <br>Si le lien est direct (.mp4), l\'enregistrement fonctionnera quand même.';
+                videoStatus.style.color = '#d97706'; // Amber color
             };
         } else {
             videoPreview.style.display = 'none';
+            videoPreviewVid.src = '';
+            videoStatus.textContent = '';
+            const iframe = videoPreview.querySelector('iframe');
+            if (iframe) iframe.style.display = 'none';
         }
     });
 
@@ -170,7 +257,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         videoUrlInput.value = '';
         videoPreview.style.display = 'none';
         videoPreviewVid.src = '';
-        document.getElementById('videoName').textContent = 'Cliquer pour choisir une vidéo';
+        videoStatus.textContent = '';
+        const iframe = videoPreview.querySelector('iframe');
+        if (iframe) iframe.src = '';
 
         // Restore input groups
         const source = document.querySelector('.media-toggle[data-for="video"] .toggle-btn.active').dataset.type;

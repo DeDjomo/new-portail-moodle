@@ -302,12 +302,50 @@ function renderCourseDetails(course) {
     // 1.5 Video Preview Logic
     const videoSection = document.getElementById('videoSection');
     const videoPlayer = document.getElementById('courseVideo');
-    if (course.video_url && videoSection && videoPlayer) {
-        const videoUrl = resolveAssetPath(course.video_url);
-        videoPlayer.src = videoUrl;
-        videoPlayer.poster = banner; // Use course image as poster
-        videoSection.style.display = 'block';
-        console.log('[DEBUG] Video found for course:', videoUrl);
+    const videoContainer = document.querySelector('.video-container');
+
+    if (course.video_url && videoSection) {
+        let videoUrl = course.video_url;
+        // Check for full URL vs relative path
+        if (!videoUrl.startsWith('http')) {
+            videoUrl = resolveAssetPath(videoUrl);
+        }
+
+        // Check for Embed (YouTube/Vimeo)
+        const embedUrl = getEmbedUrl(videoUrl);
+
+        if (embedUrl) {
+            // Render Iframe
+            videoContainer.innerHTML = `
+                <iframe 
+                    src="${embedUrl}" 
+                    width="100%" 
+                    height="450" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>`;
+            videoSection.style.display = 'block';
+            console.log('[DEBUG] Video Embed found:', embedUrl);
+        } else {
+            // Standard Video File
+            if (videoPlayer) {
+                videoPlayer.src = videoUrl;
+                videoPlayer.poster = banner;
+                videoSection.style.display = 'block';
+                console.log('[DEBUG] Video File found:', videoUrl);
+            }
+        }
+    }
+
+    // Helper: duplicate from create-course (should be in utils but inline for speed)
+    function getEmbedUrl(url) {
+        if (!url) return null;
+        const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+        if (ytMatch && ytMatch[1]) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+        const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/);
+        if (vimeoMatch && vimeoMatch[1]) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+        return null;
     }
 
     // 2. Main Content
