@@ -150,4 +150,27 @@ class EmailService {
         </body>
         </html>";
     }
+
+    public function getStudentConfirmationTemplate($studentName, $courseTitle) {
+        return "
+        <html>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
+                <h2 style='color: #00BA7C; text-align: center;'>Inscription Confirmée !</h2>
+                <hr style='border: 0; border-top: 10px solid #00BA7C;'>
+                <p>Bonjour <strong>{$studentName}</strong>,</p>
+                <p>Nous avons le plaisir de vous confirmer votre inscription au cours :</p>
+                <div style='background: #f0fdf4; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #00BA7C;'>
+                    <h3 style='margin: 0; color: #005f3f;'>{$courseTitle}</h3>
+                    <p style='margin: 5px 0;'><strong>Date :</strong> " . date('d/m/Y') . "</p>
+                </div>
+                <p>Vous pouvez dès à présent accéder au contenu du cours depuis votre espace étudiant.</p>
+                <p>Bon apprentissage !</p>
+                <br>
+                <p>Cordialement,<br><strong>L'équipe ENSPY Training</strong></p>
+                <hr style='border: 0; border-top: 1px solid #eee;'>
+            </div>
+        </body>
+        </html>";
+    }
 }

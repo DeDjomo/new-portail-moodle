@@ -36,6 +36,43 @@ class Course extends BaseModel {
     public $moodle_url;
 
     /**
+     * Get all courses with joined instructor and category details
+     */
+    public function getAllWithDetails() {
+        $query = "SELECT c.*, 
+                         i.full_name as instructor_name, 
+                         i.photo_url as instructor_photo_url,
+                         cat.name as category_name
+                  FROM " . $this->table_name . " c
+                  LEFT JOIN instructors i ON c.instructor_id = i.id
+                  LEFT JOIN categories cat ON c.category_id = cat.id
+                  WHERE c.status != 'DELETED'
+                  ORDER BY c.created_at DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    /**
+     * Get course details with joined instructor and category details
+     */
+    public function getByIdWithDetails($id) {
+        $query = "SELECT c.*, 
+                         i.full_name as instructor_name, 
+                         i.photo_url as instructor_photo_url,
+                         cat.name as category_name
+                  FROM " . $this->table_name . " c
+                  LEFT JOIN instructors i ON c.instructor_id = i.id
+                  LEFT JOIN categories cat ON c.category_id = cat.id
+                  WHERE c.id = ? AND c.status != 'DELETED'
+                  LIMIT 0,1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $id);
+        $stmt->execute();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Create a new course
      */
     public function create() {

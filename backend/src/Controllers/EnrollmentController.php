@@ -40,18 +40,19 @@ class EnrollmentController {
      */
     public function enroll($data) {
         // 1. Validation basics
-        if (empty($data['student_id']) || empty($data['course_id'])) {
-            return $this->jsonResponse(['message' => 'Student ID and Course ID are required'], 400);
+        if (empty($data['email']) || empty($data['course_id'])) {
+            return $this->jsonResponse(['message' => 'Email and Course ID are required'], 400);
         }
 
-        $studentId = $data['student_id'];
+        $email = $data['email'];
         $courseId = $data['course_id'];
 
-        // 2. Check existences
-        $student = $this->studentModel->getById($studentId);
+        // 2. Check existences (Find Student by Email)
+        $student = $this->studentModel->findByEmail($email);
         if (!$student) {
-            return $this->jsonResponse(['message' => 'Student not found'], 404);
+            return $this->jsonResponse(['message' => 'Student account not found. Please register first.'], 404);
         }
+        $studentId = $student['id'];
 
         $course = $this->courseModel->getById($courseId);
         if (!$course) {
@@ -77,11 +78,11 @@ class EnrollmentController {
             // 6. Post-enrollment actions
             $this->courseModel->incrementEnrollmentCount($courseId);
             
-            // 7. Notification
+            // 7. Notification (Admin + Student)
             $this->notifyParties($student, $course);
 
             return $this->jsonResponse([
-                'message' => 'Enrollment successful',
+                'message' => 'Enrollment successful. Confirmation email sent.',
                 'status' => 'PENDING'
             ], 201);
         }
@@ -125,9 +126,15 @@ class EnrollmentController {
             $adminName = $admin['first_name'] . ' ' . $admin['last_name'];
             $studentName = $student['first_name'] . ' ' . $student['last_name'];
             
-            $body = $this->emailService->getNewEnrollmentTemplate($adminName, $studentName, $course['title']);
-            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $body);
+            // Email to Admin
+            $bodyAdmin = $this->emailService->getNewEnrollmentTemplate($adminName, $studentName, $course['title']);
+            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $bodyAdmin);
         }
+
+        // Email to Student
+        $studentName = $student['first_name'] . ' ' . $student['last_name'];
+        $bodyStudent = $this->emailService->getStudentConfirmationTemplate($studentName, $course['title']);
+        $this->emailService->send($student['email'], "Confirmation d'inscription - ENSPY Training", $bodyStudent);
 
         error_log("Enrollment Notification: Student {$student['email']} enrolled in Course '{$course['title']}'.");
     }

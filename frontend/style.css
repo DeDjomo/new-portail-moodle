@@ -1010,6 +1010,7 @@ body:not(:has(.hero-carousel)) .main-content {
         position: static;
     }
 }
+
 /* Stretched Link Strategy */
 .btn-detail::after {
     content: '';
@@ -1020,4 +1021,224 @@ body:not(:has(.hero-carousel)) .main-content {
     height: 100%;
     z-index: 1;
     cursor: pointer;
+}
+
+/* --- Modal Styling --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    width: 100%;
+    max-width: 400px;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-submit:hover {
+    background: var(--primary-dark);
+}
+
+/* --- Message Modal (Success/Error) --- */
+.message-modal-content {
+    text-align: center;
+    max-width: 350px;
+}
+
+.msg-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.msg-icon.success {
+    color: var(--success);
+}
+
+.msg-icon.error {
+    color: var(--error);
+}
+
+.msg-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.msg-text {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.btn-msg {
+    background: var(--bg-body);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-msg:hover {
+    background: var(--border);
+}
+
+/* --- Registration Modal Specifics --- */
+.modal-lg {
+    max-width: 500px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* --- Login Page --- */
+.auth-body {
+    background-color: var(--bg-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.auth-card {
+    background: white;
+    padding: 3rem;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.auth-logo {
+    height: 60px;
+    margin-bottom: 1.5rem;
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.auth-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-footer a {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+/* --- Video Section --- */
+.video-container {
+    width: 100%;
+    margin-top: 1.5rem;
+    overflow: hidden;
+    background: #000;
+    border-radius: var(--radius-lg);
+    line-height: 0;
+}
+
+video:focus {
+    outline: none;
 }

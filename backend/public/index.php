@@ -4,6 +4,14 @@
  * Main Entry Point and Router for the Portal Backend.
  */
 
+// 0. Handle Static Files (for PHP built-in server)
+if (php_sapi_name() === 'cli-server') {
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if (is_file(__DIR__ . $path)) {
+        return false;
+    }
+}
+
 // 1. Headers & CORS
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -35,6 +43,16 @@ use Controllers\EnrollmentController;
 $database = new Database();
 $db = $database->getConnection();
 
+/**
+ * Handle 404
+ */
+if (!function_exists('routeNotFound')) {
+    function routeNotFound() {
+        http_response_code(404);
+        echo json_encode(['message' => 'Resource not found or method not allowed']);
+    }
+}
+
 // 3. Request Parsing
 $method = $_SERVER['REQUEST_METHOD'];
 $request_uri = $_SERVER['REQUEST_URI'];
@@ -42,7 +60,11 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 
 // Remove script name from URI to get clean path
 $base_path = str_replace('index.php', '', $script_name);
-$path = str_replace($base_path, '', $request_uri);
+$path = $request_uri;
+
+if ($base_path !== '/' && strpos($path, $base_path) === 0) {
+    $path = substr($path, strlen($base_path));
+}
 $path = parse_url($path, PHP_URL_PATH);
 $path_parts = explode('/', trim($path, '/'));
 
@@ -65,7 +87,7 @@ try {
     $id = $path_parts[1] ?? null;
 
     switch ($resource) {
-        case 'admins':
+        case 'administrators':
             $controller = new AdminController($db);
             if ($method === 'POST') {
                 if ($id === 'login') $controller->login($input_data);
@@ -139,17 +161,8 @@ try {
             routeNotFound();
             break;
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
     echo json_encode(['message' => 'Internal Server Error', 'error' => $e->getMessage()]);
 }
 
-/**
- * Handle 404
- */
-if (!function_exists('routeNotFound')) {
-    function routeNotFound() {
-        http_response_code(404);
-        echo json_encode(['message' => 'Resource not found or method not allowed']);
-    }
-}

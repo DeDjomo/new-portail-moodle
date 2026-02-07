@@ -1,5 +1,6 @@
 import CourseService from './src/services/courseService.js';
 import CategoryService from './src/services/categoryService.js';
+import { BASE_URL, resolveAssetPath } from './src/services/api.js';
 
 /**
  * ENSPY TRAINING - Main Controller
@@ -71,10 +72,11 @@ function initCarousel() {
 async function loadTrendingCourses() {
     try {
         const response = await CourseService.getAll();
-        const courses = (response.data || response).filter(c => c.status === 'PUBLISHED');
+        const courses = (response.data || response); // Show all (usually implies non-deleted from backend)
 
         // Take top 3 for now (mocking trending logic)
         const topCourses = courses.slice(0, 3);
+        console.log('[DEBUG] loadTrendingCourses:', topCourses.map(c => ({ id: c.id, img: c.image_url })));
 
         // Render into trendingGrid
         renderCourses(topCourses, 'trendingGrid');
@@ -104,7 +106,7 @@ async function loadInitialData() {
         ]);
 
         const categories = catRes.data || catRes;
-        const courses = (courseRes.data || courseRes).filter(c => c.status === 'PUBLISHED');
+        const courses = (courseRes.data || courseRes); // Show all
 
         allCourses = courses;
 
@@ -205,7 +207,13 @@ function renderCourses(courses, containerId = 'coursesGrid') {
         const card = document.createElement('article');
         card.className = 'course-card fade-up';
 
-        const banner = course.thumbnail_url || `https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&q=80&w=800`;
+        let banner = `https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&q=80&w=800`;
+        if (course.image_url) {
+            banner = resolveAssetPath(course.image_url);
+            console.log(`[DEBUG] Course ${course.id} banner resolved to:`, banner);
+        } else {
+            console.log(`[DEBUG] Course ${course.id} has NO image_url`);
+        }
 
         // Translate attributes
         const levelDisplay = translations[course.level] || course.level;
@@ -225,7 +233,7 @@ function renderCourses(courses, containerId = 'coursesGrid') {
                 <h3 class="card-title">${course.title}</h3>
                 <div class="card-footer">
                     <div class="card-instructor">
-                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff" class="inst-avatar">
+                        <img src="${course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff`}" class="inst-avatar">
                         <span class="inst-name">${course.instructor_name || 'Instructeur ENSPY'}</span>
                     </div>
                     <a href="course-details.html?id=${course.id}" class="btn-detail">Aperçu →</a>
@@ -275,7 +283,10 @@ async function loadCourseDetails() {
 function renderCourseDetails(course) {
     // 1. Hero
     const hero = document.getElementById('courseHero');
-    const banner = course.thumbnail_url || 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&q=80&w=1600';
+    let banner = 'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&q=80&w=1600';
+    if (course.image_url) {
+        banner = resolveAssetPath(course.image_url);
+    }
 
     hero.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${banner}')`;
     hero.innerHTML = `
@@ -287,6 +298,17 @@ function renderCourseDetails(course) {
             </div>
         </div>
     `;
+
+    // 1.5 Video Preview Logic
+    const videoSection = document.getElementById('videoSection');
+    const videoPlayer = document.getElementById('courseVideo');
+    if (course.video_url && videoSection && videoPlayer) {
+        const videoUrl = resolveAssetPath(course.video_url);
+        videoPlayer.src = videoUrl;
+        videoPlayer.poster = banner; // Use course image as poster
+        videoSection.style.display = 'block';
+        console.log('[DEBUG] Video found for course:', videoUrl);
+    }
 
     // 2. Main Content
     document.getElementById('courseDescription').innerHTML = course.description || 'Aucune description disponible.';
@@ -300,9 +322,8 @@ function renderCourseDetails(course) {
     `;
     document.getElementById('courseSyllabus').innerHTML = syllabusHTML;
 
-    // Instructor
     document.getElementById('courseInstructor').innerHTML = `
-        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff&size=128" class="inst-photo">
+        <img src="${course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff&size=128`}" class="inst-photo">
         <div class="inst-info">
             <h3>${course.instructor_name || 'Instructeur ENSPY'}</h3>
             <p class="inst-role">Expert Pédagogique</p>
@@ -315,7 +336,7 @@ function renderCourseDetails(course) {
         <div class="price-tag">Gratuit</div>
         <p class="enroll-meta">Accès illimité au contenu</p>
         
-        <a href="#" class="btn-enroll">S'inscrire maintenant</a>
+        <a href="#" class="btn-enroll" id="btnEnroll">S'inscrire maintenant</a>
         
         <div class="course-meta-list">
             <div class="meta-item">
@@ -336,4 +357,176 @@ function renderCourseDetails(course) {
             </div>
         </div>
     `;
+
+    // 4. Initialize Enrollment Modal Logic
+    setupEnrollment(course);
+}
+
+import EnrollmentService from './src/services/enrollmentService.js';
+import AuthService from './src/services/authService.js';
+
+/* --- Enrollment Logic --- */
+/* --- Modal System & Enrollment Flow --- */
+/* --- Modal System & Enrollment Flow --- */
+function setupEnrollment(course) {
+    const courseId = course.id;
+    const moodleUrl = course.moodle_url || '#';
+
+    // 1. Modal Helpers
+    const openModal = (id) => {
+        const modal = document.getElementById(id) || document.getElementById('enrollModal');
+        if (modal && id === 'enrollModal') modal.classList.add('active');
+        else if (document.getElementById(id)) document.getElementById(id).classList.add('active');
+    };
+
+    const closeModal = (id) => {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.remove('active');
+    };
+
+    const showMessage = (type, title, text) => {
+        const modal = document.getElementById('msgModal');
+        const icon = document.getElementById('msgIcon');
+        const titleEl = document.getElementById('msgTitle');
+        const textEl = document.getElementById('msgText');
+
+        // Reset classes
+        icon.className = 'fas msg-icon';
+        icon.classList.add(type === 'success' ? 'fa-check-circle' : 'fa-times-circle');
+        icon.classList.add(type);
+
+        titleEl.textContent = title;
+        textEl.textContent = text;
+
+        modal.classList.add('active');
+    };
+
+    // Helper: Show Moodle Button
+    const showMoodleButton = () => {
+        const btnEnroll = document.getElementById('btnEnroll');
+        if (btnEnroll) {
+            btnEnroll.textContent = 'Accéder au cours ↗';
+            btnEnroll.style.background = '#007bff';
+            btnEnroll.href = moodleUrl;
+            btnEnroll.target = '_blank';
+
+            // Remove click listeners by cloning
+            const newBtn = btnEnroll.cloneNode(true);
+            btnEnroll.parentNode.replaceChild(newBtn, btnEnroll);
+        }
+    };
+
+    // 2. Global Close Handlers
+    document.querySelectorAll('.close-modal, #btnMsgClose').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modalId = btn.getAttribute('data-close') || btn.closest('.modal')?.id;
+            if (modalId) closeModal(modalId);
+        });
+    });
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal(modal.id);
+        });
+    });
+
+    // 3. Elements and Listeners
+    const btnEnroll = document.getElementById('btnEnroll');
+    const enrollForm = document.getElementById('enrollForm');
+    const registerForm = document.getElementById('registerForm');
+
+    if (btnEnroll) {
+        btnEnroll.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Check if already Moodle button (just in case)
+            if (btnEnroll.textContent.includes('Moodle')) {
+                window.open(moodleUrl, '_blank');
+                return;
+            }
+            openModal('enrollModal');
+            const mailInput = document.getElementById('enrollEmail');
+            if (mailInput) mailInput.focus();
+        });
+    }
+
+    // 4. Enrollment Logic
+    if (enrollForm) {
+        enrollForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('enrollEmail').value;
+            const btn = enrollForm.querySelector('button');
+            const originalText = btn.textContent;
+
+            btn.disabled = true;
+            btn.textContent = 'Vérification...';
+
+            try {
+                await EnrollmentService.enroll(email, courseId);
+                closeModal('enrollModal');
+                showMessage('success', 'Inscription Réussie !', 'Un email de confirmation vous a été envoyé.');
+
+                // Update UI state to Moodle Button
+                showMoodleButton();
+
+            } catch (error) {
+                const msg = error.message || '';
+
+                if (msg.includes('Student account not found') || msg.includes('404')) {
+                    closeModal('enrollModal');
+                    // Switch to Register Modal
+                    document.getElementById('regEmail').value = email;
+                    openModal('registerModal');
+
+                } else if (msg.includes('already enrolled') || msg.includes('409')) {
+                    closeModal('enrollModal');
+                    showMessage('success', 'Déjà inscrit', 'Vous êtes déjà inscrit. Accédez au cours maintenant.');
+                    showMoodleButton();
+                } else {
+                    closeModal('enrollModal');
+                    showMessage('error', 'Erreur', msg);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+    }
+
+    // 5. Registration Logic
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = registerForm.querySelector('button');
+            const originalText = btn.textContent;
+
+            btn.disabled = true;
+            btn.textContent = 'Création du compte...';
+
+            // Collect Data
+            const formData = new FormData(registerForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                // Step A: Register
+                await AuthService.register(data);
+
+                // Step B: Auto-Enroll
+                btn.textContent = 'Inscription au cours...';
+                await EnrollmentService.enroll(data.email, courseId);
+
+                closeModal('registerModal');
+                showMessage('success', 'Compte Créé & Inscrit !', 'Bienvenue sur ENSPY Training. Vérifiez vos emails.');
+
+                showMoodleButton();
+
+            } catch (error) {
+                console.error(error);
+                // Don't close modal on error so user can fix inputs
+                alert(error.message || "Erreur lors de l'enregistrement");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+    }
 }

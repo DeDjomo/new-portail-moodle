@@ -41,6 +41,15 @@
     <div class="container course-layout">
         <!-- Left Column: Content -->
         <main class="course-main">
+            <section id="videoSection" class="course-section" style="display: none; margin-bottom: 3rem;">
+                <h2>Aperçu Vidéo</h2>
+                <div class="video-container">
+                    <video id="courseVideo" controls controlsList="nodownload" poster="" style="width: 100%;">
+                        Votre navigateur ne supporte pas la lecture de vidéos.
+                    </video>
+                </div>
+            </section>
+
             <section class="course-section">
                 <h2>À propos de ce cours</h2>
                 <div id="courseDescription" class="course-description">
@@ -92,6 +101,81 @@
             </div>
         </div>
     </footer>
+
+    <!-- Enrollment Modal -->
+    <div class="modal" id="enrollModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Inscription au Cours</h3>
+                <button class="close-modal" data-close="enrollModal">&times;</button>
+            </div>
+            <form id="enrollForm">
+                <div class="form-group">
+                    <label class="form-label">Votre adresse email universitaire</label>
+                    <input type="email" id="enrollEmail" class="form-input" placeholder="ex: etudiant@enspy.cm"
+                        required>
+                </div>
+                <button type="submit" class="btn-submit">Confirmer l'inscription</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title">Créer un compte étudiant</h3>
+                <button class="close-modal" data-close="registerModal">&times;</button>
+            </div>
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nom(s)</label>
+                        <input type="text" name="last_name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Prénom(s)</label>
+                        <input type="text" name="first_name" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" id="regEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mot de passe</label>
+                    <input type="password" name="password" class="form-input" required minlength="6">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Filière</label>
+                        <input type="text" name="major" class="form-input" placeholder="ex: Génie Info">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Niveau</label>
+                        <select name="level" class="form-input">
+                            <option value="Licence 1">Licence 1</option>
+                            <option value="Licence 2">Licence 2</option>
+                            <option value="Licence 3">Licence 3</option>
+                            <option value="Master 1">Master 1</option>
+                            <option value="Master 2">Master 2</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">S'inscrire et rejoindre le cours</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Modal (Success/Error) -->
+    <div class="modal" id="msgModal">
+        <div class="modal-content message-modal-content">
+            <i class="fas fa-check-circle msg-icon success" id="msgIcon"></i>
+            <h3 class="msg-title" id="msgTitle">Succès</h3>
+            <p class="msg-text" id="msgText">Opération effectuée avec succès.</p>
+            <button class="btn-msg" id="btnMsgClose">Fermer</button>
+        </div>
+    </div>
 
     <script type="module" src="script.js"></script>
 </body>

@@ -39,7 +39,7 @@ class CourseController {
      * List all courses
      */
     public function index() {
-        $stmt = $this->courseModel->getAll();
+        $stmt = $this->courseModel->getAllWithDetails();
         $courses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         // Decode JSON fields for response
@@ -54,7 +54,7 @@ class CourseController {
      * Get course details
      */
     public function show($id) {
-        $course = $this->courseModel->getById($id);
+        $course = $this->courseModel->getByIdWithDetails($id);
         if ($course) {
             $course = $this->decodeCourseJsonFields($course);
             return $this->jsonResponse($course, 200);
@@ -89,11 +89,15 @@ class CourseController {
         $imageUrl = null;
         if (isset($_FILES['image'])) {
             $imageUrl = $this->uploader->upload($_FILES['image']);
+        } elseif (!empty($data['image_url'])) {
+            $imageUrl = $this->uploader->uploadFromUrl($data['image_url']);
         }
 
         $videoUrl = null;
         if (isset($_FILES['video'])) {
             $videoUrl = $this->uploader->upload($_FILES['video']);
+        } elseif (!empty($data['video_url'])) {
+            $videoUrl = $this->uploader->uploadFromUrl($data['video_url']);
         }
 
         // 4. State Determination (Draft vs Published)

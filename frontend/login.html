@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion Administration | ENSPY TRAINING</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="auth-body">
+
+    <div class="auth-card fade-up">
+        <img src="public/images/enspy-logo.png" alt="Logo ENSPY" class="auth-logo">
+        <h1 class="auth-title">Administration</h1>
+        <p class="auth-subtitle">Connectez-vous pour gérer les cours</p>
+
+        <form id="loginForm">
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label">Email académique</label>
+                <input type="email" id="email" class="form-input" placeholder="admin@enspy.cm" required>
+            </div>
+
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label">Mot de passe</label>
+                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Se connecter</button>
+        </form>
+
+        <div class="auth-footer">
+            <a href="index.html">← Retour au site</a>
+        </div>
+    </div>
+
+    <!-- Simple Feedback Modal -->
+    <div class="modal" id="msgModal">
+        <div class="modal-content message-modal-content">
+            <i class="fas fa-exclamation-circle msg-icon error" id="msgIcon"></i>
+            <h3 class="msg-title" id="msgTitle">Erreur</h3>
+            <p class="msg-text" id="msgText">Identifiants incorrects.</p>
+            <button class="btn-msg" id="btnMsgClose">Fermer</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import AdminService from './src/services/adminService.js';
+
+        const form = document.getElementById('loginForm');
+        const modal = document.getElementById('msgModal');
+        const btnClose = document.getElementById('btnMsgClose');
+
+        // Modal Utils
+        const showModal = (msg) => {
+            document.getElementById('msgText').textContent = msg;
+            modal.classList.add('active');
+        };
+        const closeModal = () => modal.classList.remove('active');
+
+        btnClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = form.querySelector('button');
+            const originalText = btn.textContent;
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Connexion...';
+
+            try {
+                const response = await AdminService.login(email, password);
+
+                // Store token/user info
+                localStorage.setItem('admin', JSON.stringify(response.admin));
+
+                // Redirect to Dashboard
+                window.location.href = 'admin/dashboard.html';
+
+            } catch (error) {
+                console.error(error);
+                showModal(error.message || 'Identifiants invalides');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        });
+    </script>
+</body>
+
+</html>

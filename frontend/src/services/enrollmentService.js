@@ -2,25 +2,13 @@ import apiRequest from './api.js';
 
 const EnrollmentService = {
     /**
-     * Enroll a student in a course
+     * Enroll a student in a course by email
+     * @param {string} email 
+     * @param {number} courseId 
      */
-    enroll: (studentId, courseId) => apiRequest('enrollments', 'POST', { student_id: studentId, course_id: courseId }),
-
-    /**
-     * Get enrollments for a specific course
-     * @param {string|number} courseId 
-     * @param {string} [status] Optional filter: PENDING, DONE
-     */
-    getByCourse: (courseId, status = null) => {
-        let endpoint = `enrollments/course/${courseId}`;
-        if (status) endpoint += `?status=${status}`;
-        return apiRequest(endpoint);
-    },
-
-    /**
-     * Mark all pending enrollments of a course as DONE
-     */
-    markDone: (courseId) => apiRequest(`enrollments/mark-done/${courseId}`, 'PUT')
+    enroll: async (email, courseId) => {
+        return await apiRequest('enrollments', 'POST', { email, course_id: courseId });
+    }
 };
 
 export default EnrollmentService;
