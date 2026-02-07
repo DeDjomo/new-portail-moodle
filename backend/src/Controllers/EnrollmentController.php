@@ -115,6 +115,14 @@ class EnrollmentController {
     }
 
     /**
+     * Return all enrollments for an admin
+     */
+    public function getAdminEnrollments($adminId) {
+        $stmt = $this->enrollmentModel->getByAdmin($adminId);
+        return $this->jsonResponse($stmt->fetchAll(\PDO::FETCH_ASSOC), 200);
+    }
+
+    /**
      * Email notification system
      */
     private function notifyParties($student, $course) {

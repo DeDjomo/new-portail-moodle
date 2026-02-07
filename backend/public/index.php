@@ -124,12 +124,18 @@ try {
 
         case 'courses':
             $controller = new CourseController($db);
-            if ($method === 'POST') $controller->create($input_data);
+            if ($method === 'POST') $controller->create($_POST);
             elseif ($method === 'GET') {
-                if ($id) $controller->show($id);
-                else $controller->index();
-            } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
-            elseif ($method === 'DELETE' && $id) $controller->delete($id);
+                if (isset($_GET['action']) && $_GET['action'] === 'getAdminCourses' && isset($_GET['admin_id'])) {
+                    $controller->getAdminCourses($_GET['admin_id']);
+                } elseif (isset($path_parts[1])) {
+                    $controller->show($path_parts[1]);
+                } else {
+                    $controller->index();
+                }
+            }
+            elseif ($method === 'PUT' && isset($path_parts[1])) $controller->update($path_parts[1], $_PUT ?? $_POST); // Handle FormData via POST spoofing if needed, but here assuming strict REST or method override
+            elseif ($method === 'DELETE' && isset($path_parts[1])) $controller->delete($path_parts[1]);
             else routeNotFound();
             break;
 
@@ -149,9 +155,15 @@ try {
         case 'enrollments':
             $controller = new EnrollmentController($db);
             if ($method === 'POST') $controller->enroll($input_data);
-            elseif ($method === 'GET' && isset($path_parts[1]) && $path_parts[1] === 'course' && isset($path_parts[2])) {
-                $status = $_GET['status'] ?? null;
-                $controller->getCourseEnrollments($path_parts[2], $status);
+            elseif ($method === 'GET') {
+                if (isset($_GET['action']) && $_GET['action'] === 'getAdminEnrollments' && isset($_GET['admin_id'])) {
+                    $controller->getAdminEnrollments($_GET['admin_id']);
+                } elseif (isset($path_parts[1]) && $path_parts[1] === 'course' && isset($path_parts[2])) {
+                    $status = $_GET['status'] ?? null;
+                    $controller->getCourseEnrollments($path_parts[2], $status);
+                } else {
+                    routeNotFound();
+                }
             } elseif ($method === 'PUT' && isset($path_parts[1]) && $path_parts[1] === 'mark-done' && isset($path_parts[2])) {
                 $controller->exportComplete($path_parts[2]);
             } else routeNotFound();

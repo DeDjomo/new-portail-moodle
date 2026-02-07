@@ -88,4 +88,20 @@ class Enrollment {
         $stmt->execute();
         return $stmt;
     }
+    /**
+     * Get all enrollments for courses owned by a specific admin
+     */
+    public function getByAdmin($admin_id) {
+        $query = "SELECT e.*, s.first_name, s.last_name, s.email, c.title as course_title, c.image_url as course_image
+                FROM " . $this->table_name . " e
+                JOIN students s ON e.student_id = s.id
+                JOIN courses c ON e.course_id = c.id
+                WHERE c.administrator_id = ?
+                ORDER BY e.enrolled_at DESC";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $admin_id);
+        $stmt->execute();
+        return $stmt;
+    }
 }

@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Fetch & Render Data
     try {
         const [courses, students] = await Promise.all([
-            CourseService.getAll(),
+            CourseService.getByAdmin(admin.id),
             StudentService.getAll()
         ]);
 
@@ -49,11 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tbody = document.getElementById('coursesList');
         tbody.innerHTML = '';
 
-        // Sort by id descending (assuming higher ID = newer)
-        const recentCourses = courses.sort((a, b) => b.id - a.id).slice(0, 5);
+        // Sort by Enrollments descending
+        const recentCourses = courses.sort((a, b) => (parseInt(b.enrolled_count) || 0) - (parseInt(a.enrolled_count) || 0)).slice(0, 5);
 
         if (recentCourses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Aucun cours trouvé.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun cours trouvé.</td></tr>';
             return;
         }
 
@@ -80,14 +80,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td><span style="color: #6B7280; font-size: 0.9rem;">${course.category_name || 'Général'}</span></td>
                 <td style="font-weight: 600;">${course.enrolled_count || 0}</td>
                 <td><span class="badge ${statusClass}">${statusLabel}</span></td>
-                <td>
-                    <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a href="#" class="action-btn" title="Voir">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                </td>
             `;
             tbody.appendChild(tr);
         });

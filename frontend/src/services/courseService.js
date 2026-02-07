@@ -8,6 +8,8 @@ const CourseService = {
 
     getAll: () => apiRequest('courses'),
 
+    getByAdmin: (adminId) => apiRequest(`courses?action=getAdminCourses&admin_id=${adminId}`),
+
     getById: (id) => apiRequest(`courses/${id}`),
 
     update: (id, courseData) => {

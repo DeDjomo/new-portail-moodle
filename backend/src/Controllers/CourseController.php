@@ -51,6 +51,21 @@ class CourseController {
     }
 
     /**
+     * Get courses for specific admin
+     */
+    public function getAdminCourses($adminId) {
+        $stmt = $this->courseModel->getByAdmin($adminId);
+        $courses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Decode JSON fields for response
+        foreach ($courses as &$course) {
+            $course = $this->decodeCourseJsonFields($course);
+        }
+        
+        return $this->jsonResponse($courses, 200);
+    }
+
+    /**
      * Get course details
      */
     public function show($id) {

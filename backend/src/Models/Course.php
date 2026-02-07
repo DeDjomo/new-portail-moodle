@@ -54,6 +54,25 @@ class Course extends BaseModel {
     }
 
     /**
+     * Get all courses for a specific administrator
+     */
+    public function getByAdmin($admin_id) {
+        $query = "SELECT c.*, 
+                         i.full_name as instructor_name, 
+                         i.photo_url as instructor_photo_url,
+                         cat.name as category_name
+                  FROM " . $this->table_name . " c
+                  LEFT JOIN instructors i ON c.instructor_id = i.id
+                  LEFT JOIN categories cat ON c.category_id = cat.id
+                  WHERE c.administrator_id = ? AND c.status != 'DELETED'
+                  ORDER BY c.created_at DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(1, $admin_id);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    /**
      * Get course details with joined instructor and category details
      */
     public function getByIdWithDetails($id) {

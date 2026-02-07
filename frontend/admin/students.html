@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord | Administration ENSPY</title>
+    <title>Étudiants | Administration ENSPY</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,13 +27,13 @@
         </div>
 
         <nav class="nav-links">
-            <a href="#" class="nav-item active">
+            <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
             </a>
             <a href="courses.html" class="nav-item">
                 <i class="fas fa-book-open"></i> <span>Mes Cours</span>
             </a>
-            <a href="students.html" class="nav-item">
+            <a href="students.html" class="nav-item active">
                 <i class="fas fa-users"></i> <span>Étudiants</span>
             </a>
             <a href="#" class="nav-item">
@@ -65,14 +65,14 @@
         <!-- TOP HEADER -->
         <header class="top-header">
             <div class="greeting">
-                <h1 id="welcomeTitle">Bonjour, <span id="welcomeName">Admin</span> 👋</h1>
-                <p>Voici un aperçu de vos activités aujourd'hui.</p>
+                <h1 id="welcomeTitle">Gestion des Étudiants</h1>
+                <p>Suivez les inscriptions et les progrès de vos apprenants.</p>
             </div>
 
             <div class="header-actions">
                 <div class="search-box">
                     <i class="fas fa-search" style="color: #9CA3AF"></i>
-                    <input type="text" id="searchInput" placeholder="Rechercher un cours, un étudiant...">
+                    <input type="text" id="searchInput" placeholder="Rechercher par nom, email...">
                 </div>
 
                 <div class="icon-btn">
@@ -82,60 +82,29 @@
             </div>
         </header>
 
-        <!-- STATS GRID -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-content">
-                    <h3 id="statCourses">0</h3>
-                    <p>Cours Actifs</p>
-                </div>
-                <div class="stat-icon-wrapper bg-orange-soft">
-                    <i class="fas fa-book"></i>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <h3 id="statStudents">0</h3>
-                    <p>Étudiants Inscrits</p>
-                </div>
-                <div class="stat-icon-wrapper bg-blue-soft">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-content">
-                    <h3 id="statTotalEnrollments">0</h3>
-                    <p>Volume d'Inscriptions</p>
-                </div>
-                <div class="stat-icon-wrapper bg-green-soft">
-                    <i class="fas fa-layer-group"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- RECENT COURSES -->
+        <!-- STUDENTS LIST -->
         <div class="section-header">
-            <div class="section-title">Vos Cours Récents</div>
-            <a href="create-course.html" class="btn-primary">
-                <i class="fas fa-plus"></i> Nouveau Cours
-            </a>
+            <div class="section-title">
+                Liste des Inscrits
+                <span class="badge badge-published" id="totalStudentsBadge"
+                    style="font-size: 0.8rem; margin-left: 10px;">0</span>
+            </div>
         </div>
 
-        <div class="table-container">
+        <div class="table-container" id="studentsContainer">
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th>Titre du cours</th>
-                        <th>Catégorie</th>
-                        <th>Inscrits</th>
+                        <th>Étudiant</th>
+                        <th>Email</th>
+                        <th>Cours Inscrit</th>
+                        <th>Date d'inscription</th>
                         <th>Statut</th>
                     </tr>
                 </thead>
-                <tbody id="coursesList">
+                <tbody id="studentsList">
                     <tr>
-                        <td colspan="4" style="text-align:center; padding:40px; color:#9CA3AF;">
+                        <td colspan="5" style="text-align:center; padding:40px; color:#9CA3AF;">
                             <i class="fas fa-spinner fa-spin"></i> Chargement des données...
                         </td>
                     </tr>
@@ -145,7 +114,7 @@
 
     </main>
 
-    <script type="module" src="../src/views/admin/dashboard.js?v=2"></script>
+    <script type="module" src="../src/views/admin/students.js"></script>
 </body>
 
 </html>

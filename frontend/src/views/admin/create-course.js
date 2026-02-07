@@ -120,6 +120,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const file = e.target.files[0];
         if (file) {
             document.getElementById('imageName').textContent = file.name;
+
+            // Hide Upload Wrapper
+            document.querySelector('.file-upload-wrapper[for="image"]').style.display = 'none';
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 imagePreviewImg.src = e.target.result;
@@ -161,12 +165,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         imageInput.value = '';
         imageUrlInput.value = '';
         imagePreview.style.display = 'none';
-        document.getElementById('imageName').textContent = 'Cliquer pour choisir une image';
 
-        // Restore input groups
+        // Show Upload Wrapper
+        document.getElementById('imageName').textContent = 'Cliquer pour choisir une image';
+        const wrapper = document.querySelector('.file-upload-wrapper[for="image"]');
+        wrapper.style.display = 'flex'; // Restore flex display
+        wrapper.classList.remove('has-file');
+
+        // Restore input groups logic (ensure checks which tab is active)
         const source = document.querySelector('.media-toggle[data-for="image"] .toggle-btn.active').dataset.type;
         document.getElementById('imageLocalGroup').style.display = source === 'local' ? 'block' : 'none';
         document.getElementById('imageUrlGroup').style.display = source === 'url' ? 'block' : 'none';
+        if (source === 'url') wrapper.style.display = 'none'; // Keep hidden if URL tab is active
     });
 
     const videoInput = document.getElementById('video');
@@ -178,6 +188,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const file = e.target.files[0];
         if (file) {
             document.getElementById('videoName').textContent = file.name;
+
+            // Hide Upload Wrapper
+            document.querySelector('.file-upload-wrapper[for="video"]').style.display = 'none';
+
             const url = URL.createObjectURL(file);
             videoPreviewVid.src = url;
             videoPreview.style.display = 'block';
@@ -258,13 +272,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         videoPreview.style.display = 'none';
         videoPreviewVid.src = '';
         videoStatus.textContent = '';
+
+        // Show Upload Wrapper
+        document.getElementById('videoName').textContent = 'Cliquer pour choisir une vidéo';
+        const wrapper = document.querySelector('.file-upload-wrapper[for="video"]');
+        wrapper.style.display = 'flex';
+        wrapper.classList.remove('has-file');
+
         const iframe = videoPreview.querySelector('iframe');
         if (iframe) iframe.src = '';
 
-        // Restore input groups
+        // Restore input groups logic
         const source = document.querySelector('.media-toggle[data-for="video"] .toggle-btn.active').dataset.type;
         document.getElementById('videoLocalGroup').style.display = source === 'local' ? 'block' : 'none';
         document.getElementById('videoUrlGroup').style.display = source === 'url' ? 'block' : 'none';
+        if (source === 'url') wrapper.style.display = 'none';
     });
 
     // 4. Form Submission
