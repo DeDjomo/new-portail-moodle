@@ -164,6 +164,10 @@ try {
                 } elseif (isset($path_parts[1]) && $path_parts[1] === 'course' && isset($path_parts[2])) {
                     $status = $_GET['status'] ?? null;
                     $controller->getCourseEnrollments($path_parts[2], $status);
+                } elseif (isset($_GET['action']) && $_GET['action'] === 'checkStatus') {
+                   $email = $_GET['email'] ?? '';
+                   $courseId = $_GET['course_id'] ?? '';
+                   $controller->checkStatus($email, $courseId);
                 } else {
                     routeNotFound();
                 }

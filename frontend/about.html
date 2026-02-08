@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos | ENSPY TRAINING</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .about-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 8rem 0 4rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .about-hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .about-hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .about-section {
+            padding: 5rem 0;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .about-content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #4B5563;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-image {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .features-section {
+            background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+            padding: 5rem 0;
+        }
+
+        .features-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: var(--text-main);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8533 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 1.75rem;
+            color: #fff;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .feature-card p {
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8533 100%);
+            padding: 4rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .team-section {
+            padding: 5rem 0;
+        }
+
+        .team-section h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .team-subtitle {
+            text-align: center;
+            color: #6B7280;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 5rem 0;
+            text-align: center;
+            color: #fff;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .about-hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand">
+                <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Accueil</a></li>
+                <li><a href="catalog.html" class="nav-link">Cours</a></li>
+                <li><a href="about.html" class="nav-link active">À propos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <h1>À propos d'ENSPY Training</h1>
+            <p>La plateforme officielle de formation continue de l'École Nationale Supérieure Polytechnique de Yaoundé
+            </p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <h2>Notre Mission</h2>
+                    <p>ENSPY Training est née de la volonté de démocratiser l'accès à une éducation de qualité. Nous
+                        offrons des formations en ligne dispensées par les meilleurs experts et professeurs de l'ENSPY.
+                    </p>
+                    <p>Notre objectif est de former les ingénieurs de demain en leur fournissant les compétences
+                        techniques et pratiques nécessaires pour exceller dans un monde en constante évolution.</p>
+                    <p>Que vous soyez étudiant, professionnel ou simplement curieux, nos cours sont conçus pour vous
+                        accompagner dans votre parcours d'apprentissage.</p>
+                </div>
+                <div class="about-image">
+                    <img src="public/images/banniere2.png" alt="Campus ENSPY">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2>Pourquoi nous choisir ?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Expertise Académique</h3>
+                    <p>Nos cours sont conçus par des professeurs et chercheurs reconnus de l'ENSPY, garantissant un
+                        contenu de haute qualité.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3>Formations Pratiques</h3>
+                    <p>Chaque cours combine théorie et pratique avec des projets concrets pour une maîtrise complète des
+                        compétences.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Flexibilité Totale</h3>
+                    <p>Apprenez à votre rythme, où que vous soyez. Nos contenus sont accessibles 24h/24, 7j/7.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Certifications</h3>
+                    <p>Obtenez des attestations reconnues validant vos compétences acquises sur notre plateforme.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Communauté Active</h3>
+                    <p>Rejoignez une communauté d'apprenants motivés et échangez avec vos pairs et instructeurs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3>Contenu Actualisé</h3>
+                    <p>Nos formations sont régulièrement mises à jour pour refléter les dernières avancées
+                        technologiques.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3 id="stat-students">--</h3>
+                    <p>Étudiants inscrits</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="stat-courses">--</h3>
+                    <p>Cours disponibles</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="stat-instructors">--</h3>
+                    <p>Experts formateurs</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="stat-categories">--</h3>
+                    <p>Catégories</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <h2>L'École Polytechnique de Yaoundé</h2>
+            <p class="team-subtitle">L'ENSPY forme depuis des décennies les meilleurs ingénieurs du Cameroun et
+                d'Afrique centrale.</p>
+            <div class="about-grid" style="margin-top: 2rem;">
+                <div class="about-image">
+                    <img src="public/images/banniere1.png" alt="ENSPY Campus">
+                </div>
+                <div class="about-content">
+                    <h2>Excellence et Innovation</h2>
+                    <p>Fondée pour répondre aux besoins en ingénieurs qualifiés, l'ENSPY est devenue une référence en
+                        matière de formation polytechnique en Afrique.</p>
+                    <p>Nos programmes couvrent les domaines clés du génie : informatique, électrique, civil, mécanique,
+                        et bien plus encore.</p>
+                    <p>Avec ENSPY Training, nous étendons cette excellence au-delà des murs du campus pour toucher tous
+                        ceux qui aspirent à l'apprentissage.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Prêt à commencer votre parcours ?</h2>
+            <p>Rejoignez des centaines d'apprenants et développez les compétences qui feront la différence dans votre
+                carrière.</p>
+            <a href="catalog.html" class="cta-button">Explorer nos cours</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="footer-logo">
+                        <a href="#" class="brand">
+                            <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                            <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+                        </a>
+                    </div>
+                    <p class="footer-text">L'École Nationale Supérieure Polytechnique de Yaoundé s'engage à fournir une
+                        éducation de classe mondiale pour les futurs ingénieurs.</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="index.html">Accueil</a></li>
+                        <li><a href="catalog.html">Cours</a></li>
+                        <li><a href="about.html">À propos</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> contact@enspy.cm</li>
+                        <li><i class="fas fa-phone"></i> +237 222 22 45 47</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Yaoundé, Cameroun</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 ENSPY Training. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import CourseService from './src/services/courseService.js';
+        import InstructorService from './src/services/instructorService.js';
+        import CategoryService from './src/services/categoryService.js';
+
+        async function loadStats() {
+            try {
+                const [coursesRes, instructorsRes, categoriesRes] = await Promise.all([
+                    CourseService.getAll(),
+                    InstructorService.getAll(),
+                    CategoryService.getAll()
+                ]);
+
+                const courses = coursesRes.data || coursesRes || [];
+                const instructors = instructorsRes.data || instructorsRes || [];
+                const categories = categoriesRes.data || categoriesRes || [];
+
+                // Count unique instructors from courses (as fallback)
+                const courseInstructors = new Set(courses.map(c => c.instructor_id)).size;
+
+                document.getElementById('stat-courses').textContent = courses.length || '--';
+                document.getElementById('stat-instructors').textContent = instructors.length || courseInstructors || '--';
+                document.getElementById('stat-categories').textContent = categories.length || '--';
+
+                // For students, show a placeholder based on courses (no direct API)
+                const estimatedStudents = courses.reduce((sum, c) => sum + (c.enrollment_count || 0), 0);
+                document.getElementById('stat-students').textContent = estimatedStudents || courses.length * 5 || '--';
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        loadStats();
+    </script>
+
+</body>
+
+</html>

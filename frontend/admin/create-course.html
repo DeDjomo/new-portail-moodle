@@ -305,16 +305,28 @@
 
                     <div class="form-group">
                         <label for="category_id">Catégorie *</label>
-                        <select id="category_id" class="form-control" required>
-                            <option value="">Chargement...</option>
-                        </select>
+                        <div class="input-group-with-btn">
+                            <select id="category_id" class="form-control" required>
+                                <option value="">Chargement...</option>
+                            </select>
+                            <button type="button" class="btn-quick-add" id="btnQuickAddCategory"
+                                title="Ajouter une catégorie">
+                                <i class="fas fa-plus"></i> Nouveau
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="instructor_id">Instructeur *</label>
-                        <select id="instructor_id" class="form-control" required>
-                            <option value="">Chargement...</option>
-                        </select>
+                        <div class="input-group-with-btn">
+                            <select id="instructor_id" class="form-control" required>
+                                <option value="">Chargement...</option>
+                            </select>
+                            <button type="button" class="btn-quick-add" id="btnQuickAddInstructor"
+                                title="Ajouter un instructeur">
+                                <i class="fas fa-plus"></i> Nouveau
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group full-width">
@@ -364,7 +376,16 @@
 
                     <div class="form-group">
                         <label for="total_duration_minutes">Durée (minutes)</label>
-                        <input type="number" id="total_duration_minutes" class="form-control" placeholder="Ex: 120">
+                        <input type="number" id="total_duration_minutes" class="form-control" placeholder="Ex: 120"
+                            min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Statut de publication</label>
+                        <select id="status" class="form-control">
+                            <option value="DRAFT">Brouillon</option>
+                            <option value="PUBLISHED" selected>Publié</option>
+                        </select>
                     </div>
 
                     <div class="form-group is-certifying-group">
@@ -445,6 +466,69 @@
         </div>
 
     </main>
+
+    <!-- Quick Create Category Modal -->
+    <div id="modalQuickCategory" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nouvelle Catégorie</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="formQuickCategory">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" id="quickCatName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="quickCatDesc" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="btn-actions" style="margin-top: 24px;">
+                    <button type="button" class="btn-secondary btn-cancel-modal">Annuler</button>
+                    <button type="submit" class="btn-primary">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Create Instructor Modal -->
+    <div id="modalQuickInstructor" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Nouvel Instructeur</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="formQuickInstructor">
+                <div class="form-group">
+                    <label>Nom complet *</label>
+                    <input type="text" name="full_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+                <!-- Photo -->
+                <div class="form-group">
+                    <label>Photo de profil</label>
+                    <input type="file" name="photo" class="form-control" accept="image/*">
+                </div>
+                <!-- Expertise -->
+                <div class="form-group">
+                    <label>Expertise (Optionnel)</label>
+                    <input type="text" name="expertise" class="form-control">
+                </div>
+                <!-- Bio -->
+                <div class="form-group">
+                    <label>Biographie (Optionnel)</label>
+                    <textarea name="bio" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="btn-actions" style="margin-top: 24px;">
+                    <button type="button" class="btn-secondary btn-cancel-modal">Annuler</button>
+                    <button type="submit" class="btn-primary">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script type="module" src="../src/views/admin/create-course.js"></script>
 </body>

@@ -1,18 +1,14 @@
 import CourseService from '../../services/courseService.js';
 import StudentService from '../../services/studentService.js';
 import { BASE_URL, resolveAssetPath } from '../../services/api.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('Dashboard loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../../login.html';
-        return;
-    }
-
-    const admin = JSON.parse(adminStr);
+    const admin = requireAuth('STANDARD_ADMIN');
+    if (!admin) return;
 
     // 2. Populate User Info
     document.getElementById('welcomeName').textContent = admin.first_name;
@@ -22,13 +18,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
+    const btnLogout = document.getElementById('btnLogout');
+    const logoutModal = document.getElementById('logoutModal');
+    const confirmLogout = document.getElementById('confirmLogout');
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            logoutModal.classList.add('active');
+        });
+    }
+
+    if (confirmLogout) {
+        confirmLogout.addEventListener('click', () => {
             localStorage.removeItem('admin');
             window.location.href = '../../login.html';
-        }
-    });
+        });
+    }
+
+    // Close modal on outside click
+    if (logoutModal) {
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) logoutModal.classList.remove('active');
+        });
+    }
+
+    // 4. Fetch Dashboard Stats
 
     // 4. Fetch & Render Data
     try {

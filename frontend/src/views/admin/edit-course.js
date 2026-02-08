@@ -3,29 +3,13 @@ import CategoryService from '../../services/categoryService.js';
 import InstructorService from '../../services/instructorService.js';
 import { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
+import { setupQuickActions } from './quick-actions.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../../login.html';
-        return;
-    }
-    const admin = JSON.parse(adminStr);
-
-    // Sidebar Info
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // Logout
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        showCustomConfirm('Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../../login.html';
-        });
-    });
+    const admin = requireAuth('STANDARD_ADMIN');
+    if (!admin) return;
 
     // 2. Get Course ID
     const urlParams = new URLSearchParams(window.location.search);
@@ -57,6 +41,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         instructors.forEach(i => {
             insSelect.innerHTML += `<option value="${i.id}">${i.full_name}</option>`;
         });
+
+        // 3.1 Setup Quick Actions
+        setupQuickActions(
+            (newCategory) => {
+                const opt = document.createElement('option');
+                opt.value = newCategory.id;
+                opt.textContent = newCategory.name;
+                opt.selected = true;
+                catSelect.appendChild(opt);
+            },
+            (newInstructor) => {
+                const opt = document.createElement('option');
+                opt.value = newInstructor.id;
+                opt.textContent = newInstructor.full_name;
+                opt.selected = true;
+                insSelect.appendChild(opt);
+            }
+        );
 
         // Populate Form
         if (course) {
@@ -178,11 +180,111 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPreview('image', 'imagePreview', 'image');
     setupPreview('video', 'videoPreview', 'video');
 
+    // --- ENHANCED URL PREVIEWS (Ported from create-course.js) ---
+
+    // 1. Image URL Preview
+    const imageUrlInput = document.getElementById('image_url_input');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePreviewImg = imagePreview.querySelector('img');
+    const imageStatus = document.createElement('small');
+    imageUrlInput.parentNode.appendChild(imageStatus);
+
+    imageUrlInput.addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+        if (url && (url.startsWith('http'))) {
+            imagePreviewImg.src = url;
+            imagePreview.style.display = 'block';
+            imageStatus.textContent = 'Chargement de l\'aperçu...';
+            imageStatus.style.color = 'blue';
+
+            imagePreviewImg.onload = () => {
+                imageStatus.textContent = 'Image chargée avec succès';
+                imageStatus.style.color = 'green';
+            };
+
+            imagePreviewImg.onerror = () => {
+                imageStatus.textContent = 'Impossible de charger l\'image (CORS ou lien invalide)';
+                imageStatus.style.color = 'red';
+            };
+        } else {
+            // Only hide if input is cleared, otherwise keep current if valid
+            if (!url) {
+                imagePreview.style.display = 'none';
+                imageStatus.textContent = '';
+            }
+        }
+    });
+
+    // 2. Video URL Preview
+    const videoUrlInput = document.getElementById('video_url_input');
+    const videoPreview = document.getElementById('videoPreview');
+    const videoPreviewVid = videoPreview.querySelector('video');
+    const videoStatus = document.createElement('small');
+    videoUrlInput.parentNode.appendChild(videoStatus);
+
+    videoUrlInput.addEventListener('input', (e) => {
+        const url = e.target.value.trim();
+
+        // Check for Embeddable Links (YouTube/Vimeo)
+        const embedUrl = getEmbedUrl(url);
+        if (embedUrl) {
+            videoPreviewVid.style.display = 'none';
+            let iframe = videoPreview.querySelector('iframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.width = '100%';
+                iframe.height = '300';
+                iframe.frameBorder = '0';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                iframe.allowFullscreen = true;
+                videoPreview.appendChild(iframe);
+            }
+            iframe.style.display = 'block';
+            iframe.src = embedUrl;
+            videoPreview.style.display = 'block';
+            videoStatus.textContent = 'Vidéo prête (Lien Streaming détecté)';
+            videoStatus.style.color = 'green';
+            return;
+        }
+
+        // Reset iframe if exists
+        const iframe = videoPreview.querySelector('iframe');
+        if (iframe) iframe.style.display = 'none';
+        videoPreviewVid.style.display = 'block';
+
+        // Standard Direct File
+        if (url && (url.startsWith('http'))) {
+            videoPreviewVid.src = url;
+            videoPreviewVid.controls = true;
+            videoPreviewVid.load();
+            videoPreview.style.display = 'block';
+            videoStatus.textContent = 'Chargement de la vidéo...';
+            videoStatus.style.color = 'blue';
+
+            videoPreviewVid.onloadedmetadata = () => {
+                videoStatus.textContent = 'Vidéo prête (Durée: ' + Math.round(videoPreviewVid.duration) + 's)';
+                videoStatus.style.color = 'green';
+            };
+
+            videoPreviewVid.onerror = () => {
+                videoStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Échec de l\'aperçu (Format ou CORS).';
+                videoStatus.style.color = '#d97706';
+            };
+        } else {
+            if (!url) {
+                videoPreview.style.display = 'none';
+                videoPreviewVid.src = '';
+                videoStatus.textContent = '';
+            }
+        }
+    });
+
     // Remove Btns
     document.getElementById('btnRemoveImage').addEventListener('click', () => {
         document.getElementById('image').value = '';
         document.getElementById('image_url_input').value = '';
         document.getElementById('imagePreview').style.display = 'none';
+        if (imageStatus) imageStatus.textContent = '';
         document.querySelector('.file-upload-wrapper[for="image"]').style.display = 'flex';
     });
 
@@ -190,6 +292,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('video').value = '';
         document.getElementById('video_url_input').value = '';
         document.getElementById('videoPreview').style.display = 'none';
+        if (videoStatus) videoStatus.textContent = '';
+        const iframe = videoPreview.querySelector('iframe');
+        if (iframe) iframe.src = '';
+
         document.querySelector('.file-upload-wrapper[for="video"]').style.display = 'flex';
     });
 

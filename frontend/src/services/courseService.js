@@ -6,7 +6,10 @@ const CourseService = {
         return apiRequest('courses', 'POST', courseData, isMultipart);
     },
 
-    getAll: () => apiRequest('courses'),
+    getAll: (status = null) => {
+        const url = status ? `courses?status=${status}` : 'courses';
+        return apiRequest(url);
+    },
 
     getByAdmin: (adminId) => apiRequest(`courses?action=getAdminCourses&admin_id=${adminId}`),
 

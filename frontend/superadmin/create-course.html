@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modifier le Cours | Administration ENSPY</title>
+    <title>Nouveau Cours | Administration ENSPY</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" href="../public/images/enspy-logo.png">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../admin/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .form-container {
@@ -237,15 +237,39 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <img src="../public/images/enspy-logo.png" alt="Logo">
-            <span>ADMINISTRATION</span>
+            <span>SUPER ADMIN</span>
         </div>
 
         <nav class="nav-links">
             <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
             </a>
+
+            <!-- Separator: Global Management -->
+            <div
+                style="padding: 12px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Gestion Globale</div>
+
+            <a href="administrators.html" class="nav-item">
+                <i class="fas fa-user-shield"></i> <span>Administrateurs</span>
+            </a>
+            <a href="instructors.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i> <span>Instructeurs</span>
+            </a>
+            <a href="categories.html" class="nav-item">
+                <i class="fas fa-folder-open"></i> <span>Catégories</span>
+            </a>
             <a href="courses.html" class="nav-item active">
-                <i class="fas fa-book-open"></i> <span>Mes Cours</span>
+                <i class="fas fa-book-open"></i> <span>Tous les Cours</span>
+            </a>
+
+            <!-- Separator: My Space -->
+            <div
+                style="padding: 16px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Mon Espace</div>
+
+            <a href="my-courses.html" class="nav-item">
+                <i class="fas fa-graduation-cap"></i> <span>Mes Cours</span>
             </a>
             <a href="students.html" class="nav-item">
                 <i class="fas fa-users"></i> <span>Étudiants</span>
@@ -260,7 +284,7 @@
 
         <div class="sidebar-footer">
             <div class="user-card">
-                <img src="https://ui-avatars.com/api/?name=Admin&background=111827&color=fff" alt="Admin"
+                <img src="https://ui-avatars.com/api/?name=SA&background=111827&color=fff" alt="Admin"
                     class="user-avatar" id="sidebarAvatar">
                 <div class="user-info">
                     <h4 id="sidebarName">Chargement...</h4>
@@ -279,27 +303,28 @@
         <!-- TOP HEADER -->
         <header class="top-header">
             <div class="greeting">
-                <h1>Modifier le Cours</h1>
-                <p>Mettez à jour les informations du cours.</p>
+                <h1>Créer un nouveau cours</h1>
+                <p>Remplissez les informations ci-dessous pour publier un nouveau contenu.</p>
             </div>
 
             <div class="header-actions">
-                <a href="courses.html" class="icon-btn" title="Retour">
+                <a href="dashboard.html" class="icon-btn" title="Retour">
                     <i class="fas fa-arrow-left"></i>
                 </a>
             </div>
         </header>
 
         <div class="form-container">
-            <div id="alertSuccess" class="alert alert-success">Le cours a été mis à jour avec succès !</div>
-            <div id="alertError" class="alert alert-error">Une erreur est survenue lors de la mise à jour.</div>
+            <div id="alertSuccess" class="alert alert-success">Le cours a été créé avec succès !</div>
+            <div id="alertError" class="alert alert-error">Une erreur est survenue lors de la création du cours.</div>
 
-            <form id="editCourseForm">
+            <form id="createCourseForm">
                 <div class="form-grid">
                     <!-- Basic Info -->
                     <div class="form-group full-width">
                         <label for="title">Titre du cours *</label>
-                        <input type="text" id="title" class="form-control" required>
+                        <input type="text" id="title" class="form-control"
+                            placeholder="Ex: Introduction à l'Intelligence Artificielle" required>
                     </div>
 
                     <div class="form-group">
@@ -330,18 +355,21 @@
 
                     <div class="form-group full-width">
                         <label for="moodle_url">URL Moodle *</label>
-                        <input type="url" id="moodle_url" class="form-control" required>
+                        <input type="url" id="moodle_url" class="form-control"
+                            placeholder="https://moodle.polytech.cm/course/view.php?id=..." required>
                     </div>
 
                     <!-- Details -->
                     <div class="form-group full-width">
                         <label for="short_synopsis">Synopsis court</label>
-                        <textarea id="short_synopsis" class="form-control"></textarea>
+                        <textarea id="short_synopsis" class="form-control"
+                            placeholder="Une brève description pour le catalogue..."></textarea>
                     </div>
 
                     <div class="form-group full-width">
                         <label for="full_description">Description complète (HTML supporté)</label>
-                        <textarea id="full_description" class="form-control"></textarea>
+                        <textarea id="full_description" class="form-control"
+                            placeholder="Contenu détaillé du cours..."></textarea>
                     </div>
 
                     <div class="form-group">
@@ -372,20 +400,21 @@
 
                     <div class="form-group">
                         <label for="total_duration_minutes">Durée (minutes)</label>
-                        <input type="number" id="total_duration_minutes" class="form-control" min="0">
-                    </div>
-
-                    <div class="form-group is-certifying-group">
-                        <input type="checkbox" id="is_certifying">
-                        <label for="is_certifying">Délivre un certificat</label>
+                        <input type="number" id="total_duration_minutes" class="form-control" placeholder="Ex: 120"
+                            min="0">
                     </div>
 
                     <div class="form-group">
                         <label for="status">Statut de publication</label>
                         <select id="status" class="form-control">
                             <option value="DRAFT">Brouillon</option>
-                            <option value="PUBLISHED">Publié</option>
+                            <option value="PUBLISHED" selected>Publié</option>
                         </select>
+                    </div>
+
+                    <div class="form-group is-certifying-group">
+                        <input type="checkbox" id="is_certifying">
+                        <label for="is_certifying">Délivre un certificat</label>
                     </div>
 
                     <!-- Media -->
@@ -399,7 +428,7 @@
                         <div id="imageLocalGroup" class="media-input-group active">
                             <label class="file-upload-wrapper" for="image">
                                 <i class="fas fa-image"></i>
-                                <p id="imageName">Cliquer pour changer l'image</p>
+                                <p id="imageName">Cliquer pour choisir une image</p>
                                 <input type="file" id="image" accept="image/*">
                             </label>
                         </div>
@@ -426,7 +455,7 @@
                         <div id="videoLocalGroup" class="media-input-group active">
                             <label class="file-upload-wrapper" for="video">
                                 <i class="fas fa-video"></i>
-                                <p id="videoName">Cliquer pour changer la vidéo</p>
+                                <p id="videoName">Cliquer pour choisir une vidéo</p>
                                 <input type="file" id="video" accept="video/*">
                             </label>
                         </div>
@@ -443,7 +472,7 @@
                         </div>
                     </div>
 
-                    <!-- Advanced -->
+                    <!-- Advanced (JSON fields stored as strings for simplicity here) -->
                     <div class="form-group full-width">
                         <label for="pedagogical_objectives">Objectifs pédagogiques (un par ligne)</label>
                         <textarea id="pedagogical_objectives" class="form-control"
@@ -452,9 +481,9 @@
                 </div>
 
                 <div class="btn-actions">
-                    <a href="courses.html" class="btn-secondary">Annuler</a>
+                    <a href="dashboard.html" class="btn-secondary">Annuler</a>
                     <button type="submit" class="btn-primary" id="btnSubmit">
-                        <i class="fas fa-save"></i> Enregistrer les modifications
+                        <i class="fas fa-save"></i> Enregistrer le cours
                     </button>
                 </div>
             </form>
@@ -525,7 +554,7 @@
         </div>
     </div>
 
-    <script type="module" src="../src/views/admin/edit-course.js"></script>
+    <script type="module" src="../src/views/admin/create-course.js"></script>
 </body>
 
 </html>

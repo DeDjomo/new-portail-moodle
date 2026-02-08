@@ -39,7 +39,8 @@ class CourseController {
      * List all courses
      */
     public function index() {
-        $stmt = $this->courseModel->getAllWithDetails();
+        $status = $_GET['status'] ?? null;
+        $stmt = $this->courseModel->getAllWithDetails($status);
         $courses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         // Decode JSON fields for response

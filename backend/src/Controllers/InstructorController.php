@@ -50,13 +50,24 @@ class InstructorController {
         if (empty($data['full_name'])) {
             return $this->jsonResponse(['message' => "Field 'full_name' is required"], 400);
         }
+        if (empty($data['professional_title'])) {
+            return $this->jsonResponse(['message' => "Field 'professional_title' is required"], 400);
+        }
+        if (empty($data['organization'])) {
+            return $this->jsonResponse(['message' => "Field 'organization' is required"], 400);
+        }
 
         // Handle Photo Upload
         $photoUrl = null;
         if (isset($_FILES['photo'])) {
-            $uploadedPath = $this->uploader->upload($_FILES['photo']);
-            if ($uploadedPath) {
-                $photoUrl = $uploadedPath;
+            try {
+                $uploadedPath = $this->uploader->upload($_FILES['photo']);
+                if ($uploadedPath) {
+                    $photoUrl = $uploadedPath;
+                }
+            } catch (\Throwable $e) {
+                // Log error but allow creation without photo to prevent freezing
+                error_log("Photo Upload Failed: " . $e->getMessage());
             }
         }
 
@@ -92,13 +103,17 @@ class InstructorController {
         // Handle Photo Upload
         $photoUrl = $existing['photo_url'];
         if (isset($_FILES['photo'])) {
-            $uploadedPath = $this->uploader->upload($_FILES['photo']);
-            if ($uploadedPath) {
-                // Delete old photo if it exists
-                if ($existing['photo_url']) {
-                    $this->uploader->delete($existing['photo_url']);
+            try {
+                $uploadedPath = $this->uploader->upload($_FILES['photo']);
+                if ($uploadedPath) {
+                    // Delete old photo if it exists
+                    if ($existing['photo_url']) {
+                        $this->uploader->delete($existing['photo_url']);
+                    }
+                    $photoUrl = $uploadedPath;
                 }
-                $photoUrl = $uploadedPath;
+            } catch (\Throwable $e) {
+                error_log("Photo Upload Update Failed: " . $e->getMessage());
             }
         }
 

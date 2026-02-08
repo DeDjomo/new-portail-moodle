@@ -2,50 +2,66 @@ import CourseService from '../../services/courseService.js';
 import CategoryService from '../../services/categoryService.js';
 import InstructorService from '../../services/instructorService.js';
 import { BASE_URL, resolveAssetPath } from '../../services/api.js';
+import { requireAuth } from '../../utils/auth-guard.js';
+import { setupQuickActions } from './quick-actions.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../../login.html';
-        return;
-    }
-    const admin = JSON.parse(adminStr);
-
-    // Sidebar Info
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // Logout
-    document.getElementById('btnLogout').addEventListener('click', () => {
-        localStorage.removeItem('admin');
-        window.location.href = '../../login.html';
-    });
+    const admin = requireAuth('STANDARD_ADMIN');
+    if (!admin) return;
 
     // 2. Load Select Data
-    try {
-        const [categories, instructors] = await Promise.all([
-            CategoryService.getAll(),
-            InstructorService.getAll()
-        ]);
+    async function refreshSelects() {
+        try {
+            const [categories, instructors] = await Promise.all([
+                CategoryService.getAll(),
+                InstructorService.getAll()
+            ]);
 
-        const catSelect = document.getElementById('category_id');
-        catSelect.innerHTML = '<option value="">Choisir une catégorie...</option>';
-        categories.forEach(c => {
-            catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-        });
+            const catSelect = document.getElementById('category_id');
+            const currentCat = catSelect.value;
+            catSelect.innerHTML = '<option value="">Choisir une catégorie...</option>';
+            categories.forEach(c => {
+                catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+            if (currentCat) catSelect.value = currentCat;
 
-        const insSelect = document.getElementById('instructor_id');
-        insSelect.innerHTML = '<option value="">Choisir un instructeur...</option>';
-        instructors.forEach(i => {
-            insSelect.innerHTML += `<option value="${i.id}">${i.full_name}</option>`;
-        });
+            const insSelect = document.getElementById('instructor_id');
+            const currentIns = insSelect.value;
+            insSelect.innerHTML = '<option value="">Choisir un instructeur...</option>';
+            instructors.forEach(i => {
+                insSelect.innerHTML += `<option value="${i.id}">${i.full_name}</option>`;
+            });
+            if (currentIns) insSelect.value = currentIns;
 
-    } catch (error) {
-        console.error('Error loading form data:', error);
+        } catch (error) {
+            console.error('Error loading form data:', error);
+        }
     }
+
+    await refreshSelects();
+
+    // 2.1 Setup Quick Actions
+    setupQuickActions(
+        (newCategory) => {
+            // On Category Custom Created
+            const catSelect = document.getElementById('category_id');
+            const opt = document.createElement('option');
+            opt.value = newCategory.id;
+            opt.textContent = newCategory.name;
+            opt.selected = true;
+            catSelect.appendChild(opt);
+        },
+        (newInstructor) => {
+            // On Instructor Custom Created
+            const insSelect = document.getElementById('instructor_id');
+            const opt = document.createElement('option');
+            opt.value = newInstructor.id;
+            opt.textContent = newInstructor.full_name;
+            opt.selected = true;
+            insSelect.appendChild(opt);
+        }
+    );
 
 
     // --- Helper: Get Embed URL ---
@@ -320,6 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('format', document.getElementById('format').value);
         formData.append('total_duration_minutes', document.getElementById('total_duration_minutes').value);
         formData.append('is_certifying', document.getElementById('is_certifying').checked ? 1 : 0);
+        formData.append('status', document.getElementById('status').value);
 
         // Special handling for pedagogical objectives (convert lines to array)
         const objectivesText = document.getElementById('pedagogical_objectives').value;

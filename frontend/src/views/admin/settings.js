@@ -1,45 +1,37 @@
 import AdminService from '../../services/adminService.js';
 import { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('Settings Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../../login.html';
-        return;
-    }
-
-    let admin = JSON.parse(adminStr);
+    const admin = requireAuth();
+    if (!admin) return;
 
     // Helper to update UI
     const updateUI = (data) => {
-        document.getElementById('sidebarName').textContent = `${data.first_name} ${data.last_name}`;
-        if (data.avatar_url) {
-            const fullPath = resolveAssetPath(data.avatar_url);
-            document.getElementById('sidebarAvatar').src = fullPath;
-            document.getElementById('formAvatarPreview').src = fullPath;
-        }
+        // Sidebar updated by auth guard
 
         document.getElementById('lastName').value = data.last_name || '';
         document.getElementById('firstName').value = data.first_name || '';
         document.getElementById('email').value = data.email || '';
         document.getElementById('phone').value = data.phone || '';
+
+        // Update Avatar Preview
+        const avatarPreview = document.getElementById('formAvatarPreview');
+        if (avatarPreview) {
+            if (data.avatar_url) {
+                avatarPreview.src = resolveAssetPath(data.avatar_url);
+            } else {
+                avatarPreview.src = `https://ui-avatars.com/api/?name=${data.first_name}+${data.last_name}&background=111827&color=fff`;
+            }
+        }
     };
 
     // Initial UI Fill
     updateUI(admin);
-
-    // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCustomConfirm('Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../../login.html';
-        });
-    });
 
     // 4. Avatar Preview (Client side interaction only)
     const avatarInput = document.getElementById('avatarInput');

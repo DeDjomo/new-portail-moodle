@@ -1,39 +1,42 @@
 import { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('SuperAdmin Dashboard loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../login.html';
-        return;
-    }
+    const admin = requireAuth('SUPER_ADMIN');
+    if (!admin) return;
 
-    const admin = JSON.parse(adminStr);
-
-    // Restrict to SUPER_ADMIN only
-    if (admin.type !== 'SUPER_ADMIN') {
-        window.location.href = '../admin/dashboard.html';
-        return;
-    }
-
-    // 2. Populate User Info
+    // 2. Populate User Info (Welcome Name only, sidebar handled by auth guard)
     document.getElementById('welcomeName').textContent = admin.first_name;
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
 
     // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCustomConfirm('Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../login.html';
+    const btnLogout = document.getElementById('btnLogout');
+    const logoutModal = document.getElementById('logoutModal');
+    const confirmLogout = document.getElementById('confirmLogout');
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', (e) => {
+            e.preventDefault();
+            logoutModal.classList.add('active');
         });
-    });
+    }
+
+    if (confirmLogout) {
+        confirmLogout.addEventListener('click', () => {
+            localStorage.removeItem('admin');
+            window.location.href = '../../login.html';
+        });
+    }
+
+    // Close modal on outside click
+    if (logoutModal) {
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) logoutModal.classList.remove('active');
+        });
+    }
 
     // 4. Fetch Global Stats
     try {

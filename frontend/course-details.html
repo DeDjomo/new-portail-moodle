@@ -26,8 +26,7 @@
             <ul class="nav-menu">
                 <li><a href="index.html" class="nav-link">Accueil</a></li>
                 <li><a href="catalog.html" class="nav-link active">Cours</a></li>
-                <li><a href="#" class="nav-link">Formateurs</a></li>
-                <li><a href="#" class="nav-link">À propos</a></li>
+                <li><a href="about.html" class="nav-link">À propos</a></li>
             </ul>
         </div>
     </nav>
@@ -149,7 +148,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Filière</label>
-                        <input type="text" name="major" class="form-input" placeholder="ex: Génie Info">
+                        <select name="major" class="form-input" required>
+                            <option value="" disabled selected>Choisir une filière...</option>
+                            <option value="Génie Informatique (GI)">Génie Informatique (GI)</option>
+                            <option value="Génie Civil (GC)">Génie Civil (GC)</option>
+                            <option value="Génie Électrique (GE)">Génie Électrique (GE)</option>
+                            <option value="Génie Mécanique (GM)">Génie Mécanique (GM)</option>
+                            <option value="Génie Télécommunications (GT)">Génie Télécommunications (GT)</option>
+                            <option value="Génie Industriel (GInd)">Génie Industriel (GInd)</option>
+                            <option value="Arts Numériques (AN)">Arts Numériques (AN)</option>
+                            <option value="Humanités Numériques (HN)">Humanités Numériques (HN)</option>
+                            <option value="Sciences de l'Ingénieur (MSP)">Sciences de l'Ingénieur (MSP)</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Niveau</label>
@@ -177,7 +187,7 @@
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script type="module" src="./src/views/course-details.js"></script>
 </body>
 
 </html>

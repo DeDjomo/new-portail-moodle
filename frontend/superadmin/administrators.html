@@ -111,14 +111,6 @@
                         style="width: 100%; padding: 12px 16px; border: 1px solid #E5E7EB; border-radius: 10px; font-size: 0.95rem;">
                 </div>
                 <div>
-                    <select id="filterType"
-                        style="padding: 12px 16px; border: 1px solid #E5E7EB; border-radius: 10px; font-size: 0.95rem; background: white;">
-                        <option value="">Tous les types</option>
-                        <option value="SUPER_ADMIN">Super Admin</option>
-                        <option value="STANDARD_ADMIN">Admin Standard</option>
-                    </select>
-                </div>
-                <div>
                     <select id="filterStatus"
                         style="padding: 12px 16px; border: 1px solid #E5E7EB; border-radius: 10px; font-size: 0.95rem; background: white;">
                         <option value="">Tous les statuts</option>
@@ -167,7 +159,7 @@
             <form id="adminForm">
                 <input type="hidden" id="adminId">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 16px;">
                     <div>
                         <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Nom</label>
                         <input type="text" id="lastName" required
@@ -195,21 +187,15 @@
                         style="width:100%; padding:12px; border:1px solid #E5E7EB; border-radius:10px;">
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-                    <div>
-                        <label style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Type</label>
-                        <select id="type" required
-                            style="width:100%; padding:12px; border:1px solid #E5E7EB; border-radius:10px; background:white;">
-                            <option value="STANDARD_ADMIN">Admin Standard</option>
-                            <option value="SUPER_ADMIN">Super Admin</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label
-                            style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Téléphone</label>
-                        <input type="text" id="phone"
-                            style="width:100%; padding:12px; border:1px solid #E5E7EB; border-radius:10px;">
-                    </div>
+                <!-- Type is always STANDARD_ADMIN for new admins -->
+                <input type="hidden" id="type" value="STANDARD_ADMIN">
+
+                <div style="margin-bottom: 24px;">
+                    <label
+                        style="display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;">Téléphone</label>
+                    <input type="tel" id="phone" pattern="[0-9+\s\-]{9,15}" placeholder="+237 6XX XXX XXX"
+                        title="Entrez un numéro de téléphone valide (9-15 chiffres)"
+                        style="width:100%; padding:12px; border:1px solid #E5E7EB; border-radius:10px;">
                 </div>
 
                 <div style="display:flex; gap:12px; justify-content:flex-end;">

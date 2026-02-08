@@ -1,5 +1,6 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, showSuccessConfirm } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -7,33 +8,8 @@ console.log('SuperAdmin - Administrators Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../login.html';
-        return;
-    }
-
-    const admin = JSON.parse(adminStr);
-
-    if (admin.type !== 'SUPER_ADMIN') {
-        window.location.href = '../admin/dashboard.html';
-        return;
-    }
-
-    // 2. Populate User Info
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCustomConfirm('Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../login.html';
-        });
-    });
+    const admin = requireAuth('SUPER_ADMIN');
+    if (!admin) return;
 
     // State
     let allAdmins = [];
@@ -44,7 +20,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadAdmins() {
         try {
             const res = await fetch(`${API_BASE}/administrators`);
-            allAdmins = await res.json();
+            const data = await res.json();
+            // Filter out SUPER_ADMIN - they should not appear in this list
+            allAdmins = data.filter(a => a.type !== 'SUPER_ADMIN');
             renderAdmins(allAdmins);
         } catch (error) {
             console.error('Error loading admins:', error);
@@ -61,11 +39,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         tbody.innerHTML = admins.map(a => {
-            const avatarSrc = a.avatar_url ? resolveAssetPath(a.avatar_url) : `https://ui-avatars.com/api/?name=${a.first_name}+${a.last_name}&background=7C3AED&color=fff`;
-            const typeLabel = a.type === 'SUPER_ADMIN' ? 'Super Admin' : 'Admin Standard';
-            const typeBadge = a.type === 'SUPER_ADMIN'
-                ? '<span style="background:#EDE9FE; color:#7C3AED; padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:600;">Super Admin</span>'
-                : '<span style="background:#F3F4F6; color:#4B5563; padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:600;">Standard</span>';
+            const avatarSrc = a.avatar_url ? resolveAssetPath(a.avatar_url) : `https://ui-avatars.com/api/?name=${a.first_name}+${a.last_name}&background=FF6B00&color=fff`;
+            const typeBadge = '<span style="background:#FFF5EB; color:#FF6B00; padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:600;">Admin Standard</span>';
             const statusBadge = a.status === 'ACTIVE'
                 ? '<span class="badge-active">Actif</span>'
                 : '<span class="badge-suspended">Suspendu</span>';
@@ -79,17 +54,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span style="font-weight:600;">${a.first_name} ${a.last_name}</span>
                         </div>
                     </td>
-                    <td><a href="mailto:${a.email}" style="color:#7C3AED; text-decoration:none;">${a.email}</a></td>
+                    <td><a href="mailto:${a.email}" style="color:#FF6B00; text-decoration:none;">${a.email}</a></td>
                     <td>${typeBadge}</td>
                     <td>${statusBadge}</td>
                     <td style="color:#6B7280;">${lastLogin}</td>
                     <td>
                         <div style="display:flex; gap:8px;">
-                            <button class="action-btn" title="Modifier" data-edit="${a.id}"><i class="fas fa-pen"></i></button>
-                            <button class="action-btn" title="${a.status === 'ACTIVE' ? 'Suspendre' : 'Activer'}" data-toggle="${a.id}" data-status="${a.status}">
+                            <button class="action-btn" title="Modifier" data-edit="${a.id}" style="background:#DBEAFE; color:#2563EB; cursor:pointer;"><i class="fas fa-pen"></i></button>
+                            <button class="action-btn" title="${a.status === 'ACTIVE' ? 'Suspendre' : 'Activer'}" data-toggle="${a.id}" data-status="${a.status}" style="background:${a.status === 'ACTIVE' ? '#FEF3C7' : '#D1FAE5'}; color:${a.status === 'ACTIVE' ? '#D97706' : '#059669'}; cursor:pointer;">
                                 <i class="fas ${a.status === 'ACTIVE' ? 'fa-ban' : 'fa-check'}"></i>
                             </button>
-                            <button class="action-btn danger" title="Supprimer" data-delete="${a.id}"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn" title="Supprimer" data-delete="${a.id}" style="background:#FEE2E2; color:#DC2626; cursor:pointer;"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -210,11 +185,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 7. Toggle Status (Suspend/Activate)
     async function toggleStatus(id, currentStatus) {
         const newStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
-        const actionLabel = newStatus === 'SUSPENDED' ? 'suspendre' : 'activer';
+        const isSuspending = newStatus === 'SUSPENDED';
 
-        showCustomConfirm(
-            `${newStatus === 'SUSPENDED' ? 'Suspendre' : 'Activer'} l'administrateur ?`,
-            `Voulez-vous vraiment ${actionLabel} cet administrateur ?`,
+        const confirmFn = isSuspending ? showWarningConfirm : showSuccessConfirm;
+        const title = isSuspending ? 'Suspendre l\'administrateur ?' : 'Activer l\'administrateur ?';
+        const message = isSuspending
+            ? 'L\'administrateur ne pourra plus se connecter jusqu\'à sa réactivation.'
+            : 'L\'administrateur pourra à nouveau se connecter et accéder au système.';
+        const buttonText = isSuspending ? 'Suspendre' : 'Activer';
+
+        confirmFn(
+            title,
+            message,
+            buttonText,
             async () => {
                 try {
                     const res = await fetch(`${API_BASE}/administrators/${id}`, {
@@ -224,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
 
                     if (res.ok) {
-                        showToast(`Administrateur ${newStatus === 'SUSPENDED' ? 'suspendu' : 'activé'}.`, 'success');
+                        showToast(`Administrateur ${isSuspending ? 'suspendu' : 'activé'}.`, 'success');
                         loadAdmins();
                     } else {
                         const data = await res.json();
@@ -240,9 +223,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 8. Delete Admin
     async function deleteAdmin(id) {
-        showCustomConfirm(
+        const adminData = allAdmins.find(a => a.id == id);
+        if (!adminData) return;
+
+        const fullName = `${adminData.first_name} ${adminData.last_name}`;
+
+        showDangerConfirm(
             'Supprimer l\'administrateur ?',
-            'Cette action est irréversible. L\'administrateur sera définitivement supprimé.',
+            'Cette action est irréversible. L\'administrateur et toutes ses données seront définitivement supprimés.',
+            fullName,
             async () => {
                 try {
                     const res = await fetch(`${API_BASE}/administrators/${id}`, {
@@ -266,28 +255,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 9. Filters
     const searchInput = document.getElementById('searchInput');
-    const filterType = document.getElementById('filterType');
     const filterStatus = document.getElementById('filterStatus');
 
     function applyFilters() {
         const search = searchInput.value.toLowerCase();
-        const type = filterType.value;
         const status = filterStatus.value;
 
         const filtered = allAdmins.filter(a => {
             const matchesSearch = a.first_name.toLowerCase().includes(search) ||
                 a.last_name.toLowerCase().includes(search) ||
                 a.email.toLowerCase().includes(search);
-            const matchesType = !type || a.type === type;
             const matchesStatus = !status || a.status === status;
-            return matchesSearch && matchesType && matchesStatus;
+            return matchesSearch && matchesStatus;
         });
 
         renderAdmins(filtered);
     }
 
     searchInput.addEventListener('input', applyFilters);
-    filterType.addEventListener('change', applyFilters);
     filterStatus.addEventListener('change', applyFilters);
 
     // Initial Load

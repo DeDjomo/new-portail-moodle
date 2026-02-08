@@ -11,6 +11,15 @@ const EnrollmentService = {
     },
 
     /**
+     * Check enrollment status 
+     * @param {string} email 
+     * @param {number} courseId 
+     */
+    checkStatus: async (email, courseId) => {
+        return await apiRequest(`enrollments?action=checkStatus&email=${email}&course_id=${courseId}`, 'GET');
+    },
+
+    /**
      * Get all students for an admin
      * @param {number} adminId 
      */

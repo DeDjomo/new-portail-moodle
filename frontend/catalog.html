@@ -25,10 +25,9 @@
             </a>
 
             <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link active">Accueil</a></li>
-                <li><a href="#courses" class="nav-link">Cours</a></li>
-                <li><a href="#" class="nav-link">Formateurs</a></li>
-                <li><a href="#" class="nav-link">À propos</a></li>
+                <li><a href="index.html" class="nav-link">Accueil</a></li>
+                <li><a href="catalog.html" class="nav-link active">Cours</a></li>
+                <li><a href="about.html" class="nav-link">À propos</a></li>
             </ul>
 
             <!-- Login button removed -->
@@ -93,6 +92,34 @@
                                     <input type="checkbox" class="filter-checkbox" name="level" value="ADVANCED">
                                     <span class="custom-check"></span>
                                     <span class="label-text">Avancé</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="filter-section" style="margin-top: 1.5rem;">
+                            <h4 class="filter-label">Instructeur</h4>
+                            <div class="checkbox-list" id="instructorFilters">
+                                <!-- Instructors injected dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="filter-section" style="margin-top: 1.5rem;">
+                            <h4 class="filter-label">Durée</h4>
+                            <div class="checkbox-list">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="duration" value="short">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Courte (< 2h)</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="duration" value="medium">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Moyenne (2-5h)</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" class="filter-checkbox" name="duration" value="long">
+                                    <span class="custom-check"></span>
+                                    <span class="label-text">Longue (> 5h)</span>
                                 </label>
                             </div>
                         </div>

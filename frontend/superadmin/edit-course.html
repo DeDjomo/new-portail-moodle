@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" href="../public/images/enspy-logo.png">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../admin/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         .form-container {
@@ -237,15 +237,39 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <img src="../public/images/enspy-logo.png" alt="Logo">
-            <span>ADMINISTRATION</span>
+            <span>SUPER ADMIN</span>
         </div>
 
         <nav class="nav-links">
             <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
             </a>
+
+            <!-- Separator: Global Management -->
+            <div
+                style="padding: 12px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Gestion Globale</div>
+
+            <a href="administrators.html" class="nav-item">
+                <i class="fas fa-user-shield"></i> <span>Administrateurs</span>
+            </a>
+            <a href="instructors.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher"></i> <span>Instructeurs</span>
+            </a>
+            <a href="categories.html" class="nav-item">
+                <i class="fas fa-folder-open"></i> <span>Catégories</span>
+            </a>
             <a href="courses.html" class="nav-item active">
-                <i class="fas fa-book-open"></i> <span>Mes Cours</span>
+                <i class="fas fa-book-open"></i> <span>Tous les Cours</span>
+            </a>
+
+            <!-- Separator: My Space -->
+            <div
+                style="padding: 16px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">
+                Mon Espace</div>
+
+            <a href="my-courses.html" class="nav-item">
+                <i class="fas fa-graduation-cap"></i> <span>Mes Cours</span>
             </a>
             <a href="students.html" class="nav-item">
                 <i class="fas fa-users"></i> <span>Étudiants</span>
@@ -260,7 +284,7 @@
 
         <div class="sidebar-footer">
             <div class="user-card">
-                <img src="https://ui-avatars.com/api/?name=Admin&background=111827&color=fff" alt="Admin"
+                <img src="https://ui-avatars.com/api/?name=SA&background=111827&color=fff" alt="Admin"
                     class="user-avatar" id="sidebarAvatar">
                 <div class="user-info">
                     <h4 id="sidebarName">Chargement...</h4>

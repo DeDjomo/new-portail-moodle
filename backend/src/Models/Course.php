@@ -38,17 +38,28 @@ class Course extends BaseModel {
     /**
      * Get all courses with joined instructor and category details
      */
-    public function getAllWithDetails() {
+    public function getAllWithDetails($status = null) {
         $query = "SELECT c.*, 
                          i.full_name as instructor_name, 
                          i.photo_url as instructor_photo_url,
+                         i.professional_title as instructor_title,
+                         i.short_bio as instructor_bio,
                          cat.name as category_name
                   FROM " . $this->table_name . " c
                   LEFT JOIN instructors i ON c.instructor_id = i.id
-                  LEFT JOIN categories cat ON c.category_id = cat.id
-                  WHERE c.status != 'DELETED'
-                  ORDER BY c.created_at DESC";
+                  LEFT JOIN categories cat ON c.category_id = cat.id AND cat.status != 'DELETED'
+                  WHERE c.status != 'DELETED'";
+        
+        if ($status) {
+            $query .= " AND c.status = :status";
+        }
+        
+        $query .= " ORDER BY c.created_at DESC";
+
         $stmt = $this->db->prepare($query);
+        if ($status) {
+            $stmt->bindParam(':status', $status);
+        }
         $stmt->execute();
         return $stmt;
     }
@@ -60,10 +71,12 @@ class Course extends BaseModel {
         $query = "SELECT c.*, 
                          i.full_name as instructor_name, 
                          i.photo_url as instructor_photo_url,
+                         i.professional_title as instructor_title,
+                         i.short_bio as instructor_bio,
                          cat.name as category_name
                   FROM " . $this->table_name . " c
                   LEFT JOIN instructors i ON c.instructor_id = i.id
-                  LEFT JOIN categories cat ON c.category_id = cat.id
+                  LEFT JOIN categories cat ON c.category_id = cat.id AND cat.status != 'DELETED'
                   WHERE c.administrator_id = ? AND c.status != 'DELETED'
                   ORDER BY c.created_at DESC";
         $stmt = $this->db->prepare($query);
@@ -79,10 +92,12 @@ class Course extends BaseModel {
         $query = "SELECT c.*, 
                          i.full_name as instructor_name, 
                          i.photo_url as instructor_photo_url,
+                         i.professional_title as instructor_title,
+                         i.short_bio as instructor_bio,
                          cat.name as category_name
                   FROM " . $this->table_name . " c
                   LEFT JOIN instructors i ON c.instructor_id = i.id
-                  LEFT JOIN categories cat ON c.category_id = cat.id
+                  LEFT JOIN categories cat ON c.category_id = cat.id AND cat.status != 'DELETED'
                   WHERE c.id = ? AND c.status != 'DELETED'
                   LIMIT 0,1";
         $stmt = $this->db->prepare($query);

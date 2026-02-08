@@ -136,7 +136,248 @@ export const showCustomConfirm = (title, message, onConfirm) => {
         onConfirm();
         cleanup();
     });
+};
 
-    // Valid for "export" context too if we want to customize icon/color dynamically, 
-    // but for now this is a generic confirm.
+/**
+ * Show a Warning Confirmation Modal (for suspensions/toggles)
+ * @param {string} title 
+ * @param {string} message 
+ * @param {string} confirmButtonText
+ * @param {Function} onConfirm 
+ */
+export const showWarningConfirm = (title, message, confirmButtonText, onConfirm) => {
+    // Remove existing modal if any
+    const existing = document.getElementById('custom-confirm-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-confirm-modal';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '10000';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.backdropFilter = 'blur(4px)';
+
+    const modal = document.createElement('div');
+    modal.style.background = 'white';
+    modal.style.padding = '2rem';
+    modal.style.borderRadius = '16px';
+    modal.style.width = '400px';
+    modal.style.maxWidth = '90%';
+    modal.style.textAlign = 'center';
+    modal.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+    modal.style.transform = 'scale(0.95)';
+    modal.style.opacity = '0';
+    modal.style.transition = 'all 0.2s ease-out';
+
+    modal.innerHTML = `
+        <div style="width:60px; height:60px; background:#FEF3C7; border-radius:50%; color:#D97706; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem auto; font-size:1.5rem;">
+            <i class="fas fa-pause-circle"></i>
+        </div>
+        <h3 style="margin-bottom:0.5rem; color:#D97706; font-size:1.25rem;">${title}</h3>
+        <p style="color:#6B7280; margin-bottom:2rem; line-height:1.5;">${message}</p>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <button id="btnModalCancel" style="padding:0.75rem 1.5rem; border-radius:10px; border:1px solid #D1D5DB; background:white; color:#374151; cursor:pointer; font-weight:500; min-width:100px;">Annuler</button>
+            <button id="btnModalConfirm" style="padding:0.75rem 1.5rem; border-radius:10px; border:none; background:#D97706; color:white; cursor:pointer; font-weight:600; min-width:100px;">${confirmButtonText}</button>
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Animate In
+    requestAnimationFrame(() => {
+        modal.style.transform = 'scale(1)';
+        modal.style.opacity = '1';
+    });
+
+    // Event Listeners
+    const cleanup = () => {
+        modal.style.transform = 'scale(0.95)';
+        modal.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 200);
+    };
+
+    document.getElementById('btnModalCancel').addEventListener('click', cleanup);
+    document.getElementById('btnModalConfirm').addEventListener('click', () => {
+        onConfirm();
+        cleanup();
+    });
+};
+
+/**
+ * Show a Success Confirmation Modal (for activations)
+ * @param {string} title 
+ * @param {string} message 
+ * @param {string} confirmButtonText
+ * @param {Function} onConfirm 
+ */
+export const showSuccessConfirm = (title, message, confirmButtonText, onConfirm) => {
+    // Remove existing modal if any
+    const existing = document.getElementById('custom-confirm-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-confirm-modal';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '10000';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.backdropFilter = 'blur(4px)';
+
+    const modal = document.createElement('div');
+    modal.style.background = 'white';
+    modal.style.padding = '2rem';
+    modal.style.borderRadius = '16px';
+    modal.style.width = '400px';
+    modal.style.maxWidth = '90%';
+    modal.style.textAlign = 'center';
+    modal.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+    modal.style.transform = 'scale(0.95)';
+    modal.style.opacity = '0';
+    modal.style.transition = 'all 0.2s ease-out';
+
+    modal.innerHTML = `
+        <div style="width:60px; height:60px; background:#D1FAE5; border-radius:50%; color:#059669; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem auto; font-size:1.5rem;">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 style="margin-bottom:0.5rem; color:#059669; font-size:1.25rem;">${title}</h3>
+        <p style="color:#6B7280; margin-bottom:2rem; line-height:1.5;">${message}</p>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <button id="btnModalCancel" style="padding:0.75rem 1.5rem; border-radius:10px; border:1px solid #D1D5DB; background:white; color:#374151; cursor:pointer; font-weight:500; min-width:100px;">Annuler</button>
+            <button id="btnModalConfirm" style="padding:0.75rem 1.5rem; border-radius:10px; border:none; background:#059669; color:white; cursor:pointer; font-weight:600; min-width:100px;">${confirmButtonText}</button>
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Animate In
+    requestAnimationFrame(() => {
+        modal.style.transform = 'scale(1)';
+        modal.style.opacity = '1';
+    });
+
+    // Event Listeners
+    const cleanup = () => {
+        modal.style.transform = 'scale(0.95)';
+        modal.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 200);
+    };
+
+    document.getElementById('btnModalCancel').addEventListener('click', cleanup);
+    document.getElementById('btnModalConfirm').addEventListener('click', () => {
+        onConfirm();
+        cleanup();
+    });
+};
+
+/**
+ * Show a Danger Confirmation Modal (for deletions)
+ * Requires typing the name to confirm
+ * @param {string} title 
+ * @param {string} message 
+ * @param {string} confirmText - Text user must type to confirm
+ * @param {Function} onConfirm 
+ */
+export const showDangerConfirm = (title, message, confirmText, onConfirm) => {
+    // Remove existing modal if any
+    const existing = document.getElementById('custom-confirm-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-confirm-modal';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '10000';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.backdropFilter = 'blur(4px)';
+
+    const modal = document.createElement('div');
+    modal.style.background = 'white';
+    modal.style.padding = '2rem';
+    modal.style.borderRadius = '16px';
+    modal.style.width = '440px';
+    modal.style.maxWidth = '90%';
+    modal.style.textAlign = 'center';
+    modal.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
+    modal.style.transform = 'scale(0.95)';
+    modal.style.opacity = '0';
+    modal.style.transition = 'all 0.2s ease-out';
+
+    modal.innerHTML = `
+        <div style="width:60px; height:60px; background:#FEE2E2; border-radius:50%; color:#DC2626; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem auto; font-size:1.5rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 style="margin-bottom:0.5rem; color:#DC2626; font-size:1.25rem;">${title}</h3>
+        <p style="color:#6B7280; margin-bottom:1.5rem; line-height:1.5;">${message}</p>
+        <p style="color:#374151; margin-bottom:0.75rem; font-size:0.85rem;">Tapez <strong style="color:#DC2626; background:#FEE2E2; padding:2px 8px; border-radius:4px;">${confirmText}</strong> pour confirmer :</p>
+        <input type="text" id="dangerConfirmInput" placeholder="Saisir le nom..." 
+            style="width:80%; max-width:280px; padding:10px 16px; border:2px solid #FCA5A5; border-radius:10px; margin:0 auto 1.5rem; font-size:0.95rem; text-align:center; display:block; outline:none; transition:border-color 0.2s;">
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <button id="btnModalCancel" style="padding:0.75rem 1.5rem; border-radius:10px; border:1px solid #D1D5DB; background:white; color:#374151; cursor:pointer; font-weight:500; min-width:100px;">Annuler</button>
+            <button id="btnModalConfirm" disabled style="padding:0.75rem 1.5rem; border-radius:10px; border:none; background:#FCA5A5; color:white; cursor:not-allowed; font-weight:600; min-width:100px;">Supprimer</button>
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Animate In
+    requestAnimationFrame(() => {
+        modal.style.transform = 'scale(1)';
+        modal.style.opacity = '1';
+    });
+
+    const input = document.getElementById('dangerConfirmInput');
+    const confirmBtn = document.getElementById('btnModalConfirm');
+
+    // Enable button only when text matches
+    input.addEventListener('input', () => {
+        if (input.value.trim().toLowerCase() === confirmText.toLowerCase()) {
+            confirmBtn.disabled = false;
+            confirmBtn.style.background = '#DC2626';
+            confirmBtn.style.cursor = 'pointer';
+        } else {
+            confirmBtn.disabled = true;
+            confirmBtn.style.background = '#FCA5A5';
+            confirmBtn.style.cursor = 'not-allowed';
+        }
+    });
+
+    // Event Listeners
+    const cleanup = () => {
+        modal.style.transform = 'scale(0.95)';
+        modal.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 200);
+    };
+
+    document.getElementById('btnModalCancel').addEventListener('click', cleanup);
+    confirmBtn.addEventListener('click', () => {
+        if (!confirmBtn.disabled) {
+            onConfirm();
+            cleanup();
+        }
+    });
+
+    // Focus input
+    setTimeout(() => input.focus(), 100);
 };

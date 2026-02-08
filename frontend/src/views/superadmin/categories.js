@@ -1,5 +1,6 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -7,83 +8,131 @@ console.log('SuperAdmin - Categories Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../login.html';
-        return;
-    }
-
-    const admin = JSON.parse(adminStr);
-
-    if (admin.type !== 'SUPER_ADMIN') {
-        window.location.href = '../admin/dashboard.html';
-        return;
-    }
-
-    // 2. Populate User Info
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCustomConfirm('Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../login.html';
-        });
-    });
+    const admin = requireAuth('SUPER_ADMIN');
+    if (!admin) return;
 
     // State
     let allCategories = [];
     const modal = document.getElementById('categoryModal');
     const form = document.getElementById('categoryForm');
 
-    // 4. Fetch & Render Categories
+    // 4. Fetch & Render Categories with Hierarchy
     async function loadCategories() {
         try {
             const res = await fetch(`${API_BASE}/categories`);
-            allCategories = await res.json();
-            renderCategories(allCategories);
+            const rawCategories = await res.json();
+            allCategories = rawCategories; // Store raw for lookup
+
+            // Build Hierarchy
+            const hierarchy = buildHierarchy(rawCategories);
+            renderCategories(hierarchy);
+            updateParentSelect(rawCategories);
         } catch (error) {
             console.error('Error loading categories:', error);
             document.getElementById('categoriesTableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#EF4444;">Erreur de chargement.</td></tr>';
         }
     }
 
-    function renderCategories(categories) {
+    function buildHierarchy(categories) {
+        const map = {};
+        const roots = [];
+
+        // Init map
+        categories.forEach(c => {
+            map[c.id] = { ...c, children: [] };
+        });
+
+        // Link children
+        categories.forEach(c => {
+            if (c.parent_id && map[c.parent_id]) {
+                map[c.parent_id].children.push(map[c.id]);
+            } else {
+                roots.push(map[c.id]);
+            }
+        });
+
+        return roots;
+    }
+
+    function renderCategories(hierarchy, level = 0) {
         const tbody = document.getElementById('categoriesTableBody');
 
-        if (categories.length === 0) {
+        if (level === 0) tbody.innerHTML = '';
+        if (hierarchy.length === 0 && level === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#6B7280; padding:2rem;">Aucune catégorie trouvée.</td></tr>';
             return;
         }
 
-        tbody.innerHTML = categories.map(c => {
-            return `
+        hierarchy.forEach(c => {
+            // Indentation visual
+            const indent = level * 30;
+            const isSub = level > 0;
+            const iconColor = isSub ? '#9CA3AF' : '#7C3AED';
+            const bgColor = isSub ? 'transparent' : '#EDE9FE';
+            const icon = isSub ? 'fa-level-up-alt fa-rotate-90' : 'fa-folder';
+
+            const row = `
                 <tr>
                     <td>
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <div style="width:40px; height:40px; background:#EDE9FE; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#7C3AED;">
-                                <i class="fas fa-folder"></i>
+                        <div style="display:flex; align-items:center; gap:12px; padding-left:${indent}px;">
+                            <div style="width:40px; height:40px; background:${bgColor}; border-radius:10px; display:flex; align-items:center; justify-content:center; color:${iconColor};">
+                                <i class="fas ${icon}"></i>
                             </div>
-                            <span style="font-weight:600;">${c.name}</span>
+                            <span style="font-weight:${isSub ? '400' : '600'}; color:${isSub ? '#4B5563' : 'inherit'}">${c.name}</span>
                         </div>
                     </td>
                     <td style="color:#6B7280;"><code style="background:#F3F4F6; padding:2px 8px; border-radius:4px;">${c.slug}</code></td>
                     <td style="color:#6B7280; max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.description || '-'}</td>
                     <td>
                         <div style="display:flex; gap:8px;">
-                            <button class="action-btn" title="Modifier" data-edit="${c.id}"><i class="fas fa-pen"></i></button>
-                            <button class="action-btn danger" title="Supprimer" data-delete="${c.id}"><i class="fas fa-trash"></i></button>
+                            <button class="action-btn" title="Créer sous-catégorie" data-add-sub="${c.id}" style="background:#D1FAE5; color:#059669; cursor:pointer;"><i class="fas fa-plus"></i></button>
+                            <button class="action-btn" title="Modifier" data-edit="${c.id}" style="background:#DBEAFE; color:#2563EB; cursor:pointer;"><i class="fas fa-pen"></i></button>
+                            <button class="action-btn" title="Supprimer" data-delete="${c.id}" style="background:#FEE2E2; color:#DC2626; cursor:pointer;"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>
             `;
-        }).join('');
+            tbody.insertAdjacentHTML('beforeend', row);
 
-        attachRowListeners();
+            if (c.children && c.children.length > 0) {
+                renderCategories(c.children, level + 1);
+            }
+        });
+
+        if (level === 0) attachRowListeners();
+    }
+
+    function updateParentSelect(categories, excludeId = null) {
+        const select = document.getElementById('parentCategory');
+        select.innerHTML = '<option value="">Aucune (Catégorie racine)</option>';
+
+        // Helper to flatten specifically for select (simple list)
+        // But better to verify cycles? For now, just list all except self.
+        // For UI clarity, maybe show hierarchy in select too?
+
+        function addOptions(cats, level = 0) {
+            cats.forEach(c => {
+                if (c.id == excludeId) return; // Don't show self
+
+                // Simple cycle prevention: if we were updating, we also shouldn't show our own children
+                // checking excludeId children is harder here without full tree.
+                // For now just basic self-exclusion.
+
+                const prefix = '&nbsp;&nbsp;&nbsp;'.repeat(level);
+                const option = document.createElement('option');
+                option.value = c.id;
+                option.innerHTML = `${prefix}${level > 0 ? '↳ ' : ''}${c.name}`;
+                select.appendChild(option);
+
+                // We need to find children of this cat from raw list to do deep options
+                const children = categories.filter(child => child.parent_id == c.id);
+                if (children.length > 0) addOptions(children, level + 1);
+            });
+        }
+
+        // Build a fresh tree for the select options to ensure order
+        const hierarchy = buildHierarchy(categories);
+        addOptions(hierarchy);
     }
 
     function attachRowListeners() {
@@ -93,6 +142,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.querySelectorAll('[data-delete]').forEach(btn => {
             btn.addEventListener('click', () => deleteCategory(btn.dataset.delete));
+        });
+
+        document.querySelectorAll('[data-add-sub]').forEach(btn => {
+            btn.addEventListener('click', () => openCreateSubModal(btn.dataset.addSub));
         });
     }
 
@@ -104,8 +157,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     function openCreateModal() {
         form.reset();
         document.getElementById('categoryId').value = '';
+        document.getElementById('parentCategory').value = '';
+
+        // Refresh options to show all
+        updateParentSelect(allCategories);
+
         document.getElementById('modalTitle').textContent = 'Nouvelle Catégorie';
         modal.style.display = 'block';
+    }
+
+    function openCreateSubModal(parentId) {
+        openCreateModal();
+        document.getElementById('parentCategory').value = parentId;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-folder-plus"></i> Nouvelle Sous-Catégorie';
     }
 
     function openEditModal(id) {
@@ -115,6 +179,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('categoryId').value = data.id;
         document.getElementById('categoryName').value = data.name;
         document.getElementById('categoryDescription').value = data.description || '';
+
+        // Refresh options excluding self
+        updateParentSelect(allCategories, id);
+        document.getElementById('parentCategory').value = data.parent_id || '';
+
         document.getElementById('modalTitle').textContent = 'Modifier Catégorie';
 
         modal.style.display = 'block';
@@ -131,7 +200,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const id = document.getElementById('categoryId').value;
         const payload = {
             name: document.getElementById('categoryName').value,
-            description: document.getElementById('categoryDescription').value || null
+            description: document.getElementById('categoryDescription').value || null,
+            parent_id: document.getElementById('parentCategory').value || null
         };
 
         try {
@@ -158,9 +228,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 7. Delete
     async function deleteCategory(id) {
-        showCustomConfirm(
+        // Find name for better confirmation
+        const cat = allCategories.find(c => c.id == id);
+        const name = cat ? cat.name : 'Catégorie #' + id;
+
+        showDangerConfirm(
             'Supprimer la catégorie ?',
-            'Cette action est irréversible. Les cours associés pourraient être affectés.',
+            'Les sous-catégories seront détachées (deviendront racines).',
+            name,
             async () => {
                 try {
                     const res = await fetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' });

@@ -1,5 +1,6 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
 
@@ -7,33 +8,8 @@ console.log('SuperAdmin - Courses Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../login.html';
-        return;
-    }
-
-    const admin = JSON.parse(adminStr);
-
-    if (admin.type !== 'SUPER_ADMIN') {
-        window.location.href = '../admin/dashboard.html';
-        return;
-    }
-
-    // 2. Populate User Info
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        showCustomConfirm('Déconnexion', 'Voulez-vous vraiment vous déconnecter ?', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../login.html';
-        });
-    });
+    const admin = requireAuth('SUPER_ADMIN');
+    if (!admin) return;
 
     // State
     let allCourses = [];
@@ -165,9 +141,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${statusBadge}</td>
                     <td>
                         <div style="display:flex; gap:8px;">
-                            <a href="../admin/edit-course.html?id=${c.id}" class="action-btn" title="Modifier"><i class="fas fa-pen"></i></a>
-                            ${c.status !== 'ARCHIVED' ? `<button class="action-btn" title="Archiver" data-archive="${c.id}"><i class="fas fa-archive"></i></button>` : ''}
-                            <button class="action-btn danger" title="Supprimer" data-delete="${c.id}"><i class="fas fa-trash"></i></button>
+                            <a href="edit-course.html?id=${c.id}" class="action-btn" title="Modifier" style="background:#DBEAFE; color:#2563EB;">
+                                <i class="fas fa-pen"></i>
+                            </a>${c.status !== 'ARCHIVED' ? `<button class="action-btn" title="Archiver" data-archive="${c.id}" style="background:#FEF3C7; color:#D97706; cursor:pointer;"><i class="fas fa-archive"></i></button>` : ''}
+                            <button class="action-btn danger" title="Supprimer" data-delete="${c.id}" style="background:#FEE2E2; color:#DC2626; cursor:pointer;"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -191,9 +168,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 6. Archive Course
     async function archiveCourse(id) {
-        showCustomConfirm(
+        showWarningConfirm(
             'Archiver ce cours ?',
             'Le cours sera masqué du catalogue mais conservé dans la base de données.',
+            'Archiver',
             async () => {
                 try {
                     const res = await fetch(`${API_BASE}/courses/${id}`, {
@@ -219,9 +197,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 7. Delete Course
     async function deleteCourse(id) {
-        showCustomConfirm(
+        showDangerConfirm(
             'Supprimer ce cours ?',
             'Cette action est irréversible. Toutes les inscriptions associées seront également supprimées.',
+            'Cours #' + id,
             async () => {
                 try {
                     const res = await fetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });

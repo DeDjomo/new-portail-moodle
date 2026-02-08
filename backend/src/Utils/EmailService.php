@@ -156,16 +156,17 @@ class EmailService {
         <html>
         <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
             <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
-                <h2 style='color: #00BA7C; text-align: center;'>Inscription Confirmée !</h2>
-                <hr style='border: 0; border-top: 10px solid #00BA7C;'>
+                <h2 style='color: #F59E0B; text-align: center;'>Inscription en attente de validation</h2>
+                <hr style='border: 0; border-top: 10px solid #F59E0B;'>
                 <p>Bonjour <strong>{$studentName}</strong>,</p>
-                <p>Nous avons le plaisir de vous confirmer votre inscription au cours :</p>
-                <div style='background: #f0fdf4; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #00BA7C;'>
-                    <h3 style='margin: 0; color: #005f3f;'>{$courseTitle}</h3>
+                <p>Votre demande d'inscription au cours suivant a bien été reçue :</p>
+                <div style='background: #fffbeb; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #F59E0B;'>
+                    <h3 style='margin: 0; color: #92400e;'>{$courseTitle}</h3>
                     <p style='margin: 5px 0;'><strong>Date :</strong> " . date('d/m/Y') . "</p>
+                    <p style='margin: 5px 0;'><strong>Statut :</strong> <span style='color: #F59E0B; font-weight: bold;'>En attente</span></p>
                 </div>
-                <p>Vous pouvez dès à présent accéder au contenu du cours depuis votre espace étudiant.</p>
-                <p>Bon apprentissage !</p>
+                <p>Votre inscription est actuellement en cours de validation par l'administrateur du cours.</p>
+                <p>Vous recevrez une notification dès que votre accès sera validé.</p>
                 <br>
                 <p>Cordialement,<br><strong>L'équipe ENSPY Training</strong></p>
                 <hr style='border: 0; border-top: 1px solid #eee;'>

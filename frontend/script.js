@@ -71,7 +71,7 @@ function initCarousel() {
 /* --- Data Loading for Landing Page --- */
 async function loadTrendingCourses() {
     try {
-        const response = await CourseService.getAll();
+        const response = await CourseService.getAll('PUBLISHED');
         const courses = (response.data || response); // Show all (usually implies non-deleted from backend)
 
         // Take top 3 for now (mocking trending logic)
@@ -102,7 +102,7 @@ async function loadInitialData() {
         // Fetch Categories and Courses in parallel
         const [catRes, courseRes] = await Promise.all([
             CategoryService.getAll(),
-            CourseService.getAll()
+            CourseService.getAll('PUBLISHED')
         ]);
 
         const categories = catRes.data || catRes;
@@ -121,6 +121,22 @@ async function loadInitialData() {
                     <span class="label-text">${cat.name}</span>
                 `;
                 tabsContainer.appendChild(label);
+            });
+        }
+
+        // Populate Instructor Filter dynamically from courses
+        const instructorContainer = document.getElementById('instructorFilters');
+        if (instructorContainer && Array.isArray(courses)) {
+            const uniqueInstructors = [...new Map(courses.filter(c => c.instructor_name).map(c => [c.instructor_id, c.instructor_name])).entries()];
+            uniqueInstructors.forEach(([id, name]) => {
+                const label = document.createElement('label');
+                label.className = 'checkbox-item fade-up';
+                label.innerHTML = `
+                    <input type="checkbox" class="filter-checkbox" name="instructor" value="${id}">
+                    <span class="custom-check"></span>
+                    <span class="label-text">${name}</span>
+                `;
+                instructorContainer.appendChild(label);
             });
         }
 
@@ -153,6 +169,8 @@ function setupFilters() {
         const checkedCats = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(cb => cb.value);
         const checkedLangs = Array.from(document.querySelectorAll('input[name="language"]:checked')).map(cb => cb.value);
         const checkedLevels = Array.from(document.querySelectorAll('input[name="level"]:checked')).map(cb => cb.value);
+        const checkedInstructors = Array.from(document.querySelectorAll('input[name="instructor"]:checked')).map(cb => cb.value);
+        const checkedDurations = Array.from(document.querySelectorAll('input[name="duration"]:checked')).map(cb => cb.value);
 
         const filtered = allCourses.filter(course => {
             const matchesSearch = course.title.toLowerCase().includes(searchTerm) ||
@@ -163,8 +181,21 @@ function setupFilters() {
             const matchesCat = checkedCats.length === 0 || checkedCats.includes(String(course.category_id));
             const matchesLang = checkedLangs.length === 0 || checkedLangs.includes(course.language);
             const matchesLevel = checkedLevels.length === 0 || checkedLevels.includes(course.level);
+            const matchesInstructor = checkedInstructors.length === 0 || checkedInstructors.includes(String(course.instructor_id));
 
-            return matchesSearch && matchesCat && matchesLang && matchesLevel;
+            // Duration filter logic (parse duration_hours)
+            let matchesDuration = true;
+            if (checkedDurations.length > 0) {
+                const hours = parseFloat(course.duration_hours) || 0;
+                matchesDuration = checkedDurations.some(d => {
+                    if (d === 'short') return hours < 2;
+                    if (d === 'medium') return hours >= 2 && hours <= 5;
+                    if (d === 'long') return hours > 5;
+                    return false;
+                });
+            }
+
+            return matchesSearch && matchesCat && matchesLang && matchesLevel && matchesInstructor && matchesDuration;
         });
 
         renderCourses(filtered);
@@ -231,6 +262,7 @@ function renderCourses(courses, containerId = 'coursesGrid') {
                     <span>${formatDisplay}</span>
                 </div>
                 <h3 class="card-title">${course.title}</h3>
+                <p class="card-desc">${course.short_synopsis || ''}</p>
                 <div class="card-footer">
                     <div class="card-instructor">
                         <img src="${course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff`}" class="inst-avatar">
@@ -304,6 +336,8 @@ function renderCourseDetails(course) {
     const videoPlayer = document.getElementById('courseVideo');
     const videoContainer = document.querySelector('.video-container');
 
+    let hasVideo = false;
+
     if (course.video_url && videoSection) {
         let videoUrl = course.video_url;
         // Check for full URL vs relative path
@@ -328,6 +362,7 @@ function renderCourseDetails(course) {
                     allowfullscreen>
                 </iframe>`;
             videoSection.style.display = 'block';
+            hasVideo = true;
         } else {
             // Standard Video File
             if (videoPlayer) {
@@ -335,9 +370,22 @@ function renderCourseDetails(course) {
                 videoPlayer.poster = banner;
                 videoSection.style.display = 'block';
                 console.log('[DEBUG] Video File set:', videoUrl);
+                hasVideo = true;
             }
         }
     }
+
+    // Update Hero with Preview Button if video exists
+    hero.innerHTML = `
+        <div class="container">
+            <div class="hero-content fade-up">
+                <span class="hero-tag">${course.category_name || 'Formation'}</span>
+                <h1 class="hero-title">${course.title}</h1>
+                <p class="hero-subtitle">${course.short_synopsis || ''}</p>
+                ${hasVideo ? `<button onclick="document.getElementById('videoSection').scrollIntoView({behavior: 'smooth'})" class="btn-primary" style="margin-top: 20px; background: white; color: var(--primary);"><i class="fas fa-play"></i> Voir l'extrait gratuit</button>` : ''}
+            </div>
+        </div>
+    `;
 
     // 2. Main Content
     document.getElementById('courseDescription').innerHTML = course.description || 'Aucune description disponible.';

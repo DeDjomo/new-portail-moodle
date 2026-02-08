@@ -131,6 +131,27 @@ class EnrollmentController {
     }
 
     /**
+     * Check enrollment status for a specific student and course
+     */
+    public function checkStatus($email, $courseId) {
+        $student = $this->studentModel->findByEmail($email);
+        if (!$student) {
+            return $this->jsonResponse(['status' => 'NOT_ENROLLED'], 200);
+        }
+
+        $query = "SELECT status FROM enrollments WHERE student_id = ? AND course_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$student['id'], $courseId]);
+        $status = $stmt->fetchColumn();
+
+        if ($status) {
+            return $this->jsonResponse(['status' => $status], 200);
+        }
+        
+        return $this->jsonResponse(['status' => 'NOT_ENROLLED'], 200);
+    }
+
+    /**
      * Email notification system
      */
     private function notifyParties($student, $course) {

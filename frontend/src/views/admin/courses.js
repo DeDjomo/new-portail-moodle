@@ -1,39 +1,18 @@
 import CourseService from '../../services/courseService.js';
 import { resolveAssetPath } from '../../services/api.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('Courses Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../../login.html';
-        return;
-    }
-
-    const admin = JSON.parse(adminStr);
-
-    // 2. Populate User Info
-    const welcomeName = document.getElementById('welcomeName');
-    if (welcomeName) welcomeName.textContent = admin.first_name;
-
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-            localStorage.removeItem('admin');
-            window.location.href = '../../login.html';
-        }
-    });
+    const admin = requireAuth('STANDARD_ADMIN');
+    if (!admin) return;
 
     // View State
     const btnListView = document.getElementById('btnListView');
     const btnGridView = document.getElementById('btnGridView');
+    // No change needed for admin/courses.js as it has no delete/archive buttons currently.
     const tableContainer = document.getElementById('coursesTableContainer');
     const gridContainer = document.getElementById('coursesGrid');
 
@@ -109,10 +88,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="font-weight: 600;">${course.enrolled_count || 0}</td>
                 <td><span class="badge ${statusClass}">${statusLabel}</span></td>
                 <td>
-                    <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier">
+                    <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier" style="background:#DBEAFE; color:#2563EB;">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir">
+                    <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir" style="background:#EDE9FE; color:#7C3AED;">
                         <i class="fas fa-eye"></i>
                     </a>
                 </td>
@@ -159,10 +138,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span><i class="fas fa-user-graduate"></i> ${course.enrolled_count || 0}</span>
                         </div>
                         <div class="card-actions">
-                            <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier">
+                            <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier" style="background:#DBEAFE; color:#2563EB;">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir">
+                            <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir" style="background:#EDE9FE; color:#7C3AED;">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </div>

@@ -1,32 +1,13 @@
 import EnrollmentService from '../../services/enrollmentService.js';
 import { resolveAssetPath } from '../../services/api.js';
+import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('Statistics Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const adminStr = localStorage.getItem('admin');
-    if (!adminStr) {
-        window.location.href = '../../login.html';
-        return;
-    }
-
-    const admin = JSON.parse(adminStr);
-
-    // 2. Populate User Info
-    document.getElementById('sidebarName').textContent = `${admin.first_name} ${admin.last_name}`;
-    if (admin.avatar_url) {
-        document.getElementById('sidebarAvatar').src = resolveAssetPath(admin.avatar_url);
-    }
-
-    // 3. Logout Logic
-    document.getElementById('btnLogout').addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-            localStorage.removeItem('admin');
-            window.location.href = '../../login.html';
-        }
-    });
+    const admin = requireAuth();
+    if (!admin) return;
 
     // 4. Fetch Stats
     try {
