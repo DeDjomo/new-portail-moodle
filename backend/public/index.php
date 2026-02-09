@@ -161,6 +161,9 @@ try {
                     $controller->getAdminEnrollments($_GET['admin_id']);
                 } elseif (isset($_GET['action']) && $_GET['action'] === 'getAdminStats' && isset($_GET['admin_id'])) {
                     $controller->getAdminStats($_GET['admin_id']);
+                } elseif (isset($_GET['action']) && $_GET['action'] === 'getRecent') {
+                    $limit = $_GET['limit'] ?? 5;
+                    $controller->getRecentEnrollments($limit);
                 } elseif (isset($path_parts[1]) && $path_parts[1] === 'course' && isset($path_parts[2])) {
                     $status = $_GET['status'] ?? null;
                     $controller->getCourseEnrollments($path_parts[2], $status);

@@ -76,7 +76,11 @@ class InstructorController {
         $this->instructorModel->organization = $data['organization'] ?? null;
         $this->instructorModel->short_bio = $data['short_bio'] ?? null;
         $this->instructorModel->full_bio = $data['full_bio'] ?? null;
-        $this->instructorModel->photo_url = $photoUrl ?? ($data['photo_url'] ?? null);
+        $photoVal = $photoUrl ?? ($data['photo_url'] ?? null);
+        error_log("Instructor Create: photo_url received: " . ($data['photo_url'] ?? 'NULL'));
+        error_log("Instructor Create: final photo_url: " . ($photoVal ?? 'NULL'));
+        
+        $this->instructorModel->photo_url = $photoVal;
         $this->instructorModel->website = $data['website'] ?? null;
         $this->instructorModel->linkedin_url = $data['linkedin_url'] ?? null;
         $this->instructorModel->status = $data['status'] ?? 'ACTIVE';

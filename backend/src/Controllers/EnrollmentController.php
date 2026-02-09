@@ -131,6 +131,35 @@ class EnrollmentController {
     }
 
     /**
+     * Get recent enrollments for SuperAdmin dashboard
+     */
+    public function getRecentEnrollments($limit = 5) {
+        $query = "SELECT e.*, 
+                         s.first_name, s.last_name, s.email,
+                         c.title as course_title,
+                         a.first_name as admin_first, a.last_name as admin_last
+                  FROM enrollments e
+                  JOIN students s ON e.student_id = s.id
+                  JOIN courses c ON e.course_id = c.id
+                  LEFT JOIN administrators a ON c.administrator_id = a.id
+                  ORDER BY e.enrolled_at DESC
+                  LIMIT :limit";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', (int)$limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Format admin name
+        foreach ($results as &$row) {
+            $row['admin_name'] = trim(($row['admin_first'] ?? '') . ' ' . ($row['admin_last'] ?? ''));
+        }
+        
+        return $this->jsonResponse($results, 200);
+    }
+
+    /**
      * Check enrollment status for a specific student and course
      */
     public function checkStatus($email, $courseId) {

@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Status Badge
                 const statusClass = item.status === 'DONE' ? 'badge-published' : 'badge-draft';
-                const statusLabel = item.status === 'DONE' ? 'Terminé' : (item.status === 'PENDING' ? 'En attente' : item.status);
+                const statusLabel = item.status === 'DONE' ? 'Effectué' : (item.status === 'PENDING' ? 'En attente' : item.status);
 
                 const studentName = `${item.first_name} ${item.last_name}`;
                 const studentInitial = item.first_name.charAt(0);
