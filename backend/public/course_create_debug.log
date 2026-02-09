@@ -1,0 +1,5 @@
+2026-02-09 15:19:32 === COURSE CREATE DEBUG ===
+Data received: {"administrator_id":"2","instructor_id":"3","category_id":"2","title":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbb","moodle_url":"https:\/\/github.com\/Djusse\/Fleetman","short_synopsis":"mmmmmmmmmmm","full_description":"nnnnnnnnnnnnnnnnnnn","level":"BEGINNER","language":"FR","format":"VIDEO","total_duration_minutes":"480","is_certifying":"1","pedagogical_objectives":"[\"nnnnnnnbbv\"]"}
+FILES keys: ["video"]
+image_url: NOT SET
+

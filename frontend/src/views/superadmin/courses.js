@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showDangerConfirm(
             'Supprimer ce cours ?',
             'Cette action est irréversible. Toutes les inscriptions associées seront également supprimées.',
-            'Cours #' + id,
+            'supprimer',
             async () => {
                 try {
                     const res = await fetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });
