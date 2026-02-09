@@ -60,7 +60,7 @@ export function requireAuth(requiredRole = null) {
     updateSidebar(admin);
 
     // 4. Handle Logout (Common task)
-    setupLogout();
+    // REMOVED: Managed by ui.js setupLogout() explicitly in views to avoid duplicate listeners
 
     return admin;
 }
@@ -77,24 +77,4 @@ function updateSidebar(admin) {
     // Welcome message often found in dashboards
     const welcomeName = document.getElementById('welcomeName');
     if (welcomeName) welcomeName.textContent = admin.first_name;
-}
-
-function setupLogout() {
-    const btnLogout = document.getElementById('btnLogout');
-    if (btnLogout) {
-        // Clone to remove existing listeners to avoid duplicates if called multiple times
-        const newBtn = btnLogout.cloneNode(true);
-        btnLogout.parentNode.replaceChild(newBtn, btnLogout);
-
-        newBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // Use standard confirm or custom if available globally?
-            // Let's just use simple confirm for the guard utility to have 0 dependencies,
-            // or we can just clear and redirect.
-            if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-                localStorage.removeItem('admin');
-                window.location.href = '../login.html';
-            }
-        });
-    }
 }

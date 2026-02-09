@@ -1,13 +1,19 @@
 import EnrollmentService from '../../services/enrollmentService.js';
 import { resolveAssetPath } from '../../services/api.js';
+import { showToast, showCustomConfirm, showDangerConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
+import StudentService from '../../services/studentService.js';
+
+const API_BASE = 'http://localhost:8000';
 
 console.log('Students Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const admin = requireAuth();
+    const admin = requireAuth('STANDARD_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     let allEnrollments = [];
 

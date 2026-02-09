@@ -381,3 +381,64 @@ export const showDangerConfirm = (title, message, confirmText, onConfirm) => {
     // Focus input
     setTimeout(() => input.focus(), 100);
 };
+
+/**
+ * Set Button Loading State
+ * @param {HTMLButtonElement} btn 
+ * @param {boolean} isLoading 
+ * @param {string} loadingText 
+ * @param {string} originalText 
+ */
+export const setLoading = (btn, isLoading, loadingText = 'Chargement...', originalText = null) => {
+    if (!btn) return;
+
+    if (isLoading) {
+        if (originalText) btn.dataset.originalText = originalText;
+        else if (!btn.dataset.originalText) btn.dataset.originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+        btn.style.opacity = '0.7';
+        btn.style.cursor = 'not-allowed';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.originalText || originalText || 'Enregistrer';
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    }
+};
+
+/**
+ * Setup Logout Logic for Admin Pages
+ */
+export const setupLogout = () => {
+    const btnLogout = document.getElementById('btnLogout');
+    if (!btnLogout) return;
+
+    btnLogout.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        showCustomConfirm(
+            'Déconnexion',
+            'Voulez-vous vraiment vous déconnecter de l\'administration ?',
+            () => {
+                localStorage.removeItem('admin');
+                window.location.href = '../login.html';
+            }
+        );
+        // Stylize the modal for logout specifically (optional improvement)
+        const modalIcon = document.querySelector('#custom-confirm-modal i');
+        if (modalIcon) {
+            modalIcon.className = 'fas fa-sign-out-alt';
+            modalIcon.parentElement.style.backgroundColor = '#FEE2E2';
+            modalIcon.parentElement.style.color = '#DC2626';
+        }
+        const modalTitle = document.querySelector('#custom-confirm-modal h3');
+        if (modalTitle) modalTitle.style.color = '#DC2626';
+        const confirmBtn = document.getElementById('btnModalConfirm');
+        if (confirmBtn) {
+            confirmBtn.style.backgroundColor = '#DC2626';
+            confirmBtn.innerText = 'Déconnecter';
+        }
+    });
+};

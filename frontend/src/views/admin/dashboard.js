@@ -2,6 +2,7 @@ import CourseService from '../../services/courseService.js';
 import StudentService from '../../services/studentService.js';
 import { BASE_URL, resolveAssetPath } from '../../services/api.js';
 import { requireAuth } from '../../utils/auth-guard.js';
+import { setupLogout } from '../../utils/ui.js';
 
 console.log('Dashboard loaded');
 
@@ -18,30 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. Logout Logic
-    const btnLogout = document.getElementById('btnLogout');
-    const logoutModal = document.getElementById('logoutModal');
-    const confirmLogout = document.getElementById('confirmLogout');
-
-    if (btnLogout) {
-        btnLogout.addEventListener('click', (e) => {
-            e.preventDefault();
-            logoutModal.classList.add('active');
-        });
-    }
-
-    if (confirmLogout) {
-        confirmLogout.addEventListener('click', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../../login.html';
-        });
-    }
-
-    // Close modal on outside click
-    if (logoutModal) {
-        logoutModal.addEventListener('click', (e) => {
-            if (e.target === logoutModal) logoutModal.classList.remove('active');
-        });
-    }
+    setupLogout();
 
     // 4. Fetch Dashboard Stats
 

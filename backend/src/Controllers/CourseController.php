@@ -123,6 +123,11 @@ class CourseController {
 
         // 4. State Determination (Draft vs Published)
         $status = $this->determineStatus($data, $imageUrl);
+        
+        // Allow manual override if provided
+        if (isset($data['status'])) {
+            $status = $data['status'];
+        }
 
         // 5. Map to Model
         $this->courseModel->administrator_id = $data['administrator_id'];

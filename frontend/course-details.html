@@ -143,7 +143,12 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Mot de passe</label>
-                    <input type="password" name="password" class="form-input" required minlength="6">
+                    <div style="position: relative;">
+                        <input type="password" name="password" id="regPassword" class="form-input" required
+                            minlength="6" style="padding-right: 40px;">
+                        <i class="fas fa-eye" id="toggleRegPassword"
+                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #9CA3AF;"></i>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">

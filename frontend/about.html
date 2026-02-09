@@ -447,13 +447,13 @@
                 // Count unique instructors from courses (as fallback)
                 const courseInstructors = new Set(courses.map(c => c.instructor_id)).size;
 
-                document.getElementById('stat-courses').textContent = courses.length || '--';
-                document.getElementById('stat-instructors').textContent = instructors.length || courseInstructors || '--';
-                document.getElementById('stat-categories').textContent = categories.length || '--';
+                document.getElementById('stat-courses').textContent = courses.length;
+                document.getElementById('stat-instructors').textContent = instructors.length || courseInstructors || 0;
+                document.getElementById('stat-categories').textContent = categories.length;
 
                 // For students, show a placeholder based on courses (no direct API)
                 const estimatedStudents = courses.reduce((sum, c) => sum + (c.enrollment_count || 0), 0);
-                document.getElementById('stat-students').textContent = estimatedStudents || courses.length * 5 || '--';
+                document.getElementById('stat-students').textContent = estimatedStudents;
 
             } catch (error) {
                 console.error('Error loading stats:', error);

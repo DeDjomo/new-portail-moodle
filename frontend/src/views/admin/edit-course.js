@@ -1,8 +1,9 @@
 import CourseService from '../../services/courseService.js';
 import CategoryService from '../../services/categoryService.js';
 import InstructorService from '../../services/instructorService.js';
+import AdminService from '../../services/adminService.js';
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 import { setupQuickActions } from './quick-actions.js';
 
@@ -10,6 +11,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
     const admin = requireAuth('STANDARD_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // 2. Get Course ID
     const urlParams = new URLSearchParams(window.location.search);
@@ -23,9 +26,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Load Data
     try {
-        const [categories, instructors, course] = await Promise.all([
+        const [categories, instructors, admins, course] = await Promise.all([
             CategoryService.getAll(),
             InstructorService.getAll(),
+            AdminService.getAll(),
             CourseService.getById(courseId)
         ]);
 
@@ -38,9 +42,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const insSelect = document.getElementById('instructor_id');
         insSelect.innerHTML = '<option value="">Choisir un instructeur...</option>';
+
+        // 1. Existing Instructors
+        const instructorGroup = document.createElement('optgroup');
+        instructorGroup.label = "Instructeurs";
         instructors.forEach(i => {
-            insSelect.innerHTML += `<option value="${i.id}">${i.full_name}</option>`;
+            const opt = document.createElement('option');
+            opt.value = i.id;
+            opt.textContent = i.full_name;
+            instructorGroup.appendChild(opt);
         });
+        insSelect.appendChild(instructorGroup);
+
+        // 2. Admins
+        const adminGroup = document.createElement('optgroup');
+        adminGroup.label = "Administrateurs";
+
+        const norm = (str) => str.toLowerCase().replace(/\s+/g, '');
+        const instructorNames = instructors.map(i => norm(i.full_name));
+
+        admins.forEach(a => {
+            const fullName = `${a.first_name} ${a.last_name}`;
+            if (!instructorNames.includes(norm(fullName))) {
+                const opt = document.createElement('option');
+                opt.value = `ADMIN:${a.id}`;
+                opt.textContent = fullName;
+                opt.dataset.admin = JSON.stringify(a);
+                adminGroup.appendChild(opt);
+            }
+        });
+        insSelect.appendChild(adminGroup);
 
         // 3.1 Setup Quick Actions
         setupQuickActions(
@@ -73,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('format').value = course.format || 'VIDEO';
             document.getElementById('total_duration_minutes').value = course.total_duration_minutes || '';
             document.getElementById('is_certifying').checked = course.is_certifying == 1;
-            document.getElementById('status').value = course.status || 'DRAFT';
+            // document.getElementById('status').value = course.status || 'DRAFT';
 
             // Objectives
             if (course.pedagogical_objectives) {
@@ -313,8 +344,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Mandatory fields
         formData.append('administrator_id', admin.id);
-        formData.append('instructor_id', document.getElementById('instructor_id').value);
-        formData.append('category_id', document.getElementById('category_id').value);
+        // formData.append('instructor_id', document.getElementById('instructor_id').value);
+
+        let instructorId = document.getElementById('instructor_id').value;
+        if (instructorId && instructorId.startsWith('ADMIN:')) {
+            const selectedOpt = document.getElementById('instructor_id').options[document.getElementById('instructor_id').selectedIndex];
+            const adminData = JSON.parse(selectedOpt.dataset.admin);
+            const fullName = `${adminData.first_name} ${adminData.last_name}`;
+
+            try {
+                const newInstructorData = new FormData();
+                newInstructorData.append('full_name', fullName);
+                newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
+                newInstructorData.append('organization', 'Administration');
+                newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
+                newInstructorData.append('status', 'ACTIVE');
+
+                // Copy Avatar if exists
+                if (adminData.avatar_url) {
+                    newInstructorData.append('photo_url', adminData.avatar_url);
+                }
+
+                const newIns = await InstructorService.create(newInstructorData);
+                instructorId = newIns.id;
+            } catch (err) {
+                console.error("Auto-create instructor error:", err);
+                showToast('Erreur lors de la création du profil instructeur', 'error');
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer les modifications';
+                return;
+            }
+        }
+        formData.append('instructor_id', instructorId);
+
         formData.append('title', document.getElementById('title').value);
         formData.append('moodle_url', document.getElementById('moodle_url').value);
 
@@ -326,7 +388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('format', document.getElementById('format').value);
         formData.append('total_duration_minutes', document.getElementById('total_duration_minutes').value);
         formData.append('is_certifying', document.getElementById('is_certifying').checked ? 1 : 0);
-        formData.append('status', document.getElementById('status').value);
+        // formData.append('status', document.getElementById('status').value);
 
         // Objectives
         const objectivesText = document.getElementById('pedagogical_objectives').value;

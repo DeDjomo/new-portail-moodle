@@ -1,13 +1,16 @@
-import CourseService from '../../services/courseService.js';
 import { resolveAssetPath } from '../../services/api.js';
+import { showToast, showCustomConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
+import CourseService from '../../services/courseService.js';
 
-console.log('Courses Page loaded');
+console.log('Admin - Courses Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
     const admin = requireAuth('STANDARD_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // View State
     const btnListView = document.getElementById('btnListView');

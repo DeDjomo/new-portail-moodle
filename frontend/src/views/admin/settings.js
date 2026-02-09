@@ -1,6 +1,6 @@
 import AdminService from '../../services/adminService.js';
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { showToast, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('Settings Page loaded');
@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
     const admin = requireAuth();
     if (!admin) return;
+
+    setupLogout();
 
     // Helper to update UI
     const updateUI = (data) => {
@@ -87,6 +89,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // 6. Security Update
+
+    // Password Toggle Logic
+    ['toggleNewPassword', 'toggleConfirmPassword'].forEach(id => {
+        const toggleBtn = document.getElementById(id);
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                const inputId = id === 'toggleNewPassword' ? 'newPassword' : 'confirmPassword';
+                const input = document.getElementById(inputId);
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                toggleBtn.classList.toggle('fa-eye');
+                toggleBtn.classList.toggle('fa-eye-slash');
+            });
+        }
+    });
+
     document.getElementById('securityForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 

@@ -1,7 +1,15 @@
 
 import CategoryService from '../../services/categoryService.js';
 import InstructorService from '../../services/instructorService.js';
-import { showToast } from '../../utils/ui.js';
+import { showToast, setupLogout } from '../../utils/ui.js';
+import { requireAuth } from '../../utils/auth-guard.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const admin = requireAuth('STANDARD_ADMIN');
+    if (!admin) return;
+
+    setupLogout();
+});
 
 /**
  * Handles Quick Create Modals for Categories and Instructors
@@ -110,7 +118,7 @@ export function setupQuickActions(onCategoryCreated, onInstructorCreated) {
             const formData = new FormData(formInstructor);
 
             // Instructor service expects FormData for create
-            // Backend validation: full_name required.
+            // Backend validation: full_name, professional_title, organization required.
 
             try {
                 const res = await InstructorService.create(formData);
@@ -120,7 +128,7 @@ export function setupQuickActions(onCategoryCreated, onInstructorCreated) {
                 // Construct basic object for UI
                 const newInstructor = {
                     id: res.id,
-                    full_name: formData.get('full_name')
+                    full_name: formData.get('full_name') // Use getter to retrieve value
                 };
 
                 showToast('Instructeur ajouté !', 'success');

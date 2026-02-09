@@ -1,5 +1,5 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
     const admin = requireAuth('SUPER_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // State
     let allCourses = [];

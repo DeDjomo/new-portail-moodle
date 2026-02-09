@@ -1,8 +1,10 @@
 import CourseService from '../../services/courseService.js';
 import CategoryService from '../../services/categoryService.js';
 import InstructorService from '../../services/instructorService.js';
+import AdminService from '../../services/adminService.js';
 import { BASE_URL, resolveAssetPath } from '../../services/api.js';
 import { requireAuth } from '../../utils/auth-guard.js';
+import { showToast, showCustomConfirm, setupLogout, setLoading } from '../../utils/ui.js';
 import { setupQuickActions } from './quick-actions.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -10,28 +12,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     const admin = requireAuth('STANDARD_ADMIN');
     if (!admin) return;
 
+    setupLogout();
+
     // 2. Load Select Data
     async function refreshSelects() {
         try {
-            const [categories, instructors] = await Promise.all([
+            const [categories, instructors, admins] = await Promise.all([
                 CategoryService.getAll(),
-                InstructorService.getAll()
+                InstructorService.getAll(),
+                AdminService.getAll()
             ]);
 
             const catSelect = document.getElementById('category_id');
             const currentCat = catSelect.value;
             catSelect.innerHTML = '<option value="">Choisir une catégorie...</option>';
             categories.forEach(c => {
-                catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                catSelect.appendChild(opt);
             });
             if (currentCat) catSelect.value = currentCat;
 
             const insSelect = document.getElementById('instructor_id');
             const currentIns = insSelect.value;
             insSelect.innerHTML = '<option value="">Choisir un instructeur...</option>';
+
+            // 1. Add Existing Instructors
+            const instructorGroup = document.createElement('optgroup');
+            instructorGroup.label = "Instructeurs";
             instructors.forEach(i => {
-                insSelect.innerHTML += `<option value="${i.id}">${i.full_name}</option>`;
+                const opt = document.createElement('option');
+                opt.value = i.id;
+                opt.textContent = i.full_name;
+                instructorGroup.appendChild(opt);
             });
+            insSelect.appendChild(instructorGroup);
+
+            // 2. Add Admins
+            const adminGroup = document.createElement('optgroup');
+            adminGroup.label = "Administrateurs";
+
+            // Helper to normalize strings for comparison
+            const norm = (str) => str.toLowerCase().replace(/\s+/g, '');
+            const instructorNames = instructors.map(i => norm(i.full_name));
+
+            admins.forEach(a => {
+                const fullName = `${a.first_name} ${a.last_name}`;
+                // Only show if not already an instructor
+                if (!instructorNames.includes(norm(fullName))) {
+                    const opt = document.createElement('option');
+                    opt.value = `ADMIN:${a.id}`; // Marker for Admin
+                    opt.textContent = fullName;
+                    opt.dataset.admin = JSON.stringify(a); // Store header data
+                    adminGroup.appendChild(opt);
+                }
+            });
+            insSelect.appendChild(adminGroup);
+
             if (currentIns) insSelect.value = currentIns;
 
         } catch (error) {
@@ -323,7 +361,54 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Mandatory fields
         formData.append('administrator_id', admin.id);
-        formData.append('instructor_id', document.getElementById('instructor_id').value);
+        // Mandatory fields
+        formData.append('administrator_id', admin.id);
+
+        // Check if selected instructor is an Admin that needs conversion
+        let instructorId = document.getElementById('instructor_id').value;
+        if (instructorId && instructorId.startsWith('ADMIN:')) {
+            // It's an admin! We must create an Instructor profile first.
+            const adminId = instructorId.split(':')[1];
+            // Find the option to get the stored dataset or just fetch? 
+            // We can retrieve the name from text content or just rely on what we have.
+            // Better: We stored data in dataset, but reading dataset from select value is tricky.
+            // Just find the selected option.
+            const selectedOpt = document.getElementById('instructor_id').options[document.getElementById('instructor_id').selectedIndex];
+            const adminData = JSON.parse(selectedOpt.dataset.admin);
+
+            const fullName = `${adminData.first_name} ${adminData.last_name}`;
+
+            // Create Instructor Profile
+            try {
+                // We need to pass FormData or Object. Service handles both.
+                // Required: full_name, professional_title, organization
+                const newInstructorData = new FormData();
+                newInstructorData.append('full_name', fullName);
+                newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
+                newInstructorData.append('organization', 'Administration');
+                newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
+                newInstructorData.append('status', 'ACTIVE');
+
+                // Copy Avatar if exists
+                if (adminData.avatar_url) {
+                    newInstructorData.append('photo_url', adminData.avatar_url);
+                }
+
+                const newIns = await InstructorService.create(newInstructorData);
+                console.log('Auto-created instructor for admin:', newIns);
+                instructorId = newIns.id;
+
+            } catch (err) {
+                console.error("Failed to auto-create instructor from admin:", err);
+                alertError.style.display = 'block';
+                alertError.textContent = 'Erreur : Impossible de créer le profil instructeur pour cet admin.';
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer le cours';
+                return; // Stop submission
+            }
+        }
+
+        formData.append('instructor_id', instructorId);
         formData.append('category_id', document.getElementById('category_id').value);
         formData.append('title', document.getElementById('title').value);
         formData.append('moodle_url', document.getElementById('moodle_url').value);
@@ -336,7 +421,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('format', document.getElementById('format').value);
         formData.append('total_duration_minutes', document.getElementById('total_duration_minutes').value);
         formData.append('is_certifying', document.getElementById('is_certifying').checked ? 1 : 0);
-        formData.append('status', document.getElementById('status').value);
+        // formData.append('status', document.getElementById('status').value);
 
         // Special handling for pedagogical objectives (convert lines to array)
         const objectivesText = document.getElementById('pedagogical_objectives').value;
@@ -374,7 +459,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Redirect after success
             setTimeout(() => {
-                window.location.href = 'dashboard.html';
+                // Check if we are in superadmin or standard admin context
+                const isSuperAdmin = window.location.pathname.includes('/superadmin/');
+                if (isSuperAdmin) {
+                    window.location.href = 'my-courses.html';
+                } else {
+                    window.location.href = 'courses.html';
+                }
             }, 2000);
 
         } catch (error) {

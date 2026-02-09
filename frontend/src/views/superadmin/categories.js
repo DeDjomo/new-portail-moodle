@@ -1,5 +1,5 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, showDangerConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
     const admin = requireAuth('SUPER_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // State
     let allCategories = [];
@@ -204,12 +206,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             parent_id: document.getElementById('parentCategory').value || null
         };
 
+        const btnSubmit = form.querySelector('button[type="submit"]');
+        setLoading(btnSubmit, true, id ? 'Modification...' : 'Création...');
+
         try {
-            const res = await fetch(`${API_BASE}/categories${id ? `/${id}` : ''}`, {
-                method: id ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            let res;
+            if (id) {
+                res = await fetch(`${API_BASE}/categories/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                res = await fetch(`${API_BASE}/categories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            }
 
             const data = await res.json();
 
@@ -223,6 +237,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error(error);
             showToast('Erreur réseau.', 'error');
+        } finally {
+            setLoading(btnSubmit, false);
         }
     });
 

@@ -198,6 +198,9 @@ function updateEnrollmentButton(status, moodleUrl) {
     const btnEnroll = document.getElementById('btnEnroll');
     if (!btnEnroll) return;
 
+    // If not enrolled, do not replace the button (keep default listeners)
+    if (status === 'NOT_ENROLLED') return;
+
     // Clone to remove listeners
     const newBtn = btnEnroll.cloneNode(true);
     btnEnroll.parentNode.replaceChild(newBtn, btnEnroll);
@@ -300,6 +303,18 @@ function setupEnrollmentLogic(course) {
             openModal('enrollModal');
             const mailInput = document.getElementById('enrollEmail');
             if (mailInput) mailInput.focus();
+        });
+    }
+
+    // Password Toggle Logic
+    const toggleRegPassword = document.getElementById('toggleRegPassword');
+    const regPassword = document.getElementById('regPassword');
+    if (toggleRegPassword && regPassword) {
+        toggleRegPassword.addEventListener('click', () => {
+            const type = regPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            regPassword.setAttribute('type', type);
+            toggleRegPassword.classList.toggle('fa-eye');
+            toggleRegPassword.classList.toggle('fa-eye-slash');
         });
     }
 

@@ -1,13 +1,16 @@
 import EnrollmentService from '../../services/enrollmentService.js';
-import { resolveAssetPath } from '../../services/api.js';
+import { showToast, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
+import { resolveAssetPath } from '../../services/api.js';
 
 console.log('Statistics Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const admin = requireAuth();
+    const admin = requireAuth('STANDARD_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // 4. Fetch Stats
     try {

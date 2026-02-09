@@ -2,6 +2,12 @@
    ENSPY ADMIN - PREMIUM DASHBOARD THEME
    ============================================ */
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root {
     --sidebar-width: 280px;
     --header-height: 80px;
@@ -20,6 +26,10 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
     --transition-base: all 0.3s ease;
+}
+
+button {
+    cursor: pointer;
 }
 
 body {
@@ -396,6 +406,10 @@ body {
     justify-content: center;
     min-height: 160px;
     background-color: #F9FAFB;
+}
+
+.file-upload-wrapper input[type="file"] {
+    display: none;
 }
 
 .file-upload-wrapper:hover {

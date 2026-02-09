@@ -87,7 +87,9 @@
             const password = document.getElementById('password').value;
 
             btn.disabled = true;
-            btn.textContent = 'Connexion...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.7';
 
             try {
                 const response = await AdminService.login(email, password);
@@ -104,10 +106,25 @@
 
             } catch (error) {
                 console.error(error);
-                showModal(error.message || 'Identifiants invalides');
+                let msg = 'Une erreur est survenue lors de la connexion.';
+
+                // Map Backend Errors
+                if (error.message.includes('Invalid credentials') || error.message.includes('401')) {
+                    msg = 'Identifiants incorrects. Veuillez vérifier votre email et mot de passe.';
+                } else if (error.message.includes('suspended') || error.message.includes('403')) {
+                    msg = 'Votre compte a été suspendu. Veuillez contacter l\'administrateur système.';
+                } else if (error.message.includes('required') || error.message.includes('400')) {
+                    msg = 'L\'adresse email et le mot de passe sont obligatoires.';
+                } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    msg = 'Impossible de contacter le serveur. Veuillez vérifier votre connexion internet.';
+                }
+
+                showModal(msg);
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
+                btn.style.cursor = 'pointer';
+                btn.style.opacity = '1';
             }
         });
     </script>

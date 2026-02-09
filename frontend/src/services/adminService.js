@@ -20,6 +20,13 @@ const AdminService = {
         // Since apiRequest detects FormData and removes Content-Type header (allowing browser to set boundary),
         // we just need to ensure method is POST.
         return await apiRequest(`administrators/${id}`, 'POST', data, data instanceof FormData);
+    },
+
+    /**
+     * Get all administrators
+     */
+    getAll: async () => {
+        return await apiRequest('administrators', 'GET');
     }
 };
 

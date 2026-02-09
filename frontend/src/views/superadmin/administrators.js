@@ -1,5 +1,5 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, showSuccessConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, showSuccessConfirm, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
     const admin = requireAuth('SUPER_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // State
     let allAdmins = [];
@@ -96,12 +98,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btnCancelModal').addEventListener('click', () => closeModal());
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
+    // Avatar Preview Logic
+    const avatarInput = document.getElementById('avatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarContainer = document.getElementById('avatarContainer');
+
+    // Password Toggle Logic
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.classList.toggle('fa-eye');
+            togglePassword.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // Trigger file input click
+    if (avatarContainer) {
+        avatarContainer.addEventListener('click', () => {
+            avatarInput.click();
+        });
+    }
+
+    // Handle file selection
+    if (avatarInput) {
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type (image only)
+                if (!file.type.startsWith('image/')) {
+                    showToast('Veuillez sélectionner une image valide (JPG, PNG).', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    avatarPreview.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
     function openCreateModal() {
         form.reset();
         document.getElementById('adminId').value = '';
         document.getElementById('modalTitle').textContent = 'Nouvel Administrateur';
         document.getElementById('password').required = true;
         document.getElementById('passwordHint').textContent = '(requis)';
+
+        // Reset Avatar Preview
+        avatarPreview.src = `https://ui-avatars.com/api/?name=N+A&background=E5E7EB&color=6B7280`;
+
         modal.style.display = 'block';
     }
 
@@ -120,50 +171,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('passwordHint').textContent = '(laisser vide pour ne pas changer)';
         document.getElementById('modalTitle').textContent = 'Modifier Administrateur';
 
+        // Set Preview
+        if (adminData.avatar_url) {
+            avatarPreview.src = resolveAssetPath(adminData.avatar_url);
+        } else {
+            avatarPreview.src = `https://ui-avatars.com/api/?name=${adminData.first_name}+${adminData.last_name}&background=FF6B00&color=fff`;
+        }
+
         modal.style.display = 'block';
     }
 
     function closeModal() {
         modal.style.display = 'none';
+        avatarPreview.src = ''; // Clear to save memory? Not strictly necessary but clean.
     }
 
     // 6. Form Submit (Create or Update)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const id = document.getElementById('adminId').value;
-        const payload = {
-            last_name: document.getElementById('lastName').value,
-            first_name: document.getElementById('firstName').value,
-            email: document.getElementById('email').value,
-            type: document.getElementById('type').value,
-            phone: document.getElementById('phone').value || null
-        };
+        const id = document.getElementById('adminId').value; // Fix: Get value from hidden input
+        const formData = new FormData();
+        if (id) formData.append('id', id);
+        formData.append('last_name', document.getElementById('lastName').value);
+        formData.append('first_name', document.getElementById('firstName').value);
+        formData.append('email', document.getElementById('email').value);
+        formData.append('type', document.getElementById('type').value);
+
+        const phone = document.getElementById('phone').value;
+        if (phone) formData.append('phone', phone);
 
         const password = document.getElementById('password').value;
-        if (password) {
-            payload.password = password;
+        if (password) formData.append('password', password);
+
+        const avatarFile = document.getElementById('avatar').files[0];
+        if (avatarFile) {
+            formData.append('avatar', avatarFile);
         }
+
+        const btnSubmit = form.querySelector('button[type="submit"]');
+        setLoading(btnSubmit, true, id ? 'Modification...' : 'Création...');
 
         try {
             let res;
             if (id) {
-                // Update
                 res = await fetch(`${API_BASE}/administrators/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    method: 'POST',
+                    body: formData
                 });
             } else {
-                // Create (password required)
+                // Create
                 if (!password) {
                     showToast('Le mot de passe est requis pour un nouvel admin.', 'error');
+                    setLoading(btnSubmit, false);
                     return;
                 }
                 res = await fetch(`${API_BASE}/administrators`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
             }
 
@@ -179,6 +244,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error(error);
             showToast('Erreur réseau.', 'error');
+        } finally {
+            setLoading(btnSubmit, false);
         }
     });
 

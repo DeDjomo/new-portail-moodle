@@ -1,5 +1,5 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, showDangerConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
 const API_BASE = 'http://localhost:8000';
@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard (SuperAdmin only)
     const admin = requireAuth('SUPER_ADMIN');
     if (!admin) return;
+
+    setupLogout();
 
     // State
     let allInstructors = [];
@@ -159,6 +161,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             formData.append('photo', photoFile);
         }
 
+        const btnSubmit = form.querySelector('button[type="submit"]');
+        setLoading(btnSubmit, true, id ? 'Modification...' : 'Création...');
+
         try {
             // Note: Do NOT set Content-Type header when sending FormData
             // We use POST for both create and update. 
@@ -186,6 +191,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error(error);
             showToast('Erreur réseau.', 'error');
+        } finally {
+            setLoading(btnSubmit, false);
         }
     });
 

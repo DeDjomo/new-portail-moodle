@@ -1,5 +1,5 @@
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
 console.log('SuperAdmin Dashboard loaded');
@@ -13,30 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('welcomeName').textContent = admin.first_name;
 
     // 3. Logout Logic
-    const btnLogout = document.getElementById('btnLogout');
-    const logoutModal = document.getElementById('logoutModal');
-    const confirmLogout = document.getElementById('confirmLogout');
-
-    if (btnLogout) {
-        btnLogout.addEventListener('click', (e) => {
-            e.preventDefault();
-            logoutModal.classList.add('active');
-        });
-    }
-
-    if (confirmLogout) {
-        confirmLogout.addEventListener('click', () => {
-            localStorage.removeItem('admin');
-            window.location.href = '../../login.html';
-        });
-    }
-
-    // Close modal on outside click
-    if (logoutModal) {
-        logoutModal.addEventListener('click', (e) => {
-            if (e.target === logoutModal) logoutModal.classList.remove('active');
-        });
-    }
+    setupLogout();
 
     // 4. Fetch Global Stats
     try {
@@ -49,7 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         ]);
 
         // Update Stats Cards
-        document.getElementById('totalAdmins').textContent = Array.isArray(adminsRes) ? adminsRes.length : 0;
+        // Filter out SuperAdmins from the count
+        const standardAdmins = Array.isArray(adminsRes) ? adminsRes.filter(a => a.type === 'STANDARD_ADMIN') : [];
+        document.getElementById('totalAdmins').textContent = standardAdmins.length;
         document.getElementById('totalInstructors').textContent = Array.isArray(instructorsRes) ? instructorsRes.length : 0;
         document.getElementById('totalCourses').textContent = Array.isArray(coursesRes) ? coursesRes.length : 0;
         document.getElementById('totalStudents').textContent = Array.isArray(studentsRes) ? studentsRes.length : 0;
