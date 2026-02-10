@@ -1,0 +1,26 @@
+# Uploads (user-generated content)
+backend/public/uploads/
+
+# Debug logs
+backend/debug_course_create.log
+backend/public/course_create_debug.log
+
+# Root-level media files (test files)
+/*.png
+/*.jpeg
+/*.jpg
+/*.mp4
+
+# Dev backup files
+api.develop.js
+create-course.develop.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
