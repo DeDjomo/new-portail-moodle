@@ -378,6 +378,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('instructor_id', instructorId);
 
         formData.append('title', document.getElementById('title').value);
+        formData.append('category_id', document.getElementById('category_id').value);
         formData.append('moodle_url', document.getElementById('moodle_url').value);
 
         // Optional / Details

@@ -71,12 +71,59 @@ $path_parts = explode('/', trim($path, '/'));
 // Get Input Data
 $input_data = [];
 if ($method === 'POST' || $method === 'PUT') {
-    // Check for JSON
     $content_type = $_SERVER['CONTENT_TYPE'] ?? '';
+    
     if (strpos($content_type, 'application/json') !== false) {
         $input_data = json_decode(file_get_contents("php://input"), true) ?? [];
+    } elseif ($method === 'PUT' && strpos($content_type, 'multipart/form-data') !== false) {
+        // PHP does NOT auto-parse multipart for PUT requests — we must do it manually
+        // Parse boundary from Content-Type header
+        preg_match('/boundary=(.+)$/', $content_type, $matches);
+        $boundary = $matches[1] ?? '';
+        
+        if ($boundary) {
+            $rawBody = file_get_contents("php://input");
+            $parts = array_slice(explode('--' . $boundary, $rawBody), 1);
+            
+            foreach ($parts as $part) {
+                if (trim($part) === '--' || trim($part) === '') continue;
+                
+                // Split headers from body
+                list($headerBlock, $body) = explode("\r\n\r\n", $part, 2);
+                $body = substr($body, 0, -2); // Remove trailing \r\n
+                
+                // Parse headers
+                preg_match('/name="([^"]+)"/', $headerBlock, $nameMatch);
+                $fieldName = $nameMatch[1] ?? '';
+                
+                if (!$fieldName) continue;
+                
+                // Check if it's a file upload
+                if (preg_match('/filename="([^"]*)"/', $headerBlock, $fileMatch)) {
+                    $fileName = $fileMatch[1];
+                    if (empty($fileName)) continue; // Empty file input
+                    
+                    preg_match('/Content-Type:\s*(.+)/i', $headerBlock, $typeMatch);
+                    $mimeType = trim($typeMatch[1] ?? 'application/octet-stream');
+                    
+                    // Save to temp file
+                    $tmpFile = tempnam(sys_get_temp_dir(), 'put_');
+                    file_put_contents($tmpFile, $body);
+                    
+                    $_FILES[$fieldName] = [
+                        'name' => $fileName,
+                        'type' => $mimeType,
+                        'tmp_name' => $tmpFile,
+                        'error' => UPLOAD_ERR_OK,
+                        'size' => strlen($body),
+                    ];
+                } else {
+                    $input_data[$fieldName] = $body;
+                }
+            }
+        }
     } else {
-        // Fallback to $_POST for multipart or form-url-encoded
+        // Standard POST: $_POST is auto-populated
         $input_data = $_POST;
     }
 }
@@ -135,7 +182,7 @@ try {
                     $controller->index();
                 }
             }
-            elseif ($method === 'PUT' && isset($path_parts[1])) $controller->update($path_parts[1], $_PUT ?? $_POST); // Handle FormData via POST spoofing if needed, but here assuming strict REST or method override
+            elseif ($method === 'PUT' && isset($path_parts[1])) $controller->update($path_parts[1], $input_data);
             elseif ($method === 'DELETE' && isset($path_parts[1])) $controller->delete($path_parts[1]);
             else routeNotFound();
             break;
