@@ -108,6 +108,23 @@ export function setupQuickActions(onCategoryCreated, onInstructorCreated) {
 
     // 2. Instructor Submit
     if (formInstructor) {
+        // Photo Preview Logic for Quick Modal
+        const photoInput = document.getElementById('quick_photoInput');
+        const photoPreview = document.getElementById('quick_photoPreview');
+
+        if (photoInput && photoPreview) {
+            photoInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        photoPreview.src = ev.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
         formInstructor.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = formInstructor.querySelector('button[type="submit"]');
@@ -115,10 +132,18 @@ export function setupQuickActions(onCategoryCreated, onInstructorCreated) {
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-            const formData = new FormData(formInstructor);
+            const formData = new FormData();
+            formData.append('full_name', document.getElementById('quick_fullName').value);
+            formData.append('professional_title', document.getElementById('quick_professionalTitle').value);
+            formData.append('organization', document.getElementById('quick_organization').value);
+            formData.append('short_bio', document.getElementById('quick_shortBio').value);
+            formData.append('website', document.getElementById('quick_website').value);
+            formData.append('linkedin_url', document.getElementById('quick_linkedinUrl').value);
 
-            // Instructor service expects FormData for create
-            // Backend validation: full_name, professional_title, organization required.
+            const file = document.getElementById('quick_photoInput').files[0];
+            if (file) {
+                formData.append('photo', file);
+            }
 
             try {
                 const res = await InstructorService.create(formData);

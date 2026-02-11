@@ -7,7 +7,7 @@ console.log('Settings Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
-    const admin = requireAuth();
+    let admin = requireAuth();
     if (!admin) return;
 
     setupLogout();
@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Helper to update UI
     const updateUI = (data) => {
         // Sidebar updated by auth guard
+        // ... (rest of updateUI function)
 
         document.getElementById('lastName').value = data.last_name || '';
         document.getElementById('firstName').value = data.first_name || '';
@@ -42,6 +43,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     avatarInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Validate File Size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('L\'image est trop volumineuse. Max 2 Mo.', 'error');
+                e.target.value = ''; // Clear input
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 avatarPreview.src = e.target.result;

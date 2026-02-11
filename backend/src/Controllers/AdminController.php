@@ -170,6 +170,8 @@ class AdminController {
                     $this->uploader->delete($existing['avatar_url']);
                 }
                 $avatarUrl = $uploadedPath;
+            } else {
+                return $this->jsonResponse(['message' => 'Failed to upload avatar. Check file size (max 2MB) or type.'], 400);
             }
         }
 

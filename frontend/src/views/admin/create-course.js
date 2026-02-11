@@ -208,9 +208,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             imagePreviewImg.onerror = () => {
-                console.warn('[DEBUG] Image URL failed to load:', url);
-                imageStatus.textContent = 'Impossible de charger l\'image (CORS ou lien invalide)';
-                imageStatus.style.color = 'red';
+                console.warn('[DEBUG] Image URL failed to load (likely CORS):', url);
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Aperçu bloqué (CORS), mais l\'enregistrement fonctionnera si le lien est public.';
+                imageStatus.style.color = '#d97706'; // Amber/Orange
             };
         } else {
             imagePreview.style.display = 'none';
