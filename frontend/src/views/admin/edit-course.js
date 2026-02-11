@@ -217,8 +217,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const imageUrlInput = document.getElementById('image_url_input');
     const imagePreview = document.getElementById('imagePreview');
     const imagePreviewImg = imagePreview.querySelector('img');
-    const imageStatus = document.createElement('small');
-    imageUrlInput.parentNode.appendChild(imageStatus);
+    const imageStatus = document.getElementById('imageUrlStatus') || (() => {
+        const el = document.createElement('small');
+        imageUrlInput.parentNode.appendChild(el);
+        return el;
+    })();
 
     imageUrlInput.addEventListener('input', (e) => {
         const url = e.target.value.trim();
@@ -250,8 +253,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoUrlInput = document.getElementById('video_url_input');
     const videoPreview = document.getElementById('videoPreview');
     const videoPreviewVid = videoPreview.querySelector('video');
-    const videoStatus = document.createElement('small');
-    videoUrlInput.parentNode.appendChild(videoStatus);
+    const videoStatus = document.getElementById('videoUrlStatus') || (() => {
+        const el = document.createElement('small');
+        videoUrlInput.parentNode.appendChild(el);
+        return el;
+    })();
 
     videoUrlInput.addEventListener('input', (e) => {
         const url = e.target.value.trim();

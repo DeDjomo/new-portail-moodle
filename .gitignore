@@ -24,3 +24,18 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Test Data & Large Files
+donneesTest/
+
+# Logs & Debug
+*.log
+debug_output.txt
+
+# Dependencies & Build
+node_modules/
+dist/
+coverage/
+.env
+.env.local
+.env.*.local

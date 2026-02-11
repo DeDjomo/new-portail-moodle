@@ -419,13 +419,15 @@ function getEmbedUrl(url) {
     return null;
 }
 
-function formatDuration(minutes) {
-    if (!minutes) return 'Non défini';
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}min`;
+function formatDuration(hours) {
+    if (!hours && hours !== 0) return 'Non défini';
+    const totalMinutes = Math.round(parseFloat(hours) * 60);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    if (h > 0 && m > 0) return `${h}h${m}min`;
     if (h > 0) return `${h}h`;
-    return `${m}min`;
+    if (m > 0) return `${m}min`;
+    return 'Non défini';
 }
 
 function translateLevel(level) {
