@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    DirectoryIndex index.html
+
+    # Security: Deny access to sensitive files
+    <FilesMatch "^\.git|^\.gitignore|start\.sh|DEPLOY_.*\.md|task\.md|implementation_plan\.md|walkthrough\.md">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+
+    # Disable directory listing
+    Options -Indexes
+</IfModule>

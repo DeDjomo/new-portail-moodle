@@ -2,9 +2,9 @@
 
 class Database {
     private $host = "localhost";
-    private $db_name = "portal_db";
-    private $username = "portal_user";
-    private $password = "Portal_Pass_2026!"; 
+    private $db_name = "enspy_portail";
+    private $username = "etudiant_portail.enspy.training";
+    private $password = "iA5af94TZ@"; 
     public $conn;
 
     public function getConnection() {

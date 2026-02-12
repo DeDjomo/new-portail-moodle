@@ -2,7 +2,7 @@
  * Base API Service for handles all fetch requests to the backend.
  */
 
-const BASE_URL = 'http://127.0.0.1:8000'; // Target the PHP local server using IP for better reliability
+const BASE_URL = 'https://portail.enspy.training/backend/public';
 
 const apiRequest = async (endpoint, method = 'GET', data = null, isMultipart = false) => {
     const url = `${BASE_URL}/${endpoint}`;
