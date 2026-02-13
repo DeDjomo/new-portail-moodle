@@ -3,7 +3,7 @@
 class Database {
     private $host = "localhost";
     private $db_name = "enspy_portail";
-    private $username = "etudiant_portail.enspy.training";
+    private $username = "enspy_portail";
     private $password = "iA5af94TZ@"; 
     public $conn;
 
