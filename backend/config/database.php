@@ -2,8 +2,8 @@
 
 class Database {
     private $host = "localhost";
-    private $db_name = "enspy_portail";
-    private $username = "enspy_portail";
+    private $db_name = "enspy_portal";
+    private $username = "enspy_portal";
     private $password = "iA5af94TZ@"; 
     public $conn;
 
