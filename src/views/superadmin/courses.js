@@ -1,8 +1,6 @@
-import { resolveAssetPath } from '../../services/api.js';
+import apiRequest, { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
-
-const API_BASE = 'http://localhost:8000';
 
 console.log('SuperAdmin - Courses Page loaded');
 
@@ -22,16 +20,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadFilterOptions() {
         try {
             // Categories
-            const catRes = await fetch(`${API_BASE}/categories`);
-            allCategories = await catRes.json();
+            allCategories = await apiRequest('categories');
             const catSelect = document.getElementById('filterCategory');
             allCategories.forEach(c => {
                 catSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
 
             // Admins
-            const adminRes = await fetch(`${API_BASE}/administrators`);
-            allAdmins = await adminRes.json();
+            allAdmins = await apiRequest('administrators');
             const adminSelect = document.getElementById('filterAdmin');
             allAdmins.forEach(a => {
                 adminSelect.innerHTML += `<option value="${a.id}">${a.first_name} ${a.last_name}</option>`;
@@ -44,8 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 5. Fetch & Render Courses
     async function loadCourses() {
         try {
-            const res = await fetch(`${API_BASE}/courses`);
-            allCourses = await res.json();
+            allCourses = await apiRequest('courses');
             applyFiltersAndSort();
         } catch (error) {
             console.error('Error loading courses:', error);
@@ -176,22 +171,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Archiver',
             async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/courses/${id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ status: 'ARCHIVED' })
-                    });
-
-                    if (res.ok) {
-                        showToast('Cours archivé.', 'success');
-                        loadCourses();
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Échec de l\'archivage.', 'error');
-                    }
+                    await apiRequest(`courses/${id}`, 'PUT', { status: 'ARCHIVED' });
+                    showToast('Cours archivé.', 'success');
+                    loadCourses();
                 } catch (error) {
                     console.error(error);
-                    showToast('Erreur réseau.', 'error');
+                    showToast(error.message || 'Échec de l\'archivage.', 'error');
                 }
             }
         );
@@ -205,18 +190,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             'supprimer',
             async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/courses/${id}`, { method: 'DELETE' });
-
-                    if (res.ok) {
-                        showToast('Cours supprimé.', 'success');
-                        loadCourses();
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Échec de la suppression.', 'error');
-                    }
+                    await apiRequest(`courses/${id}`, 'DELETE');
+                    showToast('Cours supprimé.', 'success');
+                    loadCourses();
                 } catch (error) {
                     console.error(error);
-                    showToast('Erreur réseau.', 'error');
+                    showToast(error.message || 'Échec de la suppression.', 'error');
                 }
             }
         );

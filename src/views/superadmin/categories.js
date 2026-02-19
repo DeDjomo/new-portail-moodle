@@ -1,8 +1,6 @@
-import { resolveAssetPath } from '../../services/api.js';
+import apiRequest, { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm, showDangerConfirm, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
-
-const API_BASE = 'http://localhost:8000';
 
 console.log('SuperAdmin - Categories Page loaded');
 
@@ -21,8 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Fetch & Render Categories with Hierarchy
     async function loadCategories() {
         try {
-            const res = await fetch(`${API_BASE}/categories`);
-            const rawCategories = await res.json();
+            const rawCategories = await apiRequest('categories');
             allCategories = rawCategories; // Store raw for lookup
 
             // Build Hierarchy
@@ -210,33 +207,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         setLoading(btnSubmit, true, id ? 'Modification...' : 'Création...');
 
         try {
-            let res;
-            if (id) {
-                res = await fetch(`${API_BASE}/categories/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                res = await fetch(`${API_BASE}/categories`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            }
-
-            const data = await res.json();
-
-            if (res.ok) {
-                showToast(id ? 'Catégorie mise à jour.' : 'Catégorie créée.', 'success');
-                closeModal();
-                loadCategories();
-            } else {
-                showToast(data.message || 'Une erreur est survenue.', 'error');
-            }
+            await apiRequest(id ? `categories/${id}` : 'categories', id ? 'PUT' : 'POST', payload);
+            showToast(id ? 'Catégorie mise à jour.' : 'Catégorie créée.', 'success');
+            closeModal();
+            loadCategories();
         } catch (error) {
             console.error(error);
-            showToast('Erreur réseau.', 'error');
+            showToast(error.message || 'Une erreur est survenue.', 'error');
         } finally {
             setLoading(btnSubmit, false);
         }
@@ -254,18 +231,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             name,
             async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/categories/${id}`, { method: 'DELETE' });
-
-                    if (res.ok) {
-                        showToast('Catégorie supprimée.', 'success');
-                        loadCategories();
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Échec de la suppression.', 'error');
-                    }
+                    await apiRequest(`categories/${id}`, 'DELETE');
+                    showToast('Catégorie supprimée.', 'success');
+                    loadCategories();
                 } catch (error) {
                     console.error(error);
-                    showToast('Erreur réseau.', 'error');
+                    showToast(error.message || 'Échec de la suppression.', 'error');
                 }
             }
         );

@@ -1,4 +1,4 @@
-import { resolveAssetPath } from '../../services/api.js';
+import apiRequest, { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 
@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. Fetch Global Stats
     try {
-        // Fetch all counts in parallel
+        // Fetch all counts in parallel using centralized apiRequest
         const [adminsRes, instructorsRes, coursesRes, studentsRes] = await Promise.all([
-            fetch('http://localhost:8000/administrators').then(r => r.json()),
-            fetch('http://localhost:8000/instructors').then(r => r.json()),
-            fetch('http://localhost:8000/courses').then(r => r.json()),
-            fetch('http://localhost:8000/students').then(r => r.json())
+            apiRequest('administrators'),
+            apiRequest('instructors'),
+            apiRequest('courses'),
+            apiRequest('students')
         ]);
 
         // Update Stats Cards
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. Fetch Recent Enrollments
     try {
-        const enrollmentsRes = await fetch('http://localhost:8000/enrollments?action=getRecent&limit=5').then(r => r.json());
+        const enrollmentsRes = await apiRequest('enrollments?action=getRecent&limit=5');
         const tbody = document.getElementById('recentEnrollments');
 
         if (Array.isArray(enrollmentsRes) && enrollmentsRes.length > 0) {

@@ -1,8 +1,6 @@
-import { resolveAssetPath } from '../../services/api.js';
+import apiRequest, { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, showSuccessConfirm, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
-
-const API_BASE = 'http://localhost:8000';
 
 console.log('SuperAdmin - Administrators Page loaded');
 
@@ -21,8 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Fetch & Render Admins
     async function loadAdmins() {
         try {
-            const res = await fetch(`${API_BASE}/administrators`);
-            const data = await res.json();
+            const data = await apiRequest('administrators');
             // Filter out SUPER_ADMIN - they should not appear in this list
             allAdmins = data.filter(a => a.type !== 'SUPER_ADMIN');
             renderAdmins(allAdmins);
@@ -213,37 +210,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         setLoading(btnSubmit, true, id ? 'Modification...' : 'Création...');
 
         try {
-            let res;
-            if (id) {
-                res = await fetch(`${API_BASE}/administrators/${id}`, {
-                    method: 'POST',
-                    body: formData
-                });
-            } else {
-                // Create
-                if (!password) {
-                    showToast('Le mot de passe est requis pour un nouvel admin.', 'error');
-                    setLoading(btnSubmit, false);
-                    return;
-                }
-                res = await fetch(`${API_BASE}/administrators`, {
-                    method: 'POST',
-                    body: formData
-                });
-            }
-
-            const data = await res.json();
-
-            if (res.ok) {
-                showToast(id ? 'Administrateur mis à jour.' : 'Administrateur créé.', 'success');
-                closeModal();
-                loadAdmins();
-            } else {
-                showToast(data.message || 'Une erreur est survenue.', 'error');
-            }
+            const data = await apiRequest(id ? `administrators/${id}` : 'administrators', 'POST', formData, true);
+            showToast(id ? 'Administrateur mis à jour.' : 'Administrateur créé.', 'success');
+            closeModal();
+            loadAdmins();
         } catch (error) {
             console.error(error);
-            showToast('Erreur réseau.', 'error');
+            showToast(error.message || 'Une erreur est survenue.', 'error');
         } finally {
             setLoading(btnSubmit, false);
         }
@@ -267,22 +240,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             buttonText,
             async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/administrators/${id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ status: newStatus })
-                    });
-
-                    if (res.ok) {
-                        showToast(`Administrateur ${isSuspending ? 'suspendu' : 'activé'}.`, 'success');
-                        loadAdmins();
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Échec de la mise à jour.', 'error');
-                    }
+                    await apiRequest(`administrators/${id}`, 'PUT', { status: newStatus });
+                    showToast(`Administrateur ${isSuspending ? 'suspendu' : 'activé'}.`, 'success');
+                    loadAdmins();
                 } catch (error) {
                     console.error(error);
-                    showToast('Erreur réseau.', 'error');
+                    showToast(error.message || 'Échec de la mise à jour.', 'error');
                 }
             }
         );
@@ -301,20 +264,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             fullName,
             async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/administrators/${id}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (res.ok) {
-                        showToast('Administrateur supprimé.', 'success');
-                        loadAdmins();
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Échec de la suppression.', 'error');
-                    }
+                    await apiRequest(`administrators/${id}`, 'DELETE');
+                    showToast('Administrateur supprimé.', 'success');
+                    loadAdmins();
                 } catch (error) {
                     console.error(error);
-                    showToast('Erreur réseau.', 'error');
+                    showToast(error.message || 'Échec de la suppression.', 'error');
                 }
             }
         );

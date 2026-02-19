@@ -4,8 +4,6 @@ import { showToast, showCustomConfirm, showDangerConfirm, setupLogout } from '..
 import { requireAuth } from '../../utils/auth-guard.js';
 import StudentService from '../../services/studentService.js';
 
-const API_BASE = 'http://localhost:8000';
-
 console.log('Students Page loaded');
 
 document.addEventListener('DOMContentLoaded', async () => {

@@ -138,7 +138,7 @@ try {
             $controller = new AdminController($db);
             if ($method === 'POST') {
                 if ($id === 'login') $controller->login($input_data);
-                elseif ($id) $controller->update($id, $_POST); // Allow POST update for file uploads
+                elseif ($id) $controller->update($id, $input_data); // Allow POST update for file uploads
                 else $controller->create($input_data);
             } elseif ($method === 'GET') {
                 if ($id) $controller->show($id);
@@ -172,7 +172,7 @@ try {
 
         case 'courses':
             $controller = new CourseController($db);
-            if ($method === 'POST') $controller->create($_POST);
+            if ($method === 'POST') $controller->create($input_data);
             elseif ($method === 'GET') {
                 if (isset($_GET['action']) && $_GET['action'] === 'getAdminCourses' && isset($_GET['admin_id'])) {
                     $controller->getAdminCourses($_GET['admin_id']);

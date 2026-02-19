@@ -1,8 +1,6 @@
-import { resolveAssetPath } from '../../services/api.js';
+import apiRequest, { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm, showDangerConfirm, setLoading, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
-
-const API_BASE = 'http://localhost:8000';
 
 console.log('SuperAdmin - Instructors Page loaded');
 
@@ -21,8 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. Fetch & Render Instructors
     async function loadInstructors() {
         try {
-            const res = await fetch(`${API_BASE}/instructors`);
-            allInstructors = await res.json();
+            allInstructors = await apiRequest('instructors');
             renderInstructors(allInstructors);
         } catch (error) {
             console.error('Error loading instructors:', error);
@@ -174,23 +171,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 formData.append('_method', 'PUT');
             }
 
-            const res = await fetch(`${API_BASE}/instructors${id ? `/${id}` : ''}`, {
-                method: 'POST',
-                body: formData
-            });
+            const data = await apiRequest(id ? `instructors/${id}` : 'instructors', 'POST', formData, true);
 
-            const data = await res.json();
-
-            if (res.ok) {
-                showToast(id ? 'Instructeur mis à jour.' : 'Instructeur créé.', 'success');
-                closeModal();
-                loadInstructors();
-            } else {
-                showToast(data.message || 'Une erreur est survenue.', 'error');
-            }
+            showToast(id ? 'Instructeur mis à jour.' : 'Instructeur créé.', 'success');
+            closeModal();
+            loadInstructors();
         } catch (error) {
             console.error(error);
-            showToast('Erreur réseau.', 'error');
+            showToast(error.message || 'Une erreur est survenue.', 'error');
         } finally {
             setLoading(btnSubmit, false);
         }
@@ -208,18 +196,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             name,
             async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/instructors/${id}`, { method: 'DELETE' });
-
-                    if (res.ok) {
-                        showToast('Instructeur supprimé.', 'success');
-                        loadInstructors();
-                    } else {
-                        const data = await res.json();
-                        showToast(data.message || 'Échec de la suppression.', 'error');
-                    }
+                    await apiRequest(`instructors/${id}`, 'DELETE');
+                    showToast('Instructeur supprimé.', 'success');
+                    loadInstructors();
                 } catch (error) {
                     console.error(error);
-                    showToast('Erreur réseau.', 'error');
+                    showToast(error.message || 'Échec de la suppression.', 'error');
                 }
             }
         );
