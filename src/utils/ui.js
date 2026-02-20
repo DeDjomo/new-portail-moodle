@@ -248,13 +248,9 @@ export const showCourseStatusModal = ({ title, message, confirmText, confirmClas
 
     const isPublish = confirmClass === 'publish';
     const accentColor = isPublish ? '#FF6B00' : '#111827';
-    const icon = isPublish ? 'fa-paper-plane' : 'fa-save';
 
     modal.innerHTML = `
-        <div style="width:64px; height:64px; background:${accentColor}15; border-radius:50%; color:${accentColor}; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem auto; font-size:1.8rem;">
-            <i class="fas ${icon}"></i>
-        </div>
-        <h3 style="margin-bottom:0.75rem; color:#111827; font-size:1.75rem; font-weight:800; letter-spacing:-0.025em;">${title}</h3>
+        <h3 style="margin-bottom:1rem; color:#111827; font-size:1.75rem; font-weight:800; letter-spacing:-0.025em; margin-top: 0.5rem;">${title}</h3>
         <div style="color:#6B7280; margin-bottom:2.5rem; line-height:1.6; font-size:1.1rem; padding: 0 1rem;">${message}</div>
         <div style="display:flex; gap:1rem; justify-content:center; padding: 0 0.5rem;">
             <button id="btnModalCancel" style="padding:0.875rem 2rem; border-radius:14px; border:2px solid #F3F4F6; background:white; color:#6B7280; cursor:pointer; font-weight:600; flex:1; transition:all 0.2s;">Annuler</button>
