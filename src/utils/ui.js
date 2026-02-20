@@ -247,14 +247,18 @@ export const showCourseStatusModal = ({ title, message, confirmText, confirmClas
     modal.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
 
     const isPublish = confirmClass === 'publish';
-    const accentColor = isPublish ? '#4F46E5' : '#111827';
+    const accentColor = isPublish ? '#FF6B00' : '#111827';
+    const icon = isPublish ? 'fa-paper-plane' : 'fa-save';
 
     modal.innerHTML = `
-        <h3 style="margin-bottom:1rem; color:#111827; font-size:1.5rem; font-weight:700;">${title}</h3>
-        <div style="color:#6B7280; margin-bottom:2.5rem; line-height:1.6; font-size:1.05rem;">${message}</div>
-        <div style="display:flex; gap:1rem; justify-content:center;">
-            <button id="btnModalCancel" style="padding:0.875rem 2rem; border-radius:12px; border:1px solid #E5E7EB; background:white; color:#374151; cursor:pointer; font-weight:600; flex:1; transition:all 0.2s;">Annuler</button>
-            <button id="btnModalConfirm" style="padding:0.875rem 2rem; border-radius:12px; border:none; background:${accentColor}; color:white; cursor:pointer; font-weight:600; flex:1; transition:all 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">${confirmText}</button>
+        <div style="width:64px; height:64px; background:${accentColor}15; border-radius:50%; color:${accentColor}; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem auto; font-size:1.8rem;">
+            <i class="fas ${icon}"></i>
+        </div>
+        <h3 style="margin-bottom:0.75rem; color:#111827; font-size:1.75rem; font-weight:800; letter-spacing:-0.025em;">${title}</h3>
+        <div style="color:#6B7280; margin-bottom:2.5rem; line-height:1.6; font-size:1.1rem; padding: 0 1rem;">${message}</div>
+        <div style="display:flex; gap:1rem; justify-content:center; padding: 0 0.5rem;">
+            <button id="btnModalCancel" style="padding:0.875rem 2rem; border-radius:14px; border:2px solid #F3F4F6; background:white; color:#6B7280; cursor:pointer; font-weight:600; flex:1; transition:all 0.2s;">Annuler</button>
+            <button id="btnModalConfirm" style="padding:0.875rem 2rem; border-radius:14px; border:none; background:${accentColor}; color:white; cursor:pointer; font-weight:700; flex:1; transition:all 0.2s; box-shadow: 0 10px 15px -3px ${accentColor}40;">${confirmText}</button>
         </div>
     `;
 
