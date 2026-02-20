@@ -349,6 +349,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (source === 'url') wrapper.style.display = 'none';
     });
 
+    // --- Helper: Check Completeness for Publication ---
+    function checkCompleteness() {
+        const required = [
+            'short_synopsis', 'full_description', 'pedagogical_objectives',
+            'level', 'language', 'format', 'total_duration_minutes'
+        ];
+        const missing = [];
+
+        required.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el || !el.value || el.value.trim() === '' || el.value === '[]') {
+                missing.push(document.querySelector(`label[for="${id}"]`)?.textContent.replace(' *', '') || id);
+            }
+        });
+
+        const activeImageBtn = document.querySelector('.media-toggle[data-for="image"] .toggle-btn.active');
+        const imageSource = activeImageBtn.dataset.type;
+        const imageFile = document.getElementById('image').files[0];
+        const imageUrl = document.getElementById('image_url_input').value.trim();
+
+        if ((imageSource === 'local' && !imageFile) || (imageSource === 'url' && !imageUrl)) {
+            missing.push("Image de couverture");
+        }
+
+        return missing;
+    }
+
     // 4. Form Submission
     const form = document.getElementById('createCourseForm');
     const btnSubmit = document.getElementById('btnSubmit');
@@ -358,59 +385,78 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // 1. Initial Integrity Check (Strict Backend Requirements)
+        const instructorId = document.getElementById('instructor_id').value;
+        const categoryId = document.getElementById('category_id').value;
+        if (!instructorId || !categoryId) {
+            showToast('Veuillez remplir les champs obligatoires (*)', 'error');
+            return;
+        }
+
+        // 2. Check Completeness for State Machine logic
+        const missingFields = checkCompleteness();
+        const isComplete = missingFields.length === 0;
+
+        if (isComplete) {
+            import('../../utils/ui.js').then(ui => {
+                ui.showCourseStatusModal({
+                    title: 'Prêt pour la publication !',
+                    message: 'Toutes les informations nécessaires sont renseignées. Votre cours peut être publié immédiatement pour être visible par les étudiants.',
+                    confirmText: 'Publier maintenant',
+                    confirmClass: 'publish',
+                    onConfirm: () => submitForm('PUBLISHED')
+                });
+            });
+        } else {
+            const fieldsList = missingFields.map(f => `• ${f}`).join('<br>');
+            import('../../utils/ui.js').then(ui => {
+                ui.showCourseStatusModal({
+                    title: 'Enregistrer en brouillon ?',
+                    message: `Certains champs ne sont pas encore remplis :<br><br><div style="text-align:left; background:#F9FAFB; padding:1rem; border-radius:12px; font-size:0.9rem; color:#4B5563;">${fieldsList}</div><br>Vous pouvez enregistrer le travail actuel en tant que brouillon et revenir plus tard pour le compléter.`,
+                    confirmText: 'Enregistrer le brouillon',
+                    confirmClass: 'draft',
+                    onConfirm: () => submitForm('DRAFT')
+                });
+            });
+        }
+    });
+
+    async function submitForm(status) {
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
         alertSuccess.style.display = 'none';
         alertError.style.display = 'none';
 
         const formData = new FormData();
+        formData.append('status', status);
 
-        // Mandatory fields
-        formData.append('administrator_id', admin.id);
         // Mandatory fields
         formData.append('administrator_id', admin.id);
 
         // Check if selected instructor is an Admin that needs conversion
         let instructorId = document.getElementById('instructor_id').value;
         if (instructorId && instructorId.startsWith('ADMIN:')) {
-            // It's an admin! We must create an Instructor profile first.
-            const adminId = instructorId.split(':')[1];
-            // Find the option to get the stored dataset or just fetch? 
-            // We can retrieve the name from text content or just rely on what we have.
-            // Better: We stored data in dataset, but reading dataset from select value is tricky.
-            // Just find the selected option.
             const selectedOpt = document.getElementById('instructor_id').options[document.getElementById('instructor_id').selectedIndex];
             const adminData = JSON.parse(selectedOpt.dataset.admin);
-
             const fullName = `${adminData.first_name} ${adminData.last_name}`;
 
-            // Create Instructor Profile
             try {
-                // We need to pass FormData or Object. Service handles both.
-                // Required: full_name, professional_title, organization
                 const newInstructorData = new FormData();
                 newInstructorData.append('full_name', fullName);
                 newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
                 newInstructorData.append('organization', 'Administration');
                 newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
                 newInstructorData.append('status', 'ACTIVE');
-
-                // Copy Avatar if exists
-                if (adminData.avatar_url) {
-                    newInstructorData.append('photo_url', adminData.avatar_url);
-                }
+                if (adminData.avatar_url) newInstructorData.append('photo_url', adminData.avatar_url);
 
                 const newIns = await InstructorService.create(newInstructorData);
-                console.log('Auto-created instructor for admin:', newIns);
                 instructorId = newIns.id;
-
             } catch (err) {
-                console.error("Failed to auto-create instructor from admin:", err);
-                alertError.style.display = 'block';
-                alertError.textContent = 'Erreur : Impossible de créer le profil instructeur pour cet admin.';
+                console.error("Failed to auto-create instructor:", err);
+                showToast('Erreur : Impossible de créer le profil instructeur.', 'error');
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer le cours';
-                return; // Stop submission
+                return;
             }
         }
 
@@ -427,18 +473,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('format', document.getElementById('format').value);
         formData.append('total_duration_minutes', document.getElementById('total_duration_minutes').value);
         formData.append('is_certifying', document.getElementById('is_certifying').checked ? 1 : 0);
-        // formData.append('status', document.getElementById('status').value);
 
-        // Special handling for pedagogical objectives (convert lines to array)
+        // Special handling for pedagogical objectives
         const objectivesText = document.getElementById('pedagogical_objectives').value;
         const objectivesArray = objectivesText.split('\n').filter(line => line.trim() !== '');
         formData.append('pedagogical_objectives', JSON.stringify(objectivesArray));
 
-        // Files Handling (Local vs URL)
+        // Files Handling
         const activeImageBtn = document.querySelector('.media-toggle[data-for="image"] .toggle-btn.active');
-        const imageSource = activeImageBtn.dataset.type;
-
-        if (imageSource === 'local') {
+        if (activeImageBtn.dataset.type === 'local') {
             const imageFile = document.getElementById('image').files[0];
             if (imageFile) formData.append('image', imageFile);
         } else {
@@ -447,9 +490,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const activeVideoBtn = document.querySelector('.media-toggle[data-for="video"] .toggle-btn.active');
-        const videoSource = activeVideoBtn.dataset.type;
-
-        if (videoSource === 'local') {
+        if (activeVideoBtn.dataset.type === 'local') {
             const videoFile = document.getElementById('video').files[0];
             if (videoFile) formData.append('video', videoFile);
         } else {
@@ -459,28 +500,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const result = await CourseService.create(formData);
+            showToast(`Cours enregistré en tant que ${status === 'PUBLISHED' ? 'publié' : 'brouillon'}.`);
 
-            alertSuccess.style.display = 'block';
-            alertSuccess.textContent = `Cours créé ! Statut : ${result.status}`;
-
-            // Redirect after success
             setTimeout(() => {
-                // Check if we are in superadmin or standard admin context
                 const isSuperAdmin = window.location.pathname.includes('/superadmin/');
-                if (isSuperAdmin) {
-                    window.location.href = 'my-courses.html';
-                } else {
-                    window.location.href = 'courses.html';
-                }
-            }, 2000);
+                window.location.href = isSuperAdmin ? 'my-courses.html' : 'courses.html';
+            }, 1500);
 
         } catch (error) {
             console.error('Create Error:', error);
-            alertError.style.display = 'block';
-            alertError.textContent = 'Erreur : ' + error.message;
+            showToast('Erreur : ' + error.message, 'error');
             btnSubmit.disabled = false;
             btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer le cours';
         }
-    });
+    }
 
 });

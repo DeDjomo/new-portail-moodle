@@ -336,6 +336,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('.file-upload-wrapper[for="video"]').style.display = 'flex';
     });
 
+    // --- Helper: Check Completeness (Similar to create-course) ---
+    function checkCompleteness() {
+        const required = [
+            'short_synopsis', 'full_description', 'pedagogical_objectives',
+            'level', 'language', 'format', 'total_duration_minutes'
+        ];
+        const missing = [];
+
+        required.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el || !el.value || el.value.trim() === '' || el.value === '[]') {
+                missing.push(document.querySelector(`label[for="${id}"]`)?.textContent.replace(' *', '') || id);
+            }
+        });
+
+        const activeImageBtn = document.querySelector('.media-toggle[data-for="image"] .toggle-btn.active');
+        const imageSource = activeImageBtn.dataset.type;
+        const imageFile = document.getElementById('image').files[0];
+        const imageUrl = document.getElementById('image_url_input').value.trim();
+        const hasExistingImage = document.getElementById('imagePreview').style.display === 'block';
+
+        if (!hasExistingImage && ((imageSource === 'local' && !imageFile) || (imageSource === 'url' && !imageUrl))) {
+            missing.push("Image de couverture");
+        }
+
+        return missing;
+    }
+
     // 5. Form Submission
     const form = document.getElementById('editCourseForm');
     const btnSubmit = document.getElementById('btnSubmit');
@@ -343,14 +371,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // 1. Initial Integrity Check
+        const instructorId = document.getElementById('instructor_id').value;
+        const categoryId = document.getElementById('category_id').value;
+        if (!instructorId || !categoryId) {
+            showToast('Veuillez remplir les champs obligatoires (*)', 'error');
+            return;
+        }
+
+        // 2. Check Completeness
+        const missingFields = checkCompleteness();
+        const isComplete = missingFields.length === 0;
+
+        if (isComplete) {
+            import('../../utils/ui.js').then(ui => {
+                ui.showCourseStatusModal({
+                    title: 'Mettre à jour et Publier ?',
+                    message: 'Toutes les informations sont complètes. Le cours sera mis à jour et restera (ou passera) en mode publié.',
+                    confirmText: 'Mettre à jour & Publier',
+                    confirmClass: 'publish',
+                    onConfirm: () => submitForm('PUBLISHED')
+                });
+            });
+        } else {
+            const fieldsList = missingFields.map(f => `• ${f}`).join('<br>');
+            import('../../utils/ui.js').then(ui => {
+                ui.showCourseStatusModal({
+                    title: 'Mettre à jour en Brouillon ?',
+                    message: `Certains champs sont manquants :<br><br><div style="text-align:left; background:#F9FAFB; padding:1rem; border-radius:12px; font-size:0.9rem; color:#4B5563;">${fieldsList}</div><br>Le cours sera enregistré en tant que brouillon.`,
+                    confirmText: 'Mettre à jour (Brouillon)',
+                    confirmClass: 'draft',
+                    onConfirm: () => submitForm('DRAFT')
+                });
+            });
+        }
+    });
+
+    async function submitForm(status) {
         btnSubmit.disabled = true;
         btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
 
         const formData = new FormData();
+        formData.append('status', status);
 
         // Mandatory fields
         formData.append('administrator_id', admin.id);
-        // formData.append('instructor_id', document.getElementById('instructor_id').value);
 
         let instructorId = document.getElementById('instructor_id').value;
         if (instructorId && instructorId.startsWith('ADMIN:')) {
@@ -365,11 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 newInstructorData.append('organization', 'Administration');
                 newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
                 newInstructorData.append('status', 'ACTIVE');
-
-                // Copy Avatar if exists
-                if (adminData.avatar_url) {
-                    newInstructorData.append('photo_url', adminData.avatar_url);
-                }
+                if (adminData.avatar_url) newInstructorData.append('photo_url', adminData.avatar_url);
 
                 const newIns = await InstructorService.create(newInstructorData);
                 instructorId = newIns.id;
@@ -395,7 +456,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('format', document.getElementById('format').value);
         formData.append('total_duration_minutes', document.getElementById('total_duration_minutes').value);
         formData.append('is_certifying', document.getElementById('is_certifying').checked ? 1 : 0);
-        // formData.append('status', document.getElementById('status').value);
 
         // Objectives
         const objectivesText = document.getElementById('pedagogical_objectives').value;
@@ -403,15 +463,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('pedagogical_objectives', JSON.stringify(objectivesArray));
 
         // Media
-        // Logic: If new file selected, send it. If URL input has value, send it. 
-        // Backend handles "keep existing if null" usually, but for multipart PUT/POST we might need to be careful.
-        // If imageSource is local and file is selected -> append file
-        // If imageSource is url and value exists -> append url
-
         const activeImageBtn = document.querySelector('.media-toggle[data-for="image"] .toggle-btn.active');
-        const imageSource = activeImageBtn.dataset.type;
-
-        if (imageSource === 'local') {
+        if (activeImageBtn.dataset.type === 'local') {
             const imageFile = document.getElementById('image').files[0];
             if (imageFile) formData.append('image', imageFile);
         } else {
@@ -420,9 +473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const activeVideoBtn = document.querySelector('.media-toggle[data-for="video"] .toggle-btn.active');
-        const videoSource = activeVideoBtn.dataset.type;
-
-        if (videoSource === 'local') {
+        if (activeVideoBtn.dataset.type === 'local') {
             const videoFile = document.getElementById('video').files[0];
             if (videoFile) formData.append('video', videoFile);
         } else {
@@ -432,9 +483,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             await CourseService.update(courseId, formData);
-            showToast('Cours mis à jour avec succès !');
+            showToast(`Cours mis à jour en tant que ${status === 'PUBLISHED' ? 'publié' : 'brouillon'}.`);
             setTimeout(() => {
-                window.location.href = 'courses.html';
+                const isSuperAdmin = window.location.pathname.includes('/superadmin/');
+                window.location.href = isSuperAdmin ? 'my-courses.html' : 'courses.html';
             }, 1000);
 
         } catch (error) {
@@ -443,6 +495,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnSubmit.disabled = false;
             btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer les modifications';
         }
-    });
+    }
 
 });

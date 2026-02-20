@@ -2,7 +2,7 @@
  * Base API Service for handles all fetch requests to the backend.
  */
 
-const BASE_URL = 'http://portal.enspy.training/backend/public';
+const BASE_URL = 'http://localhost:8000';
 
 const apiRequest = async (endpoint, method = 'GET', data = null, isMultipart = false) => {
     const url = `${BASE_URL}/${endpoint}`;

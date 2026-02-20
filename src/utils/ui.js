@@ -212,6 +212,85 @@ export const showWarningConfirm = (title, message, confirmButtonText, onConfirm)
 };
 
 /**
+ * Show a Modal for Course Status Selection
+ * @param {Object} options { title, message, confirmText, confirmClass, onConfirm }
+ */
+export const showCourseStatusModal = ({ title, message, confirmText, confirmClass, onConfirm }) => {
+    // Remove existing modal if any
+    const existing = document.getElementById('custom-confirm-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'custom-confirm-modal';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = '10000';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.backdropFilter = 'blur(4px)';
+
+    const modal = document.createElement('div');
+    modal.style.background = 'white';
+    modal.style.padding = '2.5rem';
+    modal.style.borderRadius = '24px';
+    modal.style.width = '480px';
+    modal.style.maxWidth = '90%';
+    modal.style.textAlign = 'center';
+    modal.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
+    modal.style.transform = 'scale(0.95)';
+    modal.style.opacity = '0';
+    modal.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+    const isPublish = confirmClass === 'publish';
+    const accentColor = isPublish ? '#4F46E5' : '#111827';
+
+    modal.innerHTML = `
+        <h3 style="margin-bottom:1rem; color:#111827; font-size:1.5rem; font-weight:700;">${title}</h3>
+        <div style="color:#6B7280; margin-bottom:2.5rem; line-height:1.6; font-size:1.05rem;">${message}</div>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <button id="btnModalCancel" style="padding:0.875rem 2rem; border-radius:12px; border:1px solid #E5E7EB; background:white; color:#374151; cursor:pointer; font-weight:600; flex:1; transition:all 0.2s;">Annuler</button>
+            <button id="btnModalConfirm" style="padding:0.875rem 2rem; border-radius:12px; border:none; background:${accentColor}; color:white; cursor:pointer; font-weight:600; flex:1; transition:all 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">${confirmText}</button>
+        </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Animate In
+    requestAnimationFrame(() => {
+        modal.style.transform = 'scale(1)';
+        modal.style.opacity = '1';
+    });
+
+    // Event Listeners
+    const cleanup = () => {
+        modal.style.transform = 'scale(0.95)';
+        modal.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 200);
+    };
+
+    document.getElementById('btnModalCancel').addEventListener('click', cleanup);
+    document.getElementById('btnModalConfirm').addEventListener('click', () => {
+        onConfirm();
+        cleanup();
+    });
+
+    // Hover effects
+    const cbtn = document.getElementById('btnModalConfirm');
+    cbtn.onmouseover = () => cbtn.style.transform = 'translateY(-2px)';
+    cbtn.onmouseout = () => cbtn.style.transform = 'translateY(0)';
+
+    const abtn = document.getElementById('btnModalCancel');
+    abtn.onmouseover = () => abtn.style.background = '#F9FAFB';
+    abtn.onmouseout = () => abtn.style.background = 'white';
+};
+
+/**
  * Show a Success Confirmation Modal (for activations)
  * @param {string} title 
  * @param {string} message 

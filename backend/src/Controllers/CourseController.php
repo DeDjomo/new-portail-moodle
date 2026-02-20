@@ -121,13 +121,8 @@ class CourseController {
             }
         }
 
-        // 4. State Determination (Draft vs Published)
-        $status = $this->determineStatus($data, $imageUrl);
-        
-        // Allow manual override if provided
-        if (isset($data['status'])) {
-            $status = $data['status'];
-        }
+        // 4. State Determination - Now purely manual from frontend
+        $status = $data['status'] ?? 'DRAFT';
 
         // 5. Map to Model
         $this->courseModel->administrator_id = $data['administrator_id'];
@@ -206,14 +201,8 @@ class CourseController {
             }
         }
 
-        // Merge Data for status determination
-        $merged = array_merge($existing, $data);
-        $newStatus = $this->determineStatus($merged, $imageUrl);
-
-        // If manual override requested
-        if (isset($data['status'])) {
-            $newStatus = $data['status'];
-        }
+        // 4. State Determination - Manual override
+        $newStatus = $data['status'] ?? $existing['status'];
 
         $this->courseModel->id = $id;
         $this->courseModel->administrator_id = $data['administrator_id'] ?? $existing['administrator_id'];
