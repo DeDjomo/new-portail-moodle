@@ -11,10 +11,10 @@ class FileUploader {
     private $maxSize = 104857600; // 100MB
 
     public function __construct($targetSubDir) {
-        $this->targetDir = __DIR__ . '/../../public/uploads/' . trim($targetSubDir, '/') . '/';
+        $this->targetDir = __DIR__ . '/../../public/uploads/' . \trim($targetSubDir, '/') . '/';
         
-        if (!is_dir($this->targetDir)) {
-            mkdir($this->targetDir, 0777, true);
+        if (!\is_dir($this->targetDir)) {
+            \mkdir($this->targetDir, 0777, true);
         }
     }
 
@@ -36,17 +36,17 @@ class FileUploader {
         // Validate type
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($file['tmp_name']);
-        if (!in_array($mimeType, $this->allowedTypes)) {
+        if (!\in_array($mimeType, $this->allowedTypes)) {
             return false;
         }
 
         // Generate unique name
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $fileName = uniqid() . '.' . $extension;
+        $extension = \pathinfo($file['name'], PATHINFO_EXTENSION);
+        $fileName = \uniqid() . '.' . $extension;
         $targetFile = $this->targetDir . $fileName;
 
-        if (move_uploaded_file($file['tmp_name'], $targetFile)) {
-            return 'uploads/' . trim(str_replace(__DIR__ . '/../../public/uploads/', '', $this->targetDir), '/') . '/' . $fileName;
+        if (\move_uploaded_file($file['tmp_name'], $targetFile)) {
+            return 'uploads/' . \trim(\str_replace(__DIR__ . '/../../public/uploads/', '', $this->targetDir), '/') . '/' . $fileName;
         }
 
         return false;
@@ -60,33 +60,66 @@ class FileUploader {
     public function uploadFromUrl($url) {
         if (empty($url)) return false;
 
-        // Use cURL for better reliability
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXFILESIZE, $this->maxSize);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For local dev simplicity
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+        $data = null;
+        $contentType = null;
+
+        // Try cURL first
+        if (\function_exists('curl_init')) {
+            $ch = \curl_init($url);
+            \curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            \curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            \curl_setopt($ch, CURLOPT_MAXFILESIZE, $this->maxSize);
+            \curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+            \curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            \curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+            
+            $data = \curl_exec($ch);
+            $httpCode = \curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $contentType = \curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            \curl_close($ch);
+
+            if ($httpCode !== 200) {
+                $data = null;
+            }
+        } 
         
-        $data = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        curl_close($ch);
+        // Fallback to file_get_contents if cURL failed or is missing
+        if (!$data && \ini_get('allow_url_fopen')) {
+            $context = \stream_context_create([
+                'http' => [
+                    'timeout' => 60,
+                    'header' => "User-Agent: Mozilla/5.0\r\n"
+                ],
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false
+                ]
+            ]);
+            $data = @\file_get_contents($url, false, $context);
+            if ($data) {
+                // Get Content-Type from headers
+                foreach ($http_response_header as $header) {
+                    if (\preg_match('/^Content-Type: (.*)/i', $header, $matches)) {
+                        $contentType = \trim($matches[1]);
+                        break;
+                    }
+                }
+            }
+        }
 
-        if ($httpCode !== 200 || !$data) {
+        if (!$data) {
             return false;
         }
 
-        // Simple content type validation (extract base type if complex)
-        $baseType = explode(';', $contentType)[0];
-        if (!in_array($baseType, $this->allowedTypes)) {
+        // Simple content type validation
+        $baseType = $contentType ? \explode(';', $contentType)[0] : null;
+        if ($baseType && !\in_array($baseType, $this->allowedTypes)) {
             return false;
         }
 
-        // Determine extension from URL or content type
-        $extension = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
-        if (!$extension) {
+        // Determine extension
+        $extension = \pathinfo(\parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+        if (!$extension || !\strlen($extension)) {
             $extensions = [
                 'image/jpeg' => 'jpg',
                 'image/png' => 'png',
@@ -96,11 +129,11 @@ class FileUploader {
             $extension = $extensions[$baseType] ?? 'bin';
         }
 
-        $fileName = uniqid() . '.' . $extension;
+        $fileName = \uniqid() . '.' . $extension;
         $targetFile = $this->targetDir . $fileName;
 
-        if (file_put_contents($targetFile, $data)) {
-            return 'uploads/' . trim(str_replace(__DIR__ . '/../../public/uploads/', '', $this->targetDir), '/') . '/' . $fileName;
+        if (\file_put_contents($targetFile, $data)) {
+            return 'uploads/' . \trim(\str_replace(__DIR__ . '/../../public/uploads/', '', $this->targetDir), '/') . '/' . $fileName;
         }
 
         return false;
@@ -111,8 +144,8 @@ class FileUploader {
      */
     public function delete($relativePath) {
         $filePath = __DIR__ . '/../../public/' . $relativePath;
-        if (file_exists($filePath) && is_file($filePath)) {
-            return unlink($filePath);
+        if (\file_exists($filePath) && \is_file($filePath)) {
+            return \unlink($filePath);
         }
         return false;
     }
