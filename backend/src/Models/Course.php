@@ -12,7 +12,7 @@ class Course extends BaseModel {
 
     public $id;
     public $administrator_id;
-    public $instructor_id;
+    public $instructor_ids = []; // Array of instructor IDs
     public $category_id;
     public $title;
     public $slug;
@@ -34,19 +34,19 @@ class Course extends BaseModel {
     public $image_url;
     public $video_url;
     public $moodle_url;
+    public $prerequis; // New text-based prerequisites
 
     /**
      * Get all courses with joined instructor and category details
      */
     public function getAllWithDetails($status = null) {
         $query = "SELECT c.*, 
-                         i.full_name as instructor_name, 
-                         i.photo_url as instructor_photo_url,
-                         i.professional_title as instructor_title,
-                         i.short_bio as instructor_bio,
+                         GROUP_CONCAT(i.full_name SEPARATOR ', ') as instructor_names,
+                         GROUP_CONCAT(i.id SEPARATOR ',') as instructor_ids,
                          cat.name as category_name
                   FROM " . $this->table_name . " c
-                  LEFT JOIN instructors i ON c.instructor_id = i.id
+                  LEFT JOIN course_instructors ci ON c.id = ci.course_id
+                  LEFT JOIN instructors i ON ci.instructor_id = i.id
                   LEFT JOIN categories cat ON c.category_id = cat.id AND cat.status != 'DELETED'
                   WHERE c.status != 'DELETED'";
         
@@ -54,7 +54,7 @@ class Course extends BaseModel {
             $query .= " AND c.status = :status";
         }
         
-        $query .= " ORDER BY c.created_at DESC";
+        $query .= " GROUP BY c.id ORDER BY c.created_at DESC";
 
         $stmt = $this->db->prepare($query);
         if ($status) {
@@ -69,15 +69,14 @@ class Course extends BaseModel {
      */
     public function getByAdmin($admin_id) {
         $query = "SELECT c.*, 
-                         i.full_name as instructor_name, 
-                         i.photo_url as instructor_photo_url,
-                         i.professional_title as instructor_title,
-                         i.short_bio as instructor_bio,
+                         GROUP_CONCAT(i.full_name SEPARATOR ', ') as instructor_names,
                          cat.name as category_name
                   FROM " . $this->table_name . " c
-                  LEFT JOIN instructors i ON c.instructor_id = i.id
+                  LEFT JOIN course_instructors ci ON c.id = ci.course_id
+                  LEFT JOIN instructors i ON ci.instructor_id = i.id
                   LEFT JOIN categories cat ON c.category_id = cat.id AND cat.status != 'DELETED'
                   WHERE c.administrator_id = ? AND c.status != 'DELETED'
+                  GROUP BY c.id
                   ORDER BY c.created_at DESC";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(1, $admin_id);
@@ -89,21 +88,27 @@ class Course extends BaseModel {
      * Get course details with joined instructor and category details
      */
     public function getByIdWithDetails($id) {
-        $query = "SELECT c.*, 
-                         i.full_name as instructor_name, 
-                         i.photo_url as instructor_photo_url,
-                         i.professional_title as instructor_title,
-                         i.short_bio as instructor_bio,
-                         cat.name as category_name
+        $query = "SELECT c.*, cat.name as category_name
                   FROM " . $this->table_name . " c
-                  LEFT JOIN instructors i ON c.instructor_id = i.id
                   LEFT JOIN categories cat ON c.category_id = cat.id AND cat.status != 'DELETED'
                   WHERE c.id = ? AND c.status != 'DELETED'
                   LIMIT 0,1";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(1, $id);
         $stmt->execute();
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
+        $course = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($course) {
+            // Fetch instructors
+            $query_inst = "SELECT i.* FROM instructors i
+                           JOIN course_instructors ci ON i.id = ci.instructor_id
+                           WHERE ci.course_id = ?";
+            $stmt_inst = $this->db->prepare($query_inst);
+            $stmt_inst->execute([$id]);
+            $course['instructors'] = $stmt_inst->fetchAll(\PDO::FETCH_ASSOC);
+        }
+
+        return $course;
     }
 
     /**
@@ -111,13 +116,13 @@ class Course extends BaseModel {
      */
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                (administrator_id, instructor_id, category_id, title, slug, short_synopsis, 
-                full_description, pedagogical_objectives, target_audience, prerequisites, 
+                (administrator_id, category_id, title, slug, short_synopsis, 
+                full_description, pedagogical_objectives, target_audience, prerequisites, prerequis,
                 total_duration_minutes, level, language, format, is_certifying, status, 
                 published_at, meta_title, meta_description, enrolled_count, image_url, 
                 video_url, moodle_url)
-                VALUES (:administrator_id, :instructor_id, :category_id, :title, :slug, :short_synopsis, 
-                :full_description, :pedagogical_objectives, :target_audience, :prerequisites, 
+                VALUES (:administrator_id, :category_id, :title, :slug, :short_synopsis, 
+                :full_description, :pedagogical_objectives, :target_audience, :prerequisites, :prerequis,
                 :total_duration_minutes, :level, :language, :format, :is_certifying, :status, 
                 :published_at, :meta_title, :meta_description, :enrolled_count, :image_url, 
                 :video_url, :moodle_url)";
@@ -128,6 +133,7 @@ class Course extends BaseModel {
 
         if ($stmt->execute()) {
             $this->id = $this->db->lastInsertId();
+            $this->updateInstructors();
             return true;
         }
         return false;
@@ -138,11 +144,12 @@ class Course extends BaseModel {
      */
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
-                SET administrator_id = :administrator_id, instructor_id = :instructor_id, 
+                SET administrator_id = :administrator_id, 
                     category_id = :category_id, title = :title, slug = :slug, 
                     short_synopsis = :short_synopsis, full_description = :full_description, 
                     pedagogical_objectives = :pedagogical_objectives, target_audience = :target_audience, 
-                    prerequisites = :prerequisites, total_duration_minutes = :total_duration_minutes, 
+                    prerequisites = :prerequisites, prerequis = :prerequis,
+                    total_duration_minutes = :total_duration_minutes, 
                     level = :level, language = :language, format = :format, 
                     is_certifying = :is_certifying, status = :status, published_at = :published_at, 
                     meta_title = :meta_title, meta_description = :meta_description, 
@@ -154,7 +161,30 @@ class Course extends BaseModel {
         $this->bindAllParams($stmt);
         $stmt->bindValue(':id', $this->id, \PDO::PARAM_INT);
 
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            $this->updateInstructors();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Update the course_instructors mapping table
+     */
+    private function updateInstructors() {
+        // Clear existing
+        $query = "DELETE FROM course_instructors WHERE course_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$this->id]);
+
+        // Insert new
+        if (!empty($this->instructor_ids)) {
+            $query = "INSERT INTO course_instructors (course_id, instructor_id) VALUES (?, ?)";
+            $stmt = $this->db->prepare($query);
+            foreach ($this->instructor_ids as $inst_id) {
+                $stmt->execute([$this->id, $inst_id]);
+            }
+        }
     }
 
     /**
@@ -182,7 +212,6 @@ class Course extends BaseModel {
      */
     private function bindAllParams($stmt) {
         $stmt->bindValue(':administrator_id', $this->administrator_id, \PDO::PARAM_INT);
-        $stmt->bindValue(':instructor_id', $this->instructor_id, \PDO::PARAM_INT);
         $stmt->bindValue(':category_id', $this->category_id, \PDO::PARAM_INT);
         $stmt->bindValue(':title', $this->title);
         $stmt->bindValue(':slug', $this->slug);
@@ -191,6 +220,7 @@ class Course extends BaseModel {
         $stmt->bindValue(':pedagogical_objectives', $this->pedagogical_objectives);
         $stmt->bindValue(':target_audience', $this->target_audience);
         $stmt->bindValue(':prerequisites', $this->prerequisites);
+        $stmt->bindValue(':prerequis', $this->prerequis);
         $stmt->bindValue(':total_duration_minutes', $this->total_duration_minutes, \PDO::PARAM_INT);
         $stmt->bindValue(':level', $this->level);
         $stmt->bindValue(':language', $this->language);

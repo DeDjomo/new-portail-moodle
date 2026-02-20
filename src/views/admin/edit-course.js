@@ -6,6 +6,7 @@ import { resolveAssetPath } from '../../services/api.js';
 import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 import { setupQuickActions } from './quick-actions.js';
+import { initMultiSelect } from '../../utils/multi-select-component.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         const insSelect = document.getElementById('instructor_id');
-        insSelect.innerHTML = '<option value="">Choisir un instructeur...</option>';
+        insSelect.innerHTML = '';
 
         // 1. Existing Instructors
         const instructorGroup = document.createElement('optgroup');
@@ -95,8 +96,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (course) {
             document.getElementById('title').value = course.title || '';
             document.getElementById('category_id').value = course.category_id || '';
-            document.getElementById('instructor_id').value = course.instructor_id || '';
+
+            // Multiple instructors
+            const insSelect = document.getElementById('instructor_id');
+            if (course.instructors && Array.isArray(course.instructors)) {
+                const instructorIds = course.instructors.map(i => i.id.toString());
+                Array.from(insSelect.options).forEach(opt => {
+                    if (instructorIds.includes(opt.value)) {
+                        opt.selected = true;
+                    }
+                });
+            }
+
+            initMultiSelect('instructor_id', 'Choisir des instructeurs...');
+
             document.getElementById('moodle_url').value = course.moodle_url || '';
+            document.getElementById('prerequis').value = course.prerequis || '';
             document.getElementById('short_synopsis').value = course.short_synopsis || '';
             document.getElementById('full_description').value = course.full_description || '';
             document.getElementById('level').value = course.level || 'BEGINNER';
@@ -372,10 +387,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         // 1. Initial Integrity Check
-        const instructorId = document.getElementById('instructor_id').value;
+        const instructorSelect = document.getElementById('instructor_id');
+        const selectedInstructors = Array.from(instructorSelect.selectedOptions).map(opt => opt.value).filter(v => v !== "");
         const categoryId = document.getElementById('category_id').value;
-        if (!instructorId || !categoryId) {
-            showToast('Veuillez remplir les champs obligatoires (*)', 'error');
+
+        if (selectedInstructors.length === 0 || !categoryId) {
+            showToast('Veuillez choisir au moins un instructeur et une catégorie (*)', 'error');
             return;
         }
 
@@ -417,36 +434,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Mandatory fields
         formData.append('administrator_id', admin.id);
 
-        let instructorId = document.getElementById('instructor_id').value;
-        if (instructorId && instructorId.startsWith('ADMIN:')) {
-            const selectedOpt = document.getElementById('instructor_id').options[document.getElementById('instructor_id').selectedIndex];
-            const adminData = JSON.parse(selectedOpt.dataset.admin);
-            const fullName = `${adminData.first_name} ${adminData.last_name}`;
+        const instructorSelect = document.getElementById('instructor_id');
+        const selectedOptions = Array.from(instructorSelect.selectedOptions).filter(opt => opt.value !== "");
+        const finalInstructorIds = [];
 
-            try {
-                const newInstructorData = new FormData();
-                newInstructorData.append('full_name', fullName);
-                newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
-                newInstructorData.append('organization', 'Administration');
-                newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
-                newInstructorData.append('status', 'ACTIVE');
-                if (adminData.avatar_url) newInstructorData.append('photo_url', adminData.avatar_url);
+        for (const opt of selectedOptions) {
+            let val = opt.value;
+            if (val.startsWith('ADMIN:')) {
+                const adminData = JSON.parse(opt.dataset.admin);
+                const fullName = `${adminData.first_name} ${adminData.last_name}`;
 
-                const newIns = await InstructorService.create(newInstructorData);
-                instructorId = newIns.id;
-            } catch (err) {
-                console.error("Auto-create instructor error:", err);
-                showToast('Erreur lors de la création du profil instructeur', 'error');
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer les modifications';
-                return;
+                try {
+                    const newInstructorData = new FormData();
+                    newInstructorData.append('full_name', fullName);
+                    newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
+                    newInstructorData.append('organization', 'Administration');
+                    newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
+                    newInstructorData.append('status', 'ACTIVE');
+                    if (adminData.avatar_url) newInstructorData.append('photo_url', adminData.avatar_url);
+
+                    const newIns = await InstructorService.create(newInstructorData);
+                    finalInstructorIds.push(newIns.id);
+                } catch (err) {
+                    console.error("Auto-create instructor error:", err);
+                    showToast(`Erreur lors de la création du profil pour ${fullName}`, 'error');
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer les modifications';
+                    return;
+                }
+            } else {
+                finalInstructorIds.push(val);
             }
         }
-        formData.append('instructor_id', instructorId);
+
+        // Append instructor IDs as array
+        finalInstructorIds.forEach(id => {
+            formData.append('instructor_ids[]', id);
+        });
 
         formData.append('title', document.getElementById('title').value);
         formData.append('category_id', document.getElementById('category_id').value);
         formData.append('moodle_url', document.getElementById('moodle_url').value);
+        formData.append('prerequis', document.getElementById('prerequis').value);
 
         // Optional / Details
         formData.append('short_synopsis', document.getElementById('short_synopsis').value);

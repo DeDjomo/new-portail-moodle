@@ -72,7 +72,19 @@ class Instructor extends BaseModel {
         $stmt->bindParam(':linkedin_url', $this->linkedin_url);
         $stmt->bindParam(':status', $this->status);
         $stmt->bindParam(':id', $this->id);
-
+        
         return $stmt->execute();
+    }
+
+    /**
+     * Get courses associated with this instructor
+     */
+    public function getCourses() {
+        $query = "SELECT c.* FROM courses c
+                  JOIN course_instructors ci ON c.id = ci.course_id
+                  WHERE ci.instructor_id = ? AND c.status != 'DELETED'";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$this->id]);
+        return $stmt;
     }
 }

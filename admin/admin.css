@@ -858,3 +858,149 @@ body {
 .fade-up {
     animation: fadeInUp 0.5s ease forwards;
 }
+
+/* --- CUSTOM MULTI-SELECT DROPDOWN --- */
+.custom-multi-select {
+    position: relative;
+    width: 100%;
+}
+
+.multi-select-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    height: 48px;
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition-base);
+    user-select: none;
+}
+
+.multi-select-header:hover,
+.multi-select-header.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.1);
+}
+
+.multi-select-header .selected-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
+
+.multi-select-header .selected-text.is-placeholder {
+    color: #9CA3AF;
+}
+
+.multi-select-options {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    max-height: 280px;
+    overflow-y: auto;
+    display: none;
+    padding: 8px;
+    animation: fadeInScale 0.2s ease-out;
+}
+
+.multi-select-options.active {
+    display: block;
+}
+
+.multi-select-group-title {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #F9FAFB;
+    border-radius: 6px;
+    margin: 4px 0;
+}
+
+.multi-select-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 2px;
+}
+
+.multi-select-option:hover {
+    background: #F3F4F6;
+}
+
+.multi-select-option.selected {
+    background: var(--primary-soft);
+}
+
+.multi-select-option input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #D1D5DB;
+    border-radius: 5px;
+    margin-right: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.multi-select-option input:checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.multi-select-option input:checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 10px;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.multi-select-option label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    flex: 1;
+    margin: 0;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.help-text {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}

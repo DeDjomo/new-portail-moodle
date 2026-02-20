@@ -83,20 +83,29 @@ class CourseController {
      */
     public function create($data) {
         // 1. Strict mandatory fields
-        $required = ['administrator_id', 'instructor_id', 'category_id', 'title', 'moodle_url'];
+        $required = ['administrator_id', 'category_id', 'title', 'moodle_url'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 return $this->jsonResponse(['message' => "Field '$field' is required"], 400);
             }
+        }
+        
+        // instructor_ids must be an array and not empty
+        if (!isset($data['instructor_ids']) || !is_array($data['instructor_ids']) || empty($data['instructor_ids'])) {
+            return $this->jsonResponse(['message' => "At least one instructor is required (as instructor_ids array)"], 400);
         }
 
         // 2. Integrity Checks
         if (!$this->adminModel->getById($data['administrator_id'])) {
             return $this->jsonResponse(['message' => 'Administrator not found'], 400);
         }
-        if (!$this->instructorModel->getById($data['instructor_id'])) {
-            return $this->jsonResponse(['message' => 'Instructor not found'], 400);
+        
+        foreach ($data['instructor_ids'] as $instId) {
+            if (!$this->instructorModel->getById($instId)) {
+                return $this->jsonResponse(['message' => "Instructor with ID $instId not found"], 400);
+            }
         }
+
         if (!$this->categoryModel->getById($data['category_id'])) {
             return $this->jsonResponse(['message' => 'Category not found'], 400);
         }
@@ -126,10 +135,11 @@ class CourseController {
 
         // 5. Map to Model
         $this->courseModel->administrator_id = $data['administrator_id'];
-        $this->courseModel->instructor_id = $data['instructor_id'];
+        $this->courseModel->instructor_ids = $data['instructor_ids'];
         $this->courseModel->category_id = $data['category_id'];
         $this->courseModel->title = $data['title'];
         $this->courseModel->moodle_url = $data['moodle_url'];
+        $this->courseModel->prerequis = $data['prerequis'] ?? null;
         
         $this->courseModel->slug = $data['slug'] ?? $this->slugify($data['title']);
         $this->courseModel->short_synopsis = $data['short_synopsis'] ?? null;
@@ -206,12 +216,22 @@ class CourseController {
 
         $this->courseModel->id = $id;
         $this->courseModel->administrator_id = $data['administrator_id'] ?? $existing['administrator_id'];
-        $this->courseModel->instructor_id = $data['instructor_id'] ?? $existing['instructor_id'];
         $this->courseModel->category_id = $data['category_id'] ?? $existing['category_id'];
         $this->courseModel->title = $data['title'] ?? $existing['title'];
         $this->courseModel->slug = $data['slug'] ?? $existing['slug'];
         $this->courseModel->short_synopsis = $data['short_synopsis'] ?? $existing['short_synopsis'];
         $this->courseModel->full_description = $data['full_description'] ?? $existing['full_description'];
+        
+        if (isset($data['instructor_ids']) && is_array($data['instructor_ids'])) {
+            $this->courseModel->instructor_ids = $data['instructor_ids'];
+        } else {
+            // Fetch current if not provided in update
+            $inst_stmt = $this->db->prepare("SELECT instructor_id FROM course_instructors WHERE course_id = ?");
+            $inst_stmt->execute([$id]);
+            $this->courseModel->instructor_ids = $inst_stmt->fetchAll(\PDO::FETCH_COLUMN);
+        }
+
+        $this->courseModel->prerequis = $data['prerequis'] ?? $existing['prerequis'];
         
         // JSON Fields handling
         $this->courseModel->pedagogical_objectives = isset($data['pedagogical_objectives']) 

@@ -6,6 +6,7 @@ import { BASE_URL, resolveAssetPath } from '../../services/api.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 import { showToast, showCustomConfirm, setupLogout, setLoading } from '../../utils/ui.js';
 import { setupQuickActions } from './quick-actions.js';
+import { initMultiSelect } from '../../utils/multi-select-component.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Auth Guard
@@ -36,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const insSelect = document.getElementById('instructor_id');
             const currentIns = insSelect.value;
-            insSelect.innerHTML = '<option value="">Choisir un instructeur...</option>';
+            insSelect.innerHTML = '';
 
             // 1. Add Existing Instructors
             const instructorGroup = document.createElement('optgroup');
@@ -78,6 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await refreshSelects();
+    initMultiSelect('instructor_id', 'Choisir des instructeurs...');
 
     // 2.1 Setup Quick Actions
     setupQuickActions(
@@ -386,10 +388,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         // 1. Initial Integrity Check (Strict Backend Requirements)
-        const instructorId = document.getElementById('instructor_id').value;
+        const instructorSelect = document.getElementById('instructor_id');
+        const selectedInstructors = Array.from(instructorSelect.selectedOptions).map(opt => opt.value).filter(v => v !== "");
         const categoryId = document.getElementById('category_id').value;
-        if (!instructorId || !categoryId) {
-            showToast('Veuillez remplir les champs obligatoires (*)', 'error');
+
+        if (selectedInstructors.length === 0 || !categoryId) {
+            showToast('Veuillez choisir au moins un instructeur et une catégorie (*)', 'error');
             return;
         }
 
@@ -433,37 +437,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Mandatory fields
         formData.append('administrator_id', admin.id);
 
-        // Check if selected instructor is an Admin that needs conversion
-        let instructorId = document.getElementById('instructor_id').value;
-        if (instructorId && instructorId.startsWith('ADMIN:')) {
-            const selectedOpt = document.getElementById('instructor_id').options[document.getElementById('instructor_id').selectedIndex];
-            const adminData = JSON.parse(selectedOpt.dataset.admin);
-            const fullName = `${adminData.first_name} ${adminData.last_name}`;
+        const instructorSelect = document.getElementById('instructor_id');
+        const selectedOptions = Array.from(instructorSelect.selectedOptions).filter(opt => opt.value !== "");
+        const finalInstructorIds = [];
 
-            try {
-                const newInstructorData = new FormData();
-                newInstructorData.append('full_name', fullName);
-                newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
-                newInstructorData.append('organization', 'Administration');
-                newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
-                newInstructorData.append('status', 'ACTIVE');
-                if (adminData.avatar_url) newInstructorData.append('photo_url', adminData.avatar_url);
+        for (const opt of selectedOptions) {
+            let val = opt.value;
+            if (val.startsWith('ADMIN:')) {
+                const adminData = JSON.parse(opt.dataset.admin);
+                const fullName = `${adminData.first_name} ${adminData.last_name}`;
 
-                const newIns = await InstructorService.create(newInstructorData);
-                instructorId = newIns.id;
-            } catch (err) {
-                console.error("Failed to auto-create instructor:", err);
-                showToast('Erreur : Impossible de créer le profil instructeur.', 'error');
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer le cours';
-                return;
+                try {
+                    const newInstructorData = new FormData();
+                    newInstructorData.append('full_name', fullName);
+                    newInstructorData.append('professional_title', adminData.type === 'SUPER_ADMIN' ? 'Super Administrateur' : 'Administrateur');
+                    newInstructorData.append('organization', 'Administration');
+                    newInstructorData.append('short_bio', `Membre de l'équipe administrative. Contact: ${adminData.email}`);
+                    newInstructorData.append('status', 'ACTIVE');
+                    if (adminData.avatar_url) newInstructorData.append('photo_url', adminData.avatar_url);
+
+                    const newIns = await InstructorService.create(newInstructorData);
+                    finalInstructorIds.push(newIns.id);
+                } catch (err) {
+                    console.error("Failed to auto-create instructor:", err);
+                    showToast(`Erreur : Impossible de créer le profil pour ${fullName}.`, 'error');
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fas fa-save"></i> Enregistrer le cours';
+                    return;
+                }
+            } else {
+                finalInstructorIds.push(val);
             }
         }
 
-        formData.append('instructor_id', instructorId);
+        // Append instructor IDs as array
+        finalInstructorIds.forEach(id => {
+            formData.append('instructor_ids[]', id);
+        });
         formData.append('category_id', document.getElementById('category_id').value);
         formData.append('title', document.getElementById('title').value);
         formData.append('moodle_url', document.getElementById('moodle_url').value);
+        formData.append('prerequis', document.getElementById('prerequis').value);
 
         // Optional / Details
         formData.append('short_synopsis', document.getElementById('short_synopsis').value);

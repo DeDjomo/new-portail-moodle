@@ -98,19 +98,48 @@ function renderCourseDetails(course) {
         }
     }
 
-    // 5. Instructor Details
+    // 5. Instructor Details (Pedagogical Team)
     const instructorCard = document.getElementById('courseInstructor');
     if (instructorCard) {
-        const instructorPhoto = course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff&size=128`;
+        if (course.instructors && Array.isArray(course.instructors) && course.instructors.length > 0) {
+            instructorCard.className = 'instructors-grid'; // Use a grid layout for multiple
+            instructorCard.style.display = 'grid';
+            instructorCard.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+            instructorCard.style.gap = '1.5rem';
 
-        instructorCard.innerHTML = `
-            <img src="${instructorPhoto}" class="inst-photo" alt="${course.instructor_name}">
-            <div class="inst-info">
-                <h3>${course.instructor_name || 'Instructeur ENSPY'}</h3>
-                <p class="inst-role">${course.instructor_title || 'Expert Pédagogique'}</p>
-                <p class="inst-bio">${course.instructor_bio || "Biographie non disponible."}</p>
-            </div>
-        `;
+            instructorCard.innerHTML = course.instructors.map(inst => {
+                const photo = inst.photo_url ? resolveAssetPath(inst.photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(inst.full_name || 'Prof')}&background=FF6B00&color=fff&size=128`;
+                return `
+                <div class="instructor-card-item" style="background: white; padding: 1.5rem; border-radius: 16px; display: flex; gap: 1rem; align-items: flex-start; box-shadow: var(--shadow-sm);">
+                    <img src="${photo}" class="inst-photo" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;" alt="${inst.full_name}">
+                    <div class="inst-info">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">${inst.full_name}</h3>
+                        <p class="inst-role" style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">${inst.professional_title || 'Expert Pédagogique'}</p>
+                        <p class="inst-bio" style="font-size: 0.85rem; color: var(--text-dim); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;">${inst.short_bio || "Professeur à l'ENSPY."}</p>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        } else {
+            // Fallback for single/legacy (though backend now always sends array)
+            const instructorPhoto = course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff&size=128`;
+            instructorCard.innerHTML = `
+                <img src="${instructorPhoto}" class="inst-photo" alt="${course.instructor_name}">
+                <div class="inst-info">
+                    <h3>${course.instructor_name || 'Instructeur ENSPY'}</h3>
+                    <p class="inst-role">${course.instructor_title || 'Expert Pédagogique'}</p>
+                    <p class="inst-bio">${course.instructor_bio || "Biographie non disponible."}</p>
+                </div>
+            `;
+        }
+    }
+
+    // 5b. Prerequis Section
+    const prerequisSection = document.getElementById('prerequisSection');
+    const prerequisEl = document.getElementById('coursePrerequis');
+    if (prerequisSection && prerequisEl && course.prerequis) {
+        prerequisEl.innerHTML = course.prerequis.replace(/\n/g, '<br>');
+        prerequisSection.style.display = 'block';
     }
 
     // 6. Sidebar Enrollment Card

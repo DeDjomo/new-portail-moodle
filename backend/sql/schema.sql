@@ -97,7 +97,6 @@ CREATE TABLE `courses` (
     
     -- Relations obligatoires
     `administrator_id` BIGINT NOT NULL,         -- Admin créateur du cours
-    `instructor_id` BIGINT NOT NULL,            -- Instructeur qui dispense le cours
     `category_id` BIGINT NULL,                  -- Catégorie principale (peut être null si suppression cat)
     
     -- Informations principales
@@ -109,7 +108,8 @@ CREATE TABLE `courses` (
     -- Contenu détaillé (stocké en JSON pour flexibilité)
     `pedagogical_objectives` JSON,              -- Liste des objectifs ["Obj1", "Obj2"]
     `target_audience` JSON,                     -- Liste du public cible
-    `prerequisites` JSON,                       -- Liste des prérequis
+    `prerequisites` JSON,                       -- Liste des prérequis (Obsolète au profit de 'prerequis'?)
+    `prerequis` TEXT,                           -- Liste des prérequis (Format Texte/Liste)
     
     -- Détails techniques
     `total_duration_minutes` INT,               -- Durée totale estimée en minutes
@@ -138,11 +138,22 @@ CREATE TABLE `courses` (
     -- Contraintes de clés étrangères
     CONSTRAINT `fk_course_admin`
         FOREIGN KEY (`administrator_id`) REFERENCES `administrators`(`id`) ON DELETE RESTRICT,
-    CONSTRAINT `fk_course_instructor`
-        FOREIGN KEY (`instructor_id`) REFERENCES `instructors`(`id`) ON DELETE RESTRICT,
     CONSTRAINT `fk_course_category`
         FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Table principale des cours';
+
+-- -----------------------------------------------------------------------------
+-- 6. TABLE : COURSE_INSTRUCTORS (LIAISON N:M)
+-- -----------------------------------------------------------------------------
+-- Un cours peut avoir plusieurs instructeurs et vice-versa.
+DROP TABLE IF EXISTS `course_instructors`;
+CREATE TABLE `course_instructors` (
+    `course_id` BIGINT NOT NULL,
+    `instructor_id` BIGINT NOT NULL,
+    PRIMARY KEY (`course_id`, `instructor_id`),
+    CONSTRAINT `fk_ci_course` FOREIGN KEY (`course_id`) REFERENCES `courses`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_ci_instructor` FOREIGN KEY (`instructor_id`) REFERENCES `instructors`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Table de liaison Cours <-> Instructeurs';
 
 -- -----------------------------------------------------------------------------
 -- 6. TABLE : ENROLLMENTS (INSCRIPTIONS)

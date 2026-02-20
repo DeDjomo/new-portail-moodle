@@ -127,8 +127,20 @@ async function loadInitialData() {
         // Populate Instructor Filter dynamically from courses
         const instructorContainer = document.getElementById('instructorFilters');
         if (instructorContainer && Array.isArray(courses)) {
-            const uniqueInstructors = [...new Map(courses.filter(c => c.instructor_name).map(c => [c.instructor_id, c.instructor_name])).entries()];
-            uniqueInstructors.forEach(([id, name]) => {
+            const instructorMap = new Map();
+            courses.forEach(c => {
+                if (c.instructor_ids && c.instructor_names) {
+                    const ids = c.instructor_ids.split(',');
+                    const names = c.instructor_names.split(', ');
+                    ids.forEach((id, idx) => {
+                        if (id && names[idx]) {
+                            instructorMap.set(id, names[idx]);
+                        }
+                    });
+                }
+            });
+
+            instructorMap.forEach((name, id) => {
                 const label = document.createElement('label');
                 label.className = 'checkbox-item fade-up';
                 label.innerHTML = `
@@ -181,7 +193,12 @@ function setupFilters() {
             const matchesCat = checkedCats.length === 0 || checkedCats.includes(String(course.category_id));
             const matchesLang = checkedLangs.length === 0 || checkedLangs.includes(course.language);
             const matchesLevel = checkedLevels.length === 0 || checkedLevels.includes(course.level);
-            const matchesInstructor = checkedInstructors.length === 0 || checkedInstructors.includes(String(course.instructor_id));
+
+            let matchesInstructor = checkedInstructors.length === 0;
+            if (!matchesInstructor && course.instructor_ids) {
+                const courseInstIds = course.instructor_ids.split(',');
+                matchesInstructor = checkedInstructors.some(id => courseInstIds.includes(id));
+            }
 
             // Duration filter logic (parse duration_hours)
             let matchesDuration = true;
@@ -265,8 +282,8 @@ function renderCourses(courses, containerId = 'coursesGrid') {
                 <p class="card-desc">${course.short_synopsis || ''}</p>
                 <div class="card-footer">
                     <div class="card-instructor">
-                        <img src="${course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_name || 'Prof')}&background=FF6B00&color=fff`}" class="inst-avatar">
-                        <span class="inst-name">${course.instructor_name || 'Instructeur ENSPY'}</span>
+                        <img src="${course.instructor_photo_url ? resolveAssetPath(course.instructor_photo_url) : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor_names?.split(',')[0] || 'Prof')}&background=FF6B00&color=fff`}" class="inst-avatar">
+                        <span class="inst-name" title="${course.instructor_names || ''}">${course.instructor_names || 'Instructeur ENSPY'}</span>
                     </div>
                     <a href="course-details.html?id=${course.id}" class="btn-detail">Aperçu →</a>
                 </div>

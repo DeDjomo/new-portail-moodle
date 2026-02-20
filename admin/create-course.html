@@ -337,14 +337,15 @@
                     <div class="form-group">
                         <label for="instructor_id">Instructeur *</label>
                         <div class="input-group-with-btn">
-                            <select id="instructor_id" class="form-control" required>
-                                <option value="">Chargement...</option>
+                            <select id="instructor_id" class="form-control" multiple required>
                             </select>
                             <button type="button" class="btn-quick-add" id="btnQuickAddInstructor"
                                 title="Ajouter un instructeur">
                                 <i class="fas fa-plus"></i> Nouveau
                             </button>
                         </div>
+                        <small class="help-text"><i class="fas fa-info-circle"></i> Maintenez <strong>Ctrl</strong> (ou
+                            Cmd) pour sélectionner plusieurs instructeurs.</small>
                     </div>
 
                     <div class="form-group full-width">
@@ -466,6 +467,12 @@
                         <label for="pedagogical_objectives">Objectifs pédagogiques (un par ligne)</label>
                         <textarea id="pedagogical_objectives" class="form-control"
                             placeholder="Objectif 1&#10;Objectif 2..."></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="prerequis">Prérequis du cours (un par ligne ou texte libre)</label>
+                        <textarea id="prerequis" class="form-control"
+                            placeholder="Ex: Connaissances de base en PHP&#10;Avoir installé Docker..."></textarea>
                     </div>
                 </div>
 
