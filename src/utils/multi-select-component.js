@@ -7,8 +7,14 @@ export function initMultiSelect(selectId, placeholder = "Choisir des instructeur
     const originalSelect = document.getElementById(selectId);
     if (!originalSelect) return null;
 
+    // Preventive check: already initialized?
+    if (originalSelect.dataset.multiSelectInit) {
+        return originalSelect._multiSelectRef || null;
+    }
+
     // 1. Hide original select
     originalSelect.style.display = 'none';
+    originalSelect.dataset.multiSelectInit = "true";
 
     // 2. Wrap in container
     const container = document.createElement('div');
@@ -62,7 +68,7 @@ export function initMultiSelect(selectId, placeholder = "Choisir des instructeur
             });
         } else {
             Array.from(originalSelect.querySelectorAll('option')).forEach(opt => {
-                if (opt.value === "" && opt.disabled) return; // Skip placeholders
+                if (opt.value === "" && opt.disabled) return;
                 createOptionElement(opt);
             });
         }
@@ -70,7 +76,7 @@ export function initMultiSelect(selectId, placeholder = "Choisir des instructeur
     }
 
     function createOptionElement(opt) {
-        if (!opt.value && opt.textContent.includes('...')) return; // Skip dummy loading options
+        if (!opt.value && opt.textContent.includes('...')) return;
 
         const item = document.createElement('div');
         item.className = 'multi-select-option';
@@ -83,21 +89,30 @@ export function initMultiSelect(selectId, placeholder = "Choisir des instructeur
 
         const label = document.createElement('label');
         label.textContent = opt.textContent;
+        label.style.cursor = 'pointer';
 
         item.appendChild(checkbox);
         item.appendChild(label);
 
+        // Click handler for the whole row
         item.addEventListener('click', (e) => {
-            e.preventDefault();
             e.stopPropagation();
 
-            opt.selected = !opt.selected;
-            checkbox.checked = opt.selected;
+            // If the user clicked directly on the checkbox, 
+            // the checkbox state is already toggled.
+            // If they clicked the row, we toggle it manually.
+            if (e.target !== checkbox) {
+                opt.selected = !opt.selected;
+                checkbox.checked = opt.selected;
+            } else {
+                opt.selected = checkbox.checked;
+            }
+
             item.classList.toggle('selected', opt.selected);
+            updateHeader();
 
             // Trigger change on original select for form data collection
             originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            updateHeader();
         });
 
         optionsList.appendChild(item);
@@ -106,13 +121,6 @@ export function initMultiSelect(selectId, placeholder = "Choisir des instructeur
     // Toggle Dropdown
     header.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isOpen = optionsList.classList.contains('active');
-
-        // Close others
-        document.querySelectorAll('.multi-select-options.active').forEach(list => {
-            if (list !== optionsList) list.classList.remove('active');
-        });
-
         optionsList.classList.toggle('active');
         header.classList.toggle('active');
 
@@ -125,30 +133,29 @@ export function initMultiSelect(selectId, placeholder = "Choisir des instructeur
     });
 
     // Close on outside click
-    window.addEventListener('click', () => {
+    const closeDropdown = () => {
         optionsList.classList.remove('active');
         header.classList.remove('active');
         header.querySelector('i').classList.replace('fa-chevron-up', 'fa-chevron-down');
-    });
+    };
 
-    // Stop propagation inside list
-    optionsList.addEventListener('click', (e) => e.stopPropagation());
-
-    // Watch for changes in original select (useful for dynamic population)
-    const observer = new MutationObserver(() => {
-        renderOptions();
-    });
-    observer.observe(originalSelect, { childList: true, subtree: true });
+    window.addEventListener('click', closeDropdown);
 
     // Initial render
     renderOptions();
 
-    // Export public methods if needed
-    return {
+    // Watch for changes in original select (useful for dynamic population)
+    const observer = new MutationObserver((mutations) => {
+        // Only re-render if options changed
+        renderOptions();
+    });
+    observer.observe(originalSelect, { childList: true, subtree: true });
+
+    const api = {
         refresh: () => renderOptions(),
-        close: () => {
-            optionsList.classList.remove('active');
-            header.classList.remove('active');
-        }
+        close: () => closeDropdown()
     };
+
+    originalSelect._multiSelectRef = api;
+    return api;
 }

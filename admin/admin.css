@@ -968,7 +968,7 @@ body {
 
 .multi-select-option input:checked::after {
     content: '\f00c';
-    font-family: 'Font Awesome 5 Free';
+    font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     font-size: 10px;
     color: white;
