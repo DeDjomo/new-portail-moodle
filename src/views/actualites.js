@@ -16,10 +16,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (newsData.length === 0) {
             inner.innerHTML = `
-                <div style="width: 100%; display: flex; align-items: center; justify-content: center; color: #fff; height: 100%;">
-                    <p>Aucune actualité disponible pour le moment.</p>
+                <div style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; height: 100%; text-align: center; padding: 2rem;">
+                    <i class="fas fa-newspaper" style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem; opacity: 0.8;"></i>
+                    <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">Pas d'actualités pour le moment</h2>
+                    <p style="font-size: 1.2rem; color: rgba(255,255,255,0.7); max-width: 500px;">Restez connectés ! De nouvelles actualités et informations sur nos formations seront publiées très prochainement.</p>
                 </div>
             `;
+            const dots = document.getElementById('newsDots');
+            if (dots) dots.style.display = 'none';
             return;
         }
 
@@ -64,16 +68,23 @@ function renderCarousel(news) {
 function createSlide(item) {
     const banner = item.image_url ? resolveAssetPath(item.image_url) : 'public/images/banniere1.png';
     const videoUrl = item.video_url ? resolveAssetPath(item.video_url) : null;
+    const embedUrl = item.video_url ? getEmbedUrl(item.video_url) : null;
+
+    let mediaHtml = `<div class="slide-image" style="background-image: url('${banner}');"></div>`;
+
+    if (embedUrl) {
+        mediaHtml = `<iframe class="slide-video" src="${embedUrl}" style="border:none; pointer-events:none;" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    } else if (videoUrl) {
+        mediaHtml = `
+            <video class="slide-video" autoplay muted loop playsinline poster="${banner}">
+                <source src="${videoUrl}" type="video/mp4">
+            </video>
+        `;
+    }
 
     return `
         <div class="news-slide" onclick="location.href='actualite-detail.html?id=${item.id}'">
-            ${videoUrl ? `
-                <video class="slide-video" autoplay muted loop playsinline poster="${banner}">
-                    <source src="${videoUrl}" type="video/mp4">
-                </video>
-            ` : `
-                <div class="slide-image" style="background-image: url('${banner}');"></div>
-            `}
+            ${mediaHtml}
             <div class="news-slide-overlay"></div>
             <div class="news-slide-content container">
                 <span class="news-tag">Événement</span>
@@ -124,4 +135,15 @@ function initCarouselEvents() {
     setInterval(() => {
         showSlide(currentSlide + 1);
     }, 8000);
+}
+
+function getEmbedUrl(url) {
+    if (!url) return null;
+    // YouTube
+    let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${match[1]}&rel=0&showinfo=0`;
+    // Vimeo
+    match = url.match(/vimeo\.com\/(\d+)/);
+    if (match) return `https://player.vimeo.com/video/${match[1]}?background=1&autoplay=1&muted=1&loop=1`;
+    return null;
 }

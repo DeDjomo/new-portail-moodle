@@ -63,6 +63,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isUrl) {
                 videoUrlInput.value = news.video_url;
                 document.querySelector('.media-toggle[data-for="video"] [data-type="url"]').click();
+
+                const embedUrl = getEmbedUrl(news.video_url);
+                if (embedUrl) {
+                    videoPreviewVid.style.display = 'none';
+                    let iframe = document.createElement('iframe');
+                    iframe.width = '100%';
+                    iframe.height = '300';
+                    iframe.frameBorder = '0';
+                    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                    iframe.allowFullscreen = true;
+                    iframe.src = embedUrl;
+                    videoPreview.appendChild(iframe);
+                    videoPreview.style.display = 'block';
+                } else {
+                    videoPreviewVid.src = news.video_url;
+                    videoPreview.style.display = 'block';
+                }
             } else {
                 videoPreviewVid.src = resolveAssetPath(news.video_url);
                 videoPreview.style.display = 'block';
@@ -151,9 +168,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     videoUrlInput.addEventListener('input', (e) => {
         const url = e.target.value.trim();
+
+        const embedUrl = getEmbedUrl(url);
+        if (embedUrl) {
+            videoPreviewVid.style.display = 'none';
+            let iframe = videoPreview.querySelector('iframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.width = '100%';
+                iframe.height = '300';
+                iframe.frameBorder = '0';
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                iframe.allowFullscreen = true;
+                videoPreview.appendChild(iframe);
+            }
+            iframe.style.display = 'block';
+            iframe.src = embedUrl;
+            videoPreview.style.display = 'block';
+            return;
+        }
+
+        const iframe = videoPreview.querySelector('iframe');
+        if (iframe) iframe.style.display = 'none';
+        videoPreviewVid.style.display = 'block';
+
         if (url.startsWith('http')) {
             videoPreviewVid.src = url;
             videoPreview.style.display = 'block';
+        } else {
+            videoPreview.style.display = 'none';
         }
     });
 
@@ -162,6 +205,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         videoUrlInput.value = '';
         videoPreview.style.display = 'none';
         videoPreviewVid.src = '';
+        const iframe = videoPreview.querySelector('iframe');
+        if (iframe) {
+            iframe.src = '';
+            iframe.style.display = 'none';
+        }
         document.getElementById('videoName').textContent = 'Cliquer pour choisir une vidéo';
     });
 
@@ -213,3 +261,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
+
+function getEmbedUrl(url) {
+    if (!url) return null;
+    let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    if (match) return `https://www.youtube.com/embed/${match[1]}`;
+    match = url.match(/vimeo\.com\/(\d+)/);
+    if (match) return `https://player.vimeo.com/video/${match[1]}`;
+    return null;
+}
