@@ -4,7 +4,7 @@ import InstructorService from '../../services/instructorService.js';
 import AdminService from '../../services/adminService.js';
 import { BASE_URL, resolveAssetPath } from '../../services/api.js';
 import { requireAuth } from '../../utils/auth-guard.js';
-import { showToast, showCustomConfirm, setupLogout, setLoading } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, setupLogout, setLoading, showProgressModal } from '../../utils/ui.js';
 import { setupQuickActions } from './quick-actions.js';
 import { initMultiSelect } from '../../utils/multi-select-component.js';
 
@@ -427,7 +427,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function submitForm(status) {
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+        const updateProgress = showProgressModal('Enregistrement du cours', 'Préparation de l\'envoi...');
+
         alertSuccess.style.display = 'none';
         alertError.style.display = 'none';
 
@@ -513,7 +514,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const result = await CourseService.create(formData);
+            const result = await CourseService.create(formData, (progress) => {
+                updateProgress(progress.percent, `Envoi des fichiers : ${progress.loadedMB} / ${progress.totalMB} MB`);
+            });
+            updateProgress(100, 'Traitement terminé !');
+            await new Promise(r => setTimeout(r, 500));
+            document.getElementById('progressModal').remove();
             showToast(`Cours enregistré en tant que ${status === 'PUBLISHED' ? 'publié' : 'brouillon'}.`);
 
             setTimeout(() => {
@@ -522,6 +528,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1500);
 
         } catch (error) {
+            const modal = document.getElementById('progressModal');
+            if (modal) modal.remove();
+
             console.error('Create Error:', error);
             showToast('Erreur : ' + error.message, 'error');
             btnSubmit.disabled = false;

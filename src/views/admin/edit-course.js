@@ -3,7 +3,7 @@ import CategoryService from '../../services/categoryService.js';
 import InstructorService from '../../services/instructorService.js';
 import AdminService from '../../services/adminService.js';
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout, showProgressModal } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 import { setupQuickActions } from './quick-actions.js';
 import { initMultiSelect } from '../../utils/multi-select-component.js';
@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             import('../../utils/ui.js').then(ui => {
                 ui.showCourseStatusModal({
                     title: 'Mettre à jour et Publier ?',
-                    message: 'Toutes les informations sont complètes. Le cours sera mis à jour et restera (ou passera) en mode publié.',
+                    message: 'Toutes les informations sont complètes. Le cours sera mis à jour et passera en mode publié.',
                     confirmText: 'Mettre à jour & Publier',
                     confirmClass: 'publish',
                     onConfirm: () => submitForm('PUBLISHED')
@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function submitForm(status) {
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+        const updateProgress = showProgressModal('Mise à jour du cours', 'Préparation de l\'envoi...');
 
         const formData = new FormData();
         formData.append('status', status);
@@ -511,7 +511,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            await CourseService.update(courseId, formData);
+            await CourseService.update(courseId, formData, (progress) => {
+                updateProgress(progress.percent, `Envoi des fichiers : ${progress.loadedMB} / ${progress.totalMB} MB`);
+            });
+            updateProgress(100, 'Mise à jour terminée !');
+            await new Promise(r => setTimeout(r, 500));
+            document.getElementById('progressModal').remove();
             showToast(`Cours mis à jour en tant que ${status === 'PUBLISHED' ? 'publié' : 'brouillon'}.`);
             setTimeout(() => {
                 const isSuperAdmin = window.location.pathname.includes('/superadmin/');
@@ -519,6 +524,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 1000);
 
         } catch (error) {
+            const modal = document.getElementById('progressModal');
+            if (modal) modal.remove();
+
             console.error('Update Error:', error);
             showToast('Erreur : ' + error.message, 'error');
             btnSubmit.disabled = false;

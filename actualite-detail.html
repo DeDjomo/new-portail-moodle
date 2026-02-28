@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualité | ENSPY TRAINING</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .detail-header {
+            background: #fff;
+            padding: 4rem 0 2rem;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+        }
+
+        .detail-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .detail-meta {
+            color: #6B7280;
+            font-size: 1rem;
+        }
+
+        .video-container {
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            margin-top: -4rem;
+            position: relative;
+            z-index: 10;
+            aspect-ratio: 16/9;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .description-section {
+            padding: 4rem 0;
+        }
+
+        .description-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #4B5563;
+            max-width: 800px;
+        }
+
+        .linked-courses-section {
+            background: #F9FAFB;
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal Enrollment (reused from catalog.js if possible, or simple version here) */
+    </style>
+</head>
+
+<body>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand">
+                <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Accueil</a></li>
+                <li><a href="catalog.html" class="nav-link">Cours</a></li>
+                <li><a href="actualites.html" class="nav-link active">Actualités</a></li>
+                <li><a href="about.html" class="nav-link">À propos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="detail-header">
+        <div class="container">
+            <a href="actualites.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Retour aux actualités
+            </a>
+            <h1 id="newsTitle" class="detail-title">Chargement...</h1>
+            <div id="newsDate" class="detail-meta">--</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="video-container">
+                <video id="videoPlayer" class="video-player" controls preload="metadata" poster="">
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+            </div>
+        </div>
+
+        <section class="description-section">
+            <div class="container">
+                <h2>À propos de cette actualité</h2>
+                <p id="newsDescription" class="description-text">
+                    Chargement de la description...
+                </p>
+            </div>
+        </section>
+
+        <section id="linkedCoursesSection" class="linked-courses-section" style="display: none;">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Formations concernées</h2>
+                    <p>Découvrez les cours présentés dans cette vidéo</p>
+                </div>
+                <div id="coursesGrid" class="grid-courses">
+                    <!-- Linked courses injected here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2026 ENSPY Training. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="src/views/actualite-detail.js"></script>
+</body>
+
+</html>

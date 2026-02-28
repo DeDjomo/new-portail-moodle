@@ -51,12 +51,15 @@ class StudentController {
      */
     public function create($data) {
         // 1. Validation
-        $required = ['last_name', 'first_name', 'email', 'password'];
+        $required = ['last_name', 'first_name', 'email'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
                 return $this->jsonResponse(['message' => "Field '$field' is required"], 400);
             }
         }
+
+        // Default password if not provided
+        $password = $data['password'] ?? 'EnspyTraining2026';
 
         // 2. Email Uniqueness
         if ($this->studentModel->findByEmail($data['email'])) {

@@ -335,18 +335,6 @@ function setupEnrollmentLogic(course) {
         });
     }
 
-    // Password Toggle Logic
-    const toggleRegPassword = document.getElementById('toggleRegPassword');
-    const regPassword = document.getElementById('regPassword');
-    if (toggleRegPassword && regPassword) {
-        toggleRegPassword.addEventListener('click', () => {
-            const type = regPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            regPassword.setAttribute('type', type);
-            toggleRegPassword.classList.toggle('fa-eye');
-            toggleRegPassword.classList.toggle('fa-eye-slash');
-        });
-    }
-
     // 4. Enrollment Submit Logic
     if (enrollForm) {
         enrollForm.addEventListener('submit', async (e) => {
@@ -410,6 +398,11 @@ function setupEnrollmentLogic(course) {
             const formData = new FormData(registerForm);
             const data = Object.fromEntries(formData.entries());
 
+            // Add default password for backend compatibility (if backend doesn't handle it)
+            if (!data.password) {
+                data.password = 'EnspyTraining2026';
+            }
+
             try {
                 // Step A: Register
                 await AuthService.register(data);
@@ -421,13 +414,12 @@ function setupEnrollmentLogic(course) {
                 localStorage.setItem('student_email', data.email);
 
                 closeModal('registerModal');
-                showMessage('success', 'Compte Créé & Inscrit !', 'Bienvenue sur ENSPY Training. Vérifiez vos emails.');
+                showMessage('success', 'Compte Créé & Inscrit !', 'Bienvenue sur ENSPY Training. Vous pouvez maintenant accéder à vos cours.');
 
                 updateEnrollmentButton('PENDING', null);
 
             } catch (error) {
                 console.error(error);
-                // Don't close modal on error so user can fix inputs
                 alert(error.message || "Erreur lors de l'enregistrement");
             } finally {
                 btn.disabled = false;

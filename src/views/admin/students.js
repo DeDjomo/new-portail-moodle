@@ -1,6 +1,6 @@
 import EnrollmentService from '../../services/enrollmentService.js';
 import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, showDangerConfirm, setupLogout } from '../../utils/ui.js';
+import { showToast, showCustomConfirm, showDangerConfirm, setupLogout, showProgressModal } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 import StudentService from '../../services/studentService.js';
 
@@ -37,14 +37,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const headers = ["Nom", "Prénom", "Email", "Cours", "Date Inscription", "Statut"];
+        const headers = ["lastname", "firstname", "email", "password", "course"];
         const rows = data.map(item => [
             item.last_name,
             item.first_name,
             item.email,
-            item.course_title,
-            item.enrolled_at,
-            item.status
+            "studentpassword",
+            item.course_title
         ]);
 
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
@@ -339,57 +338,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 3000);
     }
 
-    // Helper: Progress Modal
-    function showProgressModal(title, initialMessage) {
-        const modalOverlay = document.createElement('div');
-        modalOverlay.id = 'progressModal';
-        modalOverlay.style.position = 'fixed';
-        modalOverlay.style.top = '0';
-        modalOverlay.style.left = '0';
-        modalOverlay.style.width = '100%';
-        modalOverlay.style.height = '100%';
-        modalOverlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        modalOverlay.style.display = 'flex';
-        modalOverlay.style.alignItems = 'center';
-        modalOverlay.style.justifyContent = 'center';
-        modalOverlay.style.zIndex = '10000';
-        modalOverlay.style.backdropFilter = 'blur(4px)';
-
-        const modalContent = document.createElement('div');
-        modalContent.style.background = 'white';
-        modalContent.style.padding = '2rem';
-        modalContent.style.borderRadius = '16px';
-        modalContent.style.width = '90%';
-        modalContent.style.maxWidth = '400px';
-        modalContent.style.textAlign = 'center';
-        modalContent.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.25)';
-
-        modalContent.innerHTML = `
-            <div style="margin-bottom:1.5rem;">
-                <h3 style="color:#111827; font-size:1.25rem; margin-bottom:0.5rem; font-weight:600;">${title}</h3>
-                <p id="progressMessage" style="color:#6B7280; font-size:0.95rem;">${initialMessage}</p>
-            </div>
-            
-            <div style="background:#E5E7EB; border-radius:999px; height:8px; width:100%; overflow:hidden; position:relative;">
-                <div id="progressBarFill" style="background:#10B981; height:100%; width:0%; transition: width 0.3s ease-out; border-radius:999px;"></div>
-            </div>
-            <div id="progressPercent" style="text-align:right; font-size:0.8rem; color:#6B7280; margin-top:0.5rem;">0%</div>
-        `;
-
-        modalOverlay.appendChild(modalContent);
-        document.body.appendChild(modalOverlay);
-
-        // Return a function to update progress
-        return (percent, message) => {
-            const fill = document.getElementById('progressBarFill');
-            const msg = document.getElementById('progressMessage');
-            const pct = document.getElementById('progressPercent');
-
-            if (fill) fill.style.width = `${percent}%`;
-            if (msg && message) msg.textContent = message;
-            if (pct) pct.textContent = `${percent}%`;
-        };
-    }
 
     // 5. Search Logic
     const searchInput = document.getElementById('searchInput');

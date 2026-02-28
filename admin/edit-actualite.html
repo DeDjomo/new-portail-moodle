@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier l'Actualité | Administration ENSPY</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../public/images/enspy-logo.png">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-md);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            padding: 12px 16px;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .multi-select-container {
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .course-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .course-option:hover {
+            background: #F9FAFB;
+        }
+
+        .btn-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        /* File Upload & Preview Styles (From create-course.html) */
+        .file-upload-wrapper {
+            border: 2px dashed #E5E7EB;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-base);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 160px;
+        }
+
+        .file-upload-wrapper input {
+            display: none;
+        }
+
+        .preview-container {
+            margin-top: 12px;
+            display: none;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #E5E7EB;
+            position: relative;
+        }
+
+        .preview-container img,
+        .preview-container video {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .preview-container video {
+            background: #000;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition-base);
+        }
+
+        .media-toggle {
+            display: flex;
+            background: #F3F4F6;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6B7280;
+            background: transparent;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .media-input-group {
+            display: none;
+        }
+
+        .media-input-group.active {
+            display: block;
+        }
+
+        .url-status {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <img src="../public/images/enspy-logo.png" alt="Logo">
+            <span>ADMINISTRATION</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
+            </a>
+            <a href="courses.html" class="nav-item">
+                <i class="fas fa-book-open"></i> <span>Mes Cours</span>
+            </a>
+            <a href="students.html" class="nav-item">
+                <i class="fas fa-users"></i> <span>Étudiants</span>
+            </a>
+            <a href="statistics.html" class="nav-item">
+                <i class="fas fa-chart-pie"></i> <span>Statistiques</span>
+            </a>
+            <a href="actualites.html" class="nav-item active">
+                <i class="fas fa-newspaper"></i> <span>Actualités</span>
+            </a>
+            <a href="settings.html" class="nav-item">
+                <i class="fas fa-cog"></i> <span>Paramètres</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="greeting">
+                <h1>Modifier l'Actualité</h1>
+                <p>Mettez à jour les informations de votre actualité.</p>
+            </div>
+        </header>
+
+        <div class="form-container">
+            <form id="newsForm">
+                <div class="form-group">
+                    <label for="title">Titre de l'actualité *</label>
+                    <input type="text" id="title" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description (Optionnel)</label>
+                    <textarea id="description" class="form-control" style="min-height: 100px;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Image de couverture (Poster)</label>
+                    <div class="media-toggle" data-for="image">
+                        <button type="button" class="toggle-btn active" data-type="local">Fichier local</button>
+                        <button type="button" class="toggle-btn" data-type="url">URL externe</button>
+                    </div>
+
+                    <div id="imageLocalGroup" class="media-input-group active">
+                        <label class="file-upload-wrapper" for="image">
+                            <i class="fas fa-image" style="font-size: 2rem; color: #D1D5DB; margin-bottom: 1rem;"></i>
+                            <p id="imageName">Cliquer pour choisir une image</p>
+                            <input type="file" id="image" accept="image/*">
+                        </label>
+                    </div>
+
+                    <div id="imageUrlGroup" class="media-input-group">
+                        <input type="url" id="image_url_input" class="form-control"
+                            placeholder="https://exemple.com/image.jpg">
+                        <small class="url-status" id="imageUrlStatus"></small>
+                    </div>
+
+                    <div id="imagePreview" class="preview-container">
+                        <img src="" alt="Preview">
+                        <button type="button" class="preview-remove" id="btnRemoveImage"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Vidéo de l'actualité *</label>
+                    <div class="media-toggle" data-for="video">
+                        <button type="button" class="toggle-btn active" data-type="local">Fichier local</button>
+                        <button type="button" class="toggle-btn" data-type="url">URL externe</button>
+                    </div>
+
+                    <div id="videoLocalGroup" class="media-input-group active">
+                        <label class="file-upload-wrapper" for="video">
+                            <i class="fas fa-video" style="font-size: 2rem; color: #D1D5DB; margin-bottom: 1rem;"></i>
+                            <p id="videoName">Cliquer pour choisir une vidéo</p>
+                            <input type="file" id="video" accept="video/*">
+                        </label>
+                    </div>
+
+                    <div id="videoUrlGroup" class="media-input-group">
+                        <input type="url" id="video_url_input" class="form-control"
+                            placeholder="https://exemple.com/video.mp4">
+                        <small class="url-status" id="videoUrlStatus"></small>
+                    </div>
+
+                    <div id="videoPreview" class="preview-container">
+                        <video controls></video>
+                        <button type="button" class="preview-remove" id="btnRemoveVideo"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Associer à des cours</label>
+                    <div id="coursesList" class="multi-select-container">
+                        <div style="padding: 10px; color: #9CA3AF;">Chargement des cours...</div>
+                    </div>
+                </div>
+
+                <div class="btn-actions">
+                    <a href="actualites.html" class="btn-secondary"
+                        style="padding: 12px 24px; text-decoration: none; border: 1px solid #ddd; border-radius: 12px; color: #666;">Annuler</a>
+                    <button type="submit" class="btn-primary"
+                        style="padding: 12px 32px; border-radius: 12px; border: none; font-weight: 700;">Enregistrer les
+                        modifications</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script type="module" src="../src/views/admin/edit-actualite.js"></script>
+</body>
+
+</html>

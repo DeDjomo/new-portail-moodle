@@ -32,6 +32,7 @@ require_once __DIR__ . '/../src/Controllers/CategoryController.php';
 require_once __DIR__ . '/../src/Controllers/CourseController.php';
 require_once __DIR__ . '/../src/Controllers/StudentController.php';
 require_once __DIR__ . '/../src/Controllers/EnrollmentController.php';
+require_once __DIR__ . '/../src/Controllers/ActualiteController.php';
 
 use Controllers\AdminController;
 use Controllers\InstructorController;
@@ -39,6 +40,7 @@ use Controllers\CategoryController;
 use Controllers\CourseController;
 use Controllers\StudentController;
 use Controllers\EnrollmentController;
+use Controllers\ActualiteController;
 
 $database = new Database();
 $db = $database->getConnection();
@@ -75,55 +77,95 @@ if ($method === 'POST' || $method === 'PUT') {
     
     if (strpos($content_type, 'application/json') !== false) {
         $input_data = json_decode(file_get_contents("php://input"), true) ?? [];
-    } elseif ($method === 'PUT' && strpos($content_type, 'multipart/form-data') !== false) {
-        // PHP does NOT auto-parse multipart for PUT requests — we must do it manually
-        // Parse boundary from Content-Type header
-        preg_match('/boundary=(.+)$/', $content_type, $matches);
-        $boundary = $matches[1] ?? '';
-        
-        if ($boundary) {
-            $rawBody = file_get_contents("php://input");
-            $parts = array_slice(explode('--' . $boundary, $rawBody), 1);
+    } elseif (strpos($content_type, 'multipart/form-data') !== false) {
+        // For POST, PHP auto-populates $_POST and $_FILES
+        // For PUT, we must parse manually
+        if ($method === 'POST') {
+            $input_data = $_POST;
+            // Fallback: if $_POST is empty (some server configs), parse manually
+            if (empty($input_data)) {
+                $input_data = [];
+                preg_match('/boundary=(.+)$/', $content_type, $matches);
+                $boundary = $matches[1] ?? '';
+                if ($boundary) {
+                    $rawBody = file_get_contents("php://input");
+                    $parts = array_slice(explode('--' . $boundary, $rawBody), 1);
+                    foreach ($parts as $part) {
+                        if (trim($part) === '--' || trim($part) === '') continue;
+                        list($headerBlock, $body) = explode("\r\n\r\n", $part, 2);
+                        $body = substr($body, 0, -2);
+                        preg_match('/name="([^"]+)"/', $headerBlock, $nameMatch);
+                        $fieldName = $nameMatch[1] ?? '';
+                        if (!$fieldName) continue;
+                        if (preg_match('/filename="([^"]*)"/', $headerBlock, $fileMatch)) {
+                            $fileName = $fileMatch[1];
+                            if (empty($fileName)) continue;
+                            preg_match('/Content-Type:\s*(.+)/i', $headerBlock, $typeMatch);
+                            $mimeType = trim($typeMatch[1] ?? 'application/octet-stream');
+                            $tmpFile = tempnam(sys_get_temp_dir(), 'post_');
+                            file_put_contents($tmpFile, $body);
+                            $_FILES[$fieldName] = [
+                                'name' => $fileName,
+                                'type' => $mimeType,
+                                'tmp_name' => $tmpFile,
+                                'error' => UPLOAD_ERR_OK,
+                                'size' => strlen($body),
+                            ];
+                        } else {
+                            $input_data[$fieldName] = $body;
+                        }
+                    }
+                }
+            }
+        } else {
+            // PUT: PHP does NOT auto-parse multipart — we must do it manually
+            preg_match('/boundary=(.+)$/', $content_type, $matches);
+            $boundary = $matches[1] ?? '';
             
-            foreach ($parts as $part) {
-                if (trim($part) === '--' || trim($part) === '') continue;
+            if ($boundary) {
+                $rawBody = file_get_contents("php://input");
+                $parts = array_slice(explode('--' . $boundary, $rawBody), 1);
                 
-                // Split headers from body
-                list($headerBlock, $body) = explode("\r\n\r\n", $part, 2);
-                $body = substr($body, 0, -2); // Remove trailing \r\n
-                
-                // Parse headers
-                preg_match('/name="([^"]+)"/', $headerBlock, $nameMatch);
-                $fieldName = $nameMatch[1] ?? '';
-                
-                if (!$fieldName) continue;
-                
-                // Check if it's a file upload
-                if (preg_match('/filename="([^"]*)"/', $headerBlock, $fileMatch)) {
-                    $fileName = $fileMatch[1];
-                    if (empty($fileName)) continue; // Empty file input
+                foreach ($parts as $part) {
+                    if (trim($part) === '--' || trim($part) === '') continue;
                     
-                    preg_match('/Content-Type:\s*(.+)/i', $headerBlock, $typeMatch);
-                    $mimeType = trim($typeMatch[1] ?? 'application/octet-stream');
+                    // Split headers from body
+                    list($headerBlock, $body) = explode("\r\n\r\n", $part, 2);
+                    $body = substr($body, 0, -2); // Remove trailing \r\n
                     
-                    // Save to temp file
-                    $tmpFile = tempnam(sys_get_temp_dir(), 'put_');
-                    file_put_contents($tmpFile, $body);
+                    // Parse headers
+                    preg_match('/name="([^"]+)"/', $headerBlock, $nameMatch);
+                    $fieldName = $nameMatch[1] ?? '';
                     
-                    $_FILES[$fieldName] = [
-                        'name' => $fileName,
-                        'type' => $mimeType,
-                        'tmp_name' => $tmpFile,
-                        'error' => UPLOAD_ERR_OK,
-                        'size' => strlen($body),
-                    ];
-                } else {
-                    $input_data[$fieldName] = $body;
+                    if (!$fieldName) continue;
+                    
+                    // Check if it's a file upload
+                    if (preg_match('/filename="([^"]*)"/', $headerBlock, $fileMatch)) {
+                        $fileName = $fileMatch[1];
+                        if (empty($fileName)) continue; // Empty file input
+                        
+                        preg_match('/Content-Type:\s*(.+)/i', $headerBlock, $typeMatch);
+                        $mimeType = trim($typeMatch[1] ?? 'application/octet-stream');
+                        
+                        // Save to temp file
+                        $tmpFile = tempnam(sys_get_temp_dir(), 'put_');
+                        file_put_contents($tmpFile, $body);
+                        
+                        $_FILES[$fieldName] = [
+                            'name' => $fileName,
+                            'type' => $mimeType,
+                            'tmp_name' => $tmpFile,
+                            'error' => UPLOAD_ERR_OK,
+                            'size' => strlen($body),
+                        ];
+                    } else {
+                        $input_data[$fieldName] = $body;
+                    }
                 }
             }
         }
     } else {
-        // Standard POST: $_POST is auto-populated
+        // Standard form-urlencoded POST
         $input_data = $_POST;
     }
 }
@@ -223,6 +265,19 @@ try {
                 }
             } elseif ($method === 'PUT' && isset($path_parts[1]) && $path_parts[1] === 'mark-done' && isset($path_parts[2])) {
                 $controller->exportComplete($path_parts[2]);
+            } else routeNotFound();
+            break;
+
+        case 'actualites':
+            $controller = new ActualiteController($db);
+            if ($method === 'POST') $controller->create($input_data);
+            elseif ($method === 'GET') {
+                if ($id) $controller->show($id);
+                else $controller->index();
+            } elseif ($method === 'DELETE' && $id) {
+                $controller->delete($id);
+            } elseif ($method === 'PUT' && $id) {
+                $controller->update($id, $input_data);
             } else routeNotFound();
             break;
 

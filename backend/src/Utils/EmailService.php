@@ -38,8 +38,12 @@ class EmailService {
         ];
 
         try {
-            $socket = fsockopen($this->host, $this->port, $errno, $errstr, 15);
+            // Reduced timeout from 15s to 5s for faster error detection
+            $socket = fsockopen($this->host, $this->port, $errno, $errstr, 5);
             if (!$socket) throw new \Exception("Socket error: $errstr ($errno)");
+
+            // Set read timeout to 3 seconds
+            stream_set_timeout($socket, 3);
 
             $this->getResponse($socket);
 
@@ -80,7 +84,7 @@ class EmailService {
 
             return true;
         } catch (\Exception $e) {
-            error_log("Email sending failed: " . $e->getMessage());
+            error_log("Email sending failed (To: $to): " . $e->getMessage());
             return false;
         }
     }
@@ -89,7 +93,12 @@ class EmailService {
         $response = "";
         while ($str = fgets($socket, 515)) {
             $response .= $str;
-            if (isset($str[3]) && $str[3] == " ") break;
+            // SMTP multiline response check: 3 digits followed by a space means end of response
+            if (preg_match("/^[0-9]{3} /", $str)) break;
+            
+            // Safety break if socket times out
+            $info = stream_get_meta_data($socket);
+            if ($info['timed_out']) break;
         }
         return $response;
     }

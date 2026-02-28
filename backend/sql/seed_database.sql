@@ -18,7 +18,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 1. ADMINISTRATORS
 INSERT INTO administrators (last_name, first_name, email, password_hash, type, status) VALUES
 ('Atangana', 'Roger', 'atangana.roger@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'SUPER_ADMIN', 'ACTIVE'),
-('Kamdem', 'Sylvain', 'kamdem.sylvain@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'STANDARD_ADMIN', 'ACTIVE'),
+('Kamdem', 'Sylvain', 'kamdem.sylvain@portal.com', '$2y$12$DrWktUsc5WJVedEK6gl7tu9KVwigQg546RstyD3TA7nnEXWJ0xg5a', 'STANDARD_ADMIN', 'ACTIVE'),
 ('Ewane', 'Thérèse', 'ewane.therese@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'STANDARD_ADMIN', 'SUSPENDED'),
 ('Ndjomo', 'Patrick', 'ndjomo.patrick@portal.com', '$2y$10$p.1Q9fqtJH9p2KKKWl7p..pCguyJcbG.Wzplc8IbxLFhaNquUZEA.', 'STANDARD_ADMIN', 'ACTIVE');
 

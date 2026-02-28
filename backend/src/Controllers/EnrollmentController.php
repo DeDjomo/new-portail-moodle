@@ -78,13 +78,16 @@ class EnrollmentController {
             // 6. Post-enrollment actions
             $this->courseModel->incrementEnrollmentCount($courseId);
             
-            // 7. Notification (Admin + Student)
-            $this->notifyParties($student, $course);
-
-            return $this->jsonResponse([
+            // 7. SEND RESPONSE FIRST (to free up the student's browser)
+            $this->jsonResponse([
                 'message' => 'Enrollment successful. Confirmation email sent.',
                 'status' => 'PENDING'
-            ], 201);
+            ], 201, true); // True = finish request
+
+            // 8. Notification (Admin + Student) - Happens in background
+            $this->notifyParties($student, $course);
+
+            return null; // Logic finished
         }
 
         return $this->jsonResponse(['message' => 'Failed to process enrollment'], 500);
@@ -207,11 +210,38 @@ class EnrollmentController {
 
     /**
      * Helper for JSON responses
+     * @param mixed $data
+     * @param int $status
+     * @param bool $finish_request Whether to disconnect the client and continue execution
      */
-    private function jsonResponse($data, $status = 200) {
-        http_response_code($status);
-        header('Content-Type: application/json');
-        echo json_encode($data);
+    private function jsonResponse($data, $status = 200, $finish_request = false) {
+        if (!headers_sent()) {
+            http_response_code($status);
+            header('Content-Type: application/json');
+        }
+
+        $response = json_encode($data);
+        
+        if ($finish_request) {
+            header('Connection: close');
+            header('Content-Length: ' . strlen($response));
+            echo $response;
+            
+            // Flush all output to client
+            if (ob_get_level() > 0) ob_end_flush();
+            flush();
+            
+            // Close session if it exists to allow next requests
+            if (session_id()) session_write_close();
+
+            // Finish the FastCGI request if possible
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+        } else {
+            echo $response;
+        }
+        
         return $data;
     }
 }

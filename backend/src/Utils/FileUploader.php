@@ -8,7 +8,7 @@ class FileUploader {
         'image/jpeg', 'image/png', 'image/webp',
         'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo'
     ];
-    private $maxSize = 104857600; // 100MB
+    private $maxSize = 524288000; // 500MB
 
     public function __construct($targetSubDir) {
         $this->targetDir = __DIR__ . '/../../public/uploads/' . \trim($targetSubDir, '/') . '/';

@@ -1,44 +1,58 @@
-/**
- * Base API Service for handles all fetch requests to the backend.
- */
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8000'
+    : 'https://portal.enspy.training/backend/public';
 
-const BASE_URL = 'http://portal.enspy.training/backend/public';
-
-const apiRequest = async (endpoint, method = 'GET', data = null, isMultipart = false) => {
+const apiRequest = async (endpoint, method = 'GET', data = null, isMultipart = false, onProgress = null) => {
     const url = `${BASE_URL}/${endpoint}`;
 
-    const options = {
-        method,
-        headers: {},
-    };
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
 
-    if (data) {
-        if (isMultipart) {
-            // FormData will automatically set the correct Content-Type with boundary
-            options.body = data;
-        } else {
-            options.headers['Content-Type'] = 'application/json';
-            options.body = JSON.stringify(data);
+        // Progress Handler
+        if (onProgress && xhr.upload) {
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    onProgress({
+                        percent: Math.round(percentComplete),
+                        loaded: e.loaded,
+                        total: e.total,
+                        loadedMB: (e.loaded / (1024 * 1024)).toFixed(2),
+                        totalMB: (e.total / (1024 * 1024)).toFixed(2)
+                    });
+                }
+            };
         }
-    }
 
-    try {
-        const response = await fetch(url, options);
-        const result = await response.json();
-
-        if (!response.ok) {
-            let errorMsg = result.message || response.statusText;
-            if (result.error) {
-                errorMsg += " (Debug: " + result.error + ")";
+        xhr.onload = () => {
+            try {
+                const result = JSON.parse(xhr.responseText);
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(result);
+                } else {
+                    let errorMsg = result.message || xhr.statusText;
+                    if (result.error) {
+                        errorMsg += " (Debug: " + result.error + ")";
+                    }
+                    reject(new Error(errorMsg));
+                }
+            } catch (e) {
+                reject(new Error(`Failed to parse response: ${xhr.statusText}`));
             }
-            throw new Error(errorMsg);
-        }
+        };
 
-        return result;
-    } catch (error) {
-        console.error(`API Error (${endpoint}):`, error);
-        throw error;
-    }
+        xhr.onerror = () => reject(new Error('Network error or server unreachable'));
+
+        // Headers
+        if (!isMultipart) {
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(data ? JSON.stringify(data) : null);
+        } else {
+            // FormData sets its own boundary
+            xhr.send(data);
+        }
+    });
 };
 
 const resolveAssetPath = (path) => {

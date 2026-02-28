@@ -15,9 +15,12 @@ const CourseService = {
 
     getById: (id) => apiRequest(`courses/${id}`),
 
-    update: (id, courseData) => {
-        const isMultipart = courseData instanceof FormData;
-        return apiRequest(`courses/${id}`, 'PUT', courseData, isMultipart);
+    create: async (courseData, onProgress = null) => {
+        return await apiRequest('courses', 'POST', courseData, true, onProgress);
+    },
+
+    update: async (id, courseData, onProgress = null) => {
+        return await apiRequest(`courses/${id}`, 'POST', courseData, true, onProgress); // Using POST with _method emulation or just POST if backend handles it
     },
 
     delete: (id) => apiRequest(`courses/${id}`, 'DELETE')

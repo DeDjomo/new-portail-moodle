@@ -137,52 +137,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Nom(s)</label>
-                        <input type="text" name="last_name" class="form-input" required>
+                        <input type="text" name="last_name" class="form-input" required placeholder="Votre nom">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Prénom(s)</label>
-                        <input type="text" name="first_name" class="form-input" required>
+                        <input type="text" name="first_name" class="form-input" required placeholder="Votre prénom">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" id="regEmail" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Mot de passe</label>
-                    <div style="position: relative;">
-                        <input type="password" name="password" id="regPassword" class="form-input" required
-                            minlength="6" style="padding-right: 40px;">
-                        <i class="fas fa-eye" id="toggleRegPassword"
-                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #9CA3AF;"></i>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Filière</label>
-                        <select name="major" class="form-input" required>
-                            <option value="" disabled selected>Choisir une filière...</option>
-                            <option value="Génie Informatique (GI)">Génie Informatique (GI)</option>
-                            <option value="Génie Civil (GC)">Génie Civil (GC)</option>
-                            <option value="Génie Électrique (GE)">Génie Électrique (GE)</option>
-                            <option value="Génie Mécanique (GM)">Génie Mécanique (GM)</option>
-                            <option value="Génie Télécommunications (GT)">Génie Télécommunications (GT)</option>
-                            <option value="Génie Industriel (GInd)">Génie Industriel (GInd)</option>
-                            <option value="Arts Numériques (AN)">Arts Numériques (AN)</option>
-                            <option value="Humanités Numériques (HN)">Humanités Numériques (HN)</option>
-                            <option value="Sciences de l'Ingénieur (MSP)">Sciences de l'Ingénieur (MSP)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Niveau</label>
-                        <select name="level" class="form-input">
-                            <option value="Licence 1">Licence 1</option>
-                            <option value="Licence 2">Licence 2</option>
-                            <option value="Licence 3">Licence 3</option>
-                            <option value="Master 1">Master 1</option>
-                            <option value="Master 2">Master 2</option>
-                        </select>
-                    </div>
+                    <label class="form-label">Email Universitaire</label>
+                    <input type="email" name="email" id="regEmail" class="form-input" required
+                        placeholder="ex: nom.prenom@enspy.cm">
                 </div>
                 <button type="submit" class="btn-submit">S'inscrire et rejoindre le cours</button>
             </form>

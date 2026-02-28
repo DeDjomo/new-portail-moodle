@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualités | ENSPY TRAINING</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .news-carousel-section {
+            position: relative;
+            height: calc(100vh - 80px);
+            /* Adjust for navbar */
+            min-height: 500px;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .news-carousel-inner {
+            display: flex;
+            height: 100%;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        .news-slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: pointer;
+            background: #000;
+        }
+
+        .slide-video,
+        .slide-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .slide-image {
+            background-size: cover;
+            background-position: center;
+        }
+
+        .news-slide-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: 2;
+        }
+
+        .news-slide-content {
+            position: relative;
+            z-index: 5;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #fff;
+            padding: 0 5%;
+        }
+
+        .news-tag {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            align-self: flex-start;
+            text-transform: uppercase;
+        }
+
+        .news-title {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        .news-desc {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .news-play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: #fff;
+            color: #000;
+            padding: 1.25rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            align-self: flex-start;
+        }
+
+        .news-play-btn:hover {
+            transform: scale(1.05);
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* Dots */
+        .news-dots {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .news-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .news-dot.active {
+            background: var(--primary);
+            transform: scale(1.3);
+        }
+
+        @media (max-width: 768px) {
+            .news-title {
+                font-size: 2.5rem;
+            }
+
+            .news-desc {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="brand">
+                <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
+                <span class="brand-name">ENSPY <span class="brand-highlight">TRAINING</span></span>
+            </a>
+
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Accueil</a></li>
+                <li><a href="catalog.html" class="nav-link">Cours</a></li>
+                <li><a href="actualites.html" class="nav-link active">Actualités</a></li>
+                <li><a href="about.html" class="nav-link">À propos</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- News Carousel Section -->
+    <section class="news-carousel-section">
+        <div class="news-carousel-inner" id="newsCarouselInner">
+            <!-- Dynamic slides injected here -->
+        </div>
+
+        <div class="news-dots" id="newsDots">
+            <!-- Dynamic dots injected here -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom" style="border: none;">
+                <p>© 2026 ENSPY Training. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="src/views/actualites.js"></script>
+</body>
+
+</html>

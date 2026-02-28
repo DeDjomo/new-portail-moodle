@@ -1,0 +1,27 @@
+Field	Type	Null	Key	Default	Extra
+id	bigint	NO	PRI	NULL	auto_increment
+administrator_id	bigint	NO	MUL	NULL	
+category_id	bigint	YES	MUL	NULL	
+title	varchar(255)	NO		NULL	
+slug	varchar(255)	NO	UNI	NULL	
+short_synopsis	text	YES		NULL	
+full_description	text	YES		NULL	
+pedagogical_objectives	json	YES		NULL	
+target_audience	json	YES		NULL	
+prerequis	text	YES		NULL	
+prerequisites	json	YES		NULL	
+total_duration_minutes	int	YES		NULL	
+level	enum('BEGINNER','INTERMEDIATE','ADVANCED')	YES		NULL	
+language	enum('FR','EN')	YES		NULL	
+format	enum('VIDEO','TEXT','MIXED')	YES		NULL	
+is_certifying	tinyint(1)	YES		0	
+status	enum('DRAFT','PUBLISHED','ARCHIVED','DELETED')	YES		DRAFT	
+published_at	datetime	YES		NULL	
+meta_title	varchar(255)	YES		NULL	
+meta_description	text	YES		NULL	
+enrolled_count	int	YES		0	
+image_url	varchar(255)	YES		NULL	
+video_url	varchar(255)	YES		NULL	
+moodle_url	varchar(255)	YES		NULL	
+created_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED
+updated_at	timestamp	YES		CURRENT_TIMESTAMP	DEFAULT_GENERATED on update CURRENT_TIMESTAMP
