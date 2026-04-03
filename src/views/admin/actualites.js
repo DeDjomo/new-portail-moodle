@@ -12,8 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Logout Logic
     setupLogout();
 
-    // 3. Load News (filtered by admin)
-    loadNews(user.id);
+    // 3. Load News (filtered by admin, unless superadmin)
+    const loadId = user.type === 'SUPER_ADMIN' ? null : user.id;
+    loadNews(loadId);
 
     // Search
     document.getElementById('searchInput').addEventListener('input', (e) => {
@@ -67,19 +68,20 @@ function renderNews(news) {
     `).join('');
 }
 
-// Global for inline onclick
 window.confirmDeleteNews = (id, title) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const admin = JSON.parse(localStorage.getItem('admin'));
     showDangerConfirm(
         'Supprimer l\'actualité',
         `Êtes-vous sûr de vouloir supprimer l'actualité "<strong>${title}</strong>" ? Cette action est irréversible.`,
-        title,
+        'supprimer',
         async () => {
             try {
                 await ActualiteService.delete(id);
                 showToast('Actualité supprimée avec succès');
-                loadNews(user.id);
+                const loadId = admin.type === 'SUPER_ADMIN' ? null : admin.id;
+                loadNews(loadId);
             } catch (error) {
+                console.error('Delete error:', error);
                 showToast('Erreur lors de la suppression', 'error');
             }
         }

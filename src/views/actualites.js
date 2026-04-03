@@ -3,6 +3,8 @@ import { resolveAssetPath } from '../services/api.js';
 
 let currentSlide = 0;
 let newsData = [];
+let adminMode = false;
+let currentDeleteId = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const inner = document.getElementById('newsCarouselInner');
@@ -41,6 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error loading news:', error);
         if (loader) loader.style.display = 'none';
     }
+
+    // Initialiser les événements du modal
+    initDeleteModalEvents();
 });
 
 function renderCarousel(news) {
@@ -50,12 +55,17 @@ function renderCarousel(news) {
     // Slides
     let slidesHtml = news.map(item => createSlide(item)).join('');
 
-    // Add clones for seamless loop (optional but recommended)
+    // Add clones for seamless loop
     if (news.length > 1) {
         slidesHtml += createSlide(news[0]); // Clone first slide at the end
     }
 
     inner.innerHTML = slidesHtml;
+
+    // Ajouter les boutons de suppression si en mode admin
+    if (adminMode) {
+        addDeleteButtons();
+    }
 
     // Dots
     if (news.length > 1) {
@@ -82,18 +92,25 @@ function createSlide(item) {
         `;
     }
 
+    const adminDeleteBtn = adminMode ? `
+        <button class="delete-slide-btn" onclick="event.stopPropagation(); showDeleteModal('${item.id}', '${item.title.replace(/'/g, "\\'")}')">
+            <i class="fas fa-trash"></i>
+        </button>
+    ` : '';
+
     return `
-        <div class="news-slide" onclick="location.href='actualite-detail.html?id=${item.id}'">
+        <div class="news-slide" data-id="${item.id}" onclick="location.href='actualite-detail.html?id=${item.id}'">
             ${mediaHtml}
             <div class="news-slide-overlay"></div>
             <div class="news-slide-content container">
                 <span class="news-tag">Événement</span>
                 <h2 class="news-title">${item.title}</h2>
                 <p class="news-desc">${item.description || 'Découvrez cette actualité en exclusivité sur ENSPY Training.'}</p>
-                <a href="actualite-detail.html?id=${item.id}" class="news-play-btn">
+                <a href="actualite-detail.html?id=${item.id}" class="news-play-btn" onclick="event.stopPropagation();">
                     <i class="fas fa-play"></i> REGARDER LA VIDÉO
                 </a>
             </div>
+            ${adminDeleteBtn}
         </div>
     `;
 }
@@ -146,4 +163,151 @@ function getEmbedUrl(url) {
     match = url.match(/vimeo\.com\/(\d+)/);
     if (match) return `https://player.vimeo.com/video/${match[1]}?background=1&autoplay=1&muted=1&loop=1`;
     return null;
+}
+
+// Fonctions pour le mode admin
+function toggleAdminMode() {
+    adminMode = !adminMode;
+    renderCarousel(newsData);
+    
+    const btn = document.querySelector('.btn-secondary');
+    if (btn) {
+        btn.innerHTML = adminMode ? 
+            '<i class="fas fa-eye"></i> Quitter mode admin' : 
+            '<i class="fas fa-cog"></i> Mode admin';
+    }
+}
+
+function addDeleteButtons() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .delete-slide-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(255, 68, 68, 0.9);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            border: 2px solid white;
+        }
+        
+        .delete-slide-btn:hover {
+            background: #ff4444;
+            transform: scale(1.1);
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Fonctions pour le modal de suppression
+function initDeleteModalEvents() {
+    const input = document.getElementById('deleteValidationInput');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const message = document.getElementById('deleteValidationMessage');
+
+    if (input) {
+        input.addEventListener('input', function() {
+            const isValid = this.value.toLowerCase() === 'supprimer';
+            
+            if (isValid) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.add('active');
+                message.textContent = '✓ Vous pouvez maintenant supprimer';
+                message.classList.add('success');
+                this.classList.remove('error');
+            } else {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.remove('active');
+                message.textContent = 'Veuillez saisir "supprimer" pour confirmer';
+                message.classList.remove('success');
+                
+                if (this.value.length > 0) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+            }
+        });
+
+        // Permettre la suppression avec Entrée
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !confirmBtn.disabled) {
+                confirmDelete();
+            }
+        });
+    }
+}
+
+// Fonction globale pour afficher le modal
+window.showDeleteModal = function(id, title) {
+    currentDeleteId = id;
+    document.getElementById('deleteActualiteTitle').textContent = title;
+    document.getElementById('deleteValidationInput').value = '';
+    document.getElementById('deleteValidationInput').classList.remove('error');
+    document.getElementById('confirmDeleteBtn').disabled = true;
+    document.getElementById('confirmDeleteBtn').classList.remove('active');
+    document.getElementById('deleteValidationMessage').textContent = 'Veuillez saisir "supprimer" pour confirmer';
+    document.getElementById('deleteValidationMessage').classList.remove('success');
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+// Fonction globale pour fermer le modal
+window.closeDeleteModal = function() {
+    document.getElementById('deleteModal').style.display = 'none';
+    currentDeleteId = null;
+}
+
+// Fonction globale pour confirmer la suppression
+window.confirmDelete = async function() {
+    const input = document.getElementById('deleteValidationInput');
+    
+    if (input.value.toLowerCase() === 'supprimer' && currentDeleteId) {
+        try {
+            // Afficher un loader
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = confirmBtn.innerHTML;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+            confirmBtn.disabled = true;
+            
+            await ActualiteService.delete(currentDeleteId);
+            
+            // Fermer le modal
+            closeDeleteModal();
+            
+            // Recharger les données
+            const response = await ActualiteService.getAll();
+            newsData = response.data || response || [];
+            renderCarousel(newsData);
+            
+            // Message de succès (optionnel)
+            alert('Actualité supprimée avec succès !');
+            
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            alert('Erreur lors de la suppression. Veuillez réessayer.');
+            
+            // Restaurer le bouton
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+            confirmBtn.disabled = false;
+        }
+    }
+}
+
+// Fermer le modal si on clique en dehors
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        closeDeleteModal();
+    }
 }

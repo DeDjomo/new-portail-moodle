@@ -558,8 +558,8 @@ export const showProgressModal = (title, initialMessage) => {
 
     modalContent.innerHTML = `
         <div style="margin-bottom:1.5rem;">
-            <h3 style="color:#111827; font-size:1.25rem; margin-bottom:0.5rem; font-weight:600;">\${title}</h3>
-            <p id="progressMessage" style="color:#6B7280; font-size:0.95rem;">\${initialMessage}</p>
+            <h3 style="color:#111827; font-size:1.25rem; margin-bottom:0.5rem; font-weight:600;">${title}</h3>
+            <p id="progressMessage" style="color:#6B7280; font-size:0.95rem;">${initialMessage}</p>
         </div>
         
         <div style="background:#E5E7EB; border-radius:999px; height:8px; width:100%; overflow:hidden; position:relative;">
@@ -577,8 +577,8 @@ export const showProgressModal = (title, initialMessage) => {
         const msg = document.getElementById('progressMessage');
         const pct = document.getElementById('progressPercent');
 
-        if (fill) fill.style.width = `\${percent}%`;
+        if (fill) fill.style.width = `${percent}%`;
         if (msg && message) msg.textContent = message;
-        if (pct) pct.textContent = `\${percent}%`;
+        if (pct) pct.textContent = `${percent}%`;
     };
 };

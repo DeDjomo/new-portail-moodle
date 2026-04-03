@@ -1,5 +1,5 @@
-import { resolveAssetPath } from '../../services/api.js';
-import { showToast, showCustomConfirm, setupLogout } from '../../utils/ui.js';
+import apiRequest, { resolveAssetPath } from '../../services/api.js';
+import { showToast, showCustomConfirm, showDangerConfirm, showWarningConfirm, setupLogout } from '../../utils/ui.js';
 import { requireAuth } from '../../utils/auth-guard.js';
 import CourseService from '../../services/courseService.js';
 
@@ -91,12 +91,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="font-weight: 600;">${course.enrolled_count || 0}</td>
                 <td><span class="badge ${statusClass}">${statusLabel}</span></td>
                 <td>
-                    <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier" style="background:#DBEAFE; color:#2563EB;">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                    <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir" style="background:#EDE9FE; color:#7C3AED;">
-                        <i class="fas fa-eye"></i>
-                    </a>
+                    <div style="display:flex; gap:8px;">
+                        <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier" style="background:#DBEAFE; color:#2563EB;">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir" style="background:#EDE9FE; color:#7C3AED;">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        ${course.status !== 'ARCHIVED' ? `
+                        <button class="action-btn" title="Archiver" data-archive="${course.id}" style="background:#FEF3C7; color:#D97706; cursor:pointer; border:none; border-radius:8px; width:34px; height:34px;">
+                            <i class="fas fa-archive"></i>
+                        </button>` : ''}
+                        <button class="action-btn" title="Supprimer" data-delete="${course.id}" style="background:#FEE2E2; color:#DC2626; cursor:pointer; border:none; border-radius:8px; width:34px; height:34px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -140,19 +149,92 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="card-stats">
                             <span><i class="fas fa-user-graduate"></i> ${course.enrolled_count || 0}</span>
                         </div>
-                        <div class="card-actions">
+                        <div class="card-actions" style="display:flex; gap:8px;">
                             <a href="edit-course.html?id=${course.id}" class="action-btn" title="Modifier" style="background:#DBEAFE; color:#2563EB;">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <a href="../../course-details.html?id=${course.id}" target="_blank" class="action-btn" title="Voir" style="background:#EDE9FE; color:#7C3AED;">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            ${course.status !== 'ARCHIVED' ? `
+                            <button class="action-btn" title="Archiver" data-archive="${course.id}" style="background:#FEF3C7; color:#D97706; cursor:pointer; border:none; border-radius:8px; width:34px; height:34px;">
+                                <i class="fas fa-archive"></i>
+                            </button>` : ''}
+                            <button class="action-btn" title="Supprimer" data-delete="${course.id}" style="background:#FEE2E2; color:#DC2626; cursor:pointer; border:none; border-radius:8px; width:34px; height:34px;">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
             gridContainer.appendChild(card);
         });
+
+        attachActionListeners();
+    }
+
+    function attachActionListeners() {
+        // Archive
+        document.querySelectorAll('[data-archive]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                archiveCourse(btn.dataset.archive);
+            });
+        });
+
+        // Delete
+        document.querySelectorAll('[data-delete]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                deleteCourse(btn.dataset.delete);
+            });
+        });
+    }
+
+    async function archiveCourse(id) {
+        showWarningConfirm(
+            'Archiver ce cours ?',
+            'Le cours sera masqué du catalogue mais conservé dans vos archives.',
+            'Archiver',
+            async () => {
+                try {
+                    await apiRequest(`courses/${id}`, 'PUT', { status: 'ARCHIVED' });
+                    showToast('Cours archivé.', 'success');
+                    // Refresh data
+                    const response = await CourseService.getByAdmin(admin.id);
+                    allCoursesData = Array.isArray(response) ? response : (response.data || []);
+                    allCoursesData.sort((a, b) => b.id - a.id);
+                    renderTable(allCoursesData);
+                    renderGrid(allCoursesData);
+                } catch (error) {
+                    console.error(error);
+                    showToast(error.message || 'Échec de l\'archivage.', 'error');
+                }
+            }
+        );
+    }
+
+    async function deleteCourse(id) {
+        showDangerConfirm(
+            'Supprimer ce cours ?',
+            'Cette action est irréversible. Toutes les données associées seront supprimées.',
+            'Supprimer',
+            async () => {
+                try {
+                    await CourseService.delete(id);
+                    showToast('Cours supprimé.', 'success');
+                    // Refresh data
+                    const response = await CourseService.getByAdmin(admin.id);
+                    allCoursesData = Array.isArray(response) ? response : (response.data || []);
+                    allCoursesData.sort((a, b) => b.id - a.id);
+                    renderTable(allCoursesData);
+                    renderGrid(allCoursesData);
+                } catch (error) {
+                    console.error(error);
+                    showToast(error.message || 'Échec de la suppression.', 'error');
+                }
+            }
+        );
     }
 
     // 5. Search Logic

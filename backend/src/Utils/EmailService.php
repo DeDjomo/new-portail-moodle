@@ -19,7 +19,34 @@ class EmailService {
     /**
      * Send a formatted HTML email
      */
-    public function send($to, $subject, $body) {
+    public function send($to, $subject, $body, $attachment = null) {
+        $boundary = md5(uniqid(time()));
+
+        if ($attachment) {
+            $headers = "Subject: {$subject}\r\n" .
+                "To: {$to}\r\n" .
+                "From: {$this->fromName} <{$this->username}>\r\n" .
+                "MIME-Version: 1.0\r\n" .
+                "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n\r\n";
+
+            $message = "--{$boundary}\r\n" .
+                "Content-Type: text/html; charset=UTF-8\r\n\r\n" .
+                $body . "\r\n\r\n" .
+                "--{$boundary}\r\n" .
+                "Content-Type: text/csv; name=\"{$attachment['name']}\"\r\n" .
+                "Content-Disposition: attachment; filename=\"{$attachment['name']}\"\r\n" .
+                "Content-Transfer-Encoding: base64\r\n\r\n" .
+                $attachment['data'] . "\r\n\r\n" .
+                "--{$boundary}--";
+        } else {
+            $headers = "Subject: {$subject}\r\n" .
+                "To: {$to}\r\n" .
+                "From: {$this->fromName} <{$this->username}>\r\n" .
+                "MIME-Version: 1.0\r\n" .
+                "Content-Type: text/html; charset=UTF-8\r\n\r\n";
+            $message = $body;
+        }
+
         $data = [
             "EHLO " . gethostname(),
             "AUTH LOGIN",
@@ -28,12 +55,7 @@ class EmailService {
             "MAIL FROM: <{$this->username}>",
             "RCPT TO: <{$to}>",
             "DATA",
-            "Subject: {$subject}\r\n" .
-            "To: {$to}\r\n" .
-            "From: {$this->fromName} <{$this->username}>\r\n" .
-            "MIME-Version: 1.0\r\n" .
-            "Content-Type: text/html; charset=UTF-8\r\n\r\n" .
-            $body . "\r\n.",
+            $headers . $message . "\r\n.",
             "QUIT"
         ];
 
@@ -176,9 +198,42 @@ class EmailService {
                 </div>
                 <p>Votre inscription est actuellement en cours de validation par l'administrateur du cours.</p>
                 <p>Vous recevrez une notification dès que votre accès sera validé.</p>
+                <p>Pensez à consulter régulièrement vos e-mails (et vos spams) dans les 2 jours qui suivent votre inscription.</p>
                 <br>
                 <p>Cordialement,<br><strong>L'équipe ENSPY Training</strong></p>
                 <hr style='border: 0; border-top: 1px solid #eee;'>
+            </div>
+        </body>
+        </html>";
+    }
+
+    public function getEnrollmentApprovedTemplate($studentName, $courseTitle, $email, $password) {
+        return "
+        <html>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
+                <h2 style='color: #10B981; text-align: center;'>🎉 Inscription Validée !</h2>
+                <hr style='border: 0; border-top: 10px solid #10B981;'>
+                <p>Bonjour <strong>{$studentName}</strong>,</p>
+                <p>Nous avons le plaisir de vous informer que votre inscription au cours suivant a été <strong style='color: #10B981;'>validée</strong> :</p>
+                <div style='background: #ECFDF5; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #10B981;'>
+                    <h3 style='margin: 0; color: #065F46;'>{$courseTitle}</h3>
+                    <p style='margin: 5px 0;'><strong>Date de validation :</strong> " . date('d/m/Y') . "</p>
+                    <p style='margin: 5px 0;'><strong>Statut :</strong> <span style='color: #10B981; font-weight: bold;'>✅ Validé</span></p>
+                </div>
+                
+                <h3 style='color: #065F46; margin-top: 30px;'>Vos identifiants de connexion Moodle</h3>
+                <div style='background: #f8fafc; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #e2e8f0;'>
+                    <p style='margin: 5px 0;'><strong>Nom d'utilisateur :</strong> {$email}</p>
+                    <p style='margin: 5px 0;'><strong>Mot de passe :</strong> <span style='background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;'>{$password}</span></p>
+                </div>
+
+                <p>Vous pouvez dès à présent accéder au contenu du cours sur la plateforme Moodle de l'ENSPY. Lors de votre première connexion, il vous sera demandé de modifier ce mot de passe par défaut pour des raisons de sécurité.</p>
+                <p>Si vous avez des questions, n'hésitez pas à contacter l'administrateur du cours.</p>
+                <br>
+                <p>Cordialement,<br><strong>L'équipe ENSPY Training</strong></p>
+                <hr style='border: 0; border-top: 1px solid #eee;'>
+                <p style='font-size: 0.8em; color: #777; text-align: center;'>Ceci est un message automatique du Portail ENSPY Training.</p>
             </div>
         </body>
         </html>";

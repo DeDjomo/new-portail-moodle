@@ -11,7 +11,10 @@ const CourseService = {
         return apiRequest(url);
     },
 
-    getByAdmin: (adminId) => apiRequest(`courses?action=getAdminCourses&admin_id=${adminId}`),
+    getByAdmin: (adminId) => {
+        if (!adminId) return CourseService.getAll();
+        return apiRequest(`courses?action=getAdminCourses&admin_id=${adminId}`);
+    },
 
     getById: (id) => apiRequest(`courses/${id}`),
 

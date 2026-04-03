@@ -37,13 +37,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const headers = ["lastname", "firstname", "email", "password", "course"];
+        const headers = ["username", "firstname", "lastname", "password", "email"];
         const rows = data.map(item => [
-            item.last_name,
+            item.email, // username
             item.first_name,
-            item.email,
+            item.last_name,
             "studentpassword",
-            item.course_title
+            item.email
         ]);
 
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <th>Email</th>
                         <th>Date d'inscription</th>
                         <th>Statut</th>
+                        <th style="text-align:center;">Notifier</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -219,6 +220,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td><a href="mailto:${item.email}" style="color:var(--primary); text-decoration:none;">${item.email}</a></td>
                     <td>${dateStr}</td>
                     <td><span class="badge ${statusClass}">${statusLabel}</span></td>
+                    <td style="text-align:center;">
+                        <button class="btn-notify-email" data-student-id="${item.student_id}" data-course-id="${item.course_id}" data-student-name="${studentName}" data-course-title="${item.course_title}" title="${item.status === 'DONE' ? 'Déjà notifié / Validé' : 'Envoyer un email de confirmation'}" style="background:none; border:1px solid ${item.status === 'DONE' ? '#D1D5DB' : '#10B981'}; color:${item.status === 'DONE' ? '#9CA3AF' : '#10B981'}; width:36px; height:36px; border-radius:50%; cursor:${item.status === 'DONE' ? 'not-allowed' : 'pointer'}; display:inline-flex; align-items:center; justify-content:center; transition:all 0.3s;" ${item.status === 'DONE' ? 'disabled' : ''}>
+                            <i class="fas ${item.status === 'DONE' ? 'fa-check' : 'fa-envelope'}"></i>
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -226,6 +232,57 @@ document.addEventListener('DOMContentLoaded', async () => {
             tableWrapper.appendChild(table);
             section.appendChild(tableWrapper);
             container.appendChild(section);
+        });
+
+        // Attach email notification handlers
+        container.querySelectorAll('.btn-notify-email').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const studentId = btn.dataset.studentId;
+                const courseId = btn.dataset.courseId;
+                const studentName = btn.dataset.studentName;
+                const courseTitle = btn.dataset.courseTitle;
+
+                // Confirm before sending using custom modal
+                showCustomConfirm(
+                    'Confirmer l\'envoi',
+                    `Voulez-vous envoyer un email de confirmation d'inscription à <strong>${studentName}</strong> pour le cours "<strong>${courseTitle}</strong>" ?`,
+                    async () => {
+                        // Show spinner
+                        const originalContent = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        btn.disabled = true;
+                        btn.style.opacity = '0.6';
+
+                        try {
+                            await EnrollmentService.sendNotification(studentId, courseId);
+                            btn.innerHTML = '<i class="fas fa-check"></i>';
+                            btn.style.borderColor = '#10B981';
+                            btn.style.color = '#10B981';
+                            showToast(`Email envoyé à ${studentName}`, 'success');
+
+                            // After 1.5 seconds, reload the page to show the updated "DONE" status
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+                        } catch (error) {
+                            console.error('Email send error:', error);
+                            btn.innerHTML = '<i class="fas fa-times"></i>';
+                            btn.style.borderColor = '#EF4444';
+                            btn.style.color = '#EF4444';
+                            showToast('Échec de l\'envoi de l\'email', 'error');
+
+                            setTimeout(() => {
+                                btn.innerHTML = originalContent;
+                                btn.disabled = false;
+                                btn.style.opacity = '1';
+                                btn.style.borderColor = '#10B981';
+                                btn.style.color = '#10B981';
+                            }, 3000);
+                        }
+                    }
+                );
+            });
         });
     }
 

@@ -12,7 +12,8 @@ const ActualiteService = {
      * Get news items by admin
      */
     getByAdmin: async (adminId) => {
-        return await apiRequest(`actualites?admin_id=${adminId}`);
+        const url = adminId ? `actualites?admin_id=${adminId}` : 'actualites';
+        return await apiRequest(url);
     },
 
     /**

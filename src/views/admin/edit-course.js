@@ -371,9 +371,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageFile = document.getElementById('image').files[0];
         const imageUrl = document.getElementById('image_url_input').value.trim();
         const hasExistingImage = document.getElementById('imagePreview').style.display === 'block';
+        const hasImage = hasExistingImage || (imageSource === 'local' && imageFile) || (imageSource === 'url' && imageUrl);
 
-        if (!hasExistingImage && ((imageSource === 'local' && !imageFile) || (imageSource === 'url' && !imageUrl))) {
-            missing.push("Image de couverture");
+        const activeVideoBtn = document.querySelector('.media-toggle[data-for="video"] .toggle-btn.active');
+        const videoSource = activeVideoBtn.dataset.type;
+        const videoFile = document.getElementById('video').files[0];
+        const videoUrl = document.getElementById('video_url_input').value.trim();
+        const hasExistingVideo = document.getElementById('videoPreview').style.display === 'block';
+        const hasVideo = hasExistingVideo || (videoSource === 'local' && videoFile) || (videoSource === 'url' && videoUrl);
+
+        if (!hasImage && !hasVideo) {
+            missing.push("Image de couverture ou Vidéo de présentation");
         }
 
         return missing;
@@ -432,8 +440,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         formData.append('status', status);
 
         // Mandatory fields
-        formData.append('administrator_id', admin.id);
-
         const instructorSelect = document.getElementById('instructor_id');
         const selectedOptions = Array.from(instructorSelect.selectedOptions).filter(opt => opt.value !== "");
         const finalInstructorIds = [];

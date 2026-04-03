@@ -6,7 +6,7 @@ class FileUploader {
     private $targetDir;
     private $allowedTypes = [
         'image/jpeg', 'image/png', 'image/webp',
-        'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo'
+        'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska', 'video/webm'
     ];
     private $maxSize = 524288000; // 500MB
 

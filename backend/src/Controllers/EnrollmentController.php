@@ -184,6 +184,50 @@ class EnrollmentController {
     }
 
     /**
+     * Send enrollment confirmation email to a student (triggered by admin)
+     */
+    public function sendEnrollmentEmail($data) {
+        $studentId = $data['student_id'] ?? null;
+        $courseId = $data['course_id'] ?? null;
+
+        if (!$studentId || !$courseId) {
+            return $this->jsonResponse(['message' => 'student_id and course_id are required'], 400);
+        }
+
+        // Fetch student
+        $student = $this->studentModel->getById($studentId);
+        if (!$student) {
+            return $this->jsonResponse(['message' => 'Student not found'], 404);
+        }
+
+        // Fetch course
+        $course = $this->courseModel->getById($courseId);
+        if (!$course) {
+            return $this->jsonResponse(['message' => 'Course not found'], 404);
+        }
+
+        $studentName = $student['first_name'] . ' ' . $student['last_name'];
+        $defaultPassword = "studentpassword"; // This matches the password generated in the CSV export (students.js line 45)
+        
+        $body = $this->emailService->getEnrollmentApprovedTemplate(
+            $studentName, 
+            $course['title'], 
+            $student['email'], 
+            $defaultPassword
+        );
+        $sent = $this->emailService->send($student['email'], "Inscription validée - " . $course['title'], $body);
+
+        if ($sent) {
+            // Update enrollment status to DONE
+            $this->enrollmentModel->updateStatus($studentId, $courseId, 'DONE');
+            
+            return $this->jsonResponse(['message' => 'Email envoyé et inscription validée avec succès'], 200);
+        } else {
+            return $this->jsonResponse(['message' => 'Échec de l\'envoi de l\'email'], 500);
+        }
+    }
+
+    /**
      * Email notification system
      */
     private function notifyParties($student, $course) {
@@ -195,9 +239,20 @@ class EnrollmentController {
             $adminName = $admin['first_name'] . ' ' . $admin['last_name'];
             $studentName = $student['first_name'] . ' ' . $student['last_name'];
             
+            // Generate CSV
+            $csvData = "username,firstname,lastname,password,email\r\n";
+            $csvData .= "\"{$student['email']}\",\"{$student['first_name']}\",\"{$student['last_name']}\",\"studentpassword\",\"{$student['email']}\"\r\n";
+            
+            $attachmentName = "inscription_" . preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($studentName)) . ".csv";
+            
+            $attachment = [
+                'name' => $attachmentName,
+                'data' => base64_encode($csvData)
+            ];
+
             // Email to Admin
             $bodyAdmin = $this->emailService->getNewEnrollmentTemplate($adminName, $studentName, $course['title']);
-            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $bodyAdmin);
+            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $bodyAdmin, $attachment);
         }
 
         // Email to Student

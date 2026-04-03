@@ -59,7 +59,7 @@ class Actualite extends BaseModel {
                   LEFT JOIN categories cat ON c.category_id = cat.id
                   LEFT JOIN course_instructors ci ON c.id = ci.course_id
                   LEFT JOIN instructors i ON ci.instructor_id = i.id
-                  WHERE ac.actualite_id = ? AND c.status = 'PUBLISHED'
+                  WHERE ac.actualite_id = ?
                   GROUP BY c.id";
         
         $stmt = $this->db->prepare($query);

@@ -370,9 +370,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageSource = activeImageBtn.dataset.type;
         const imageFile = document.getElementById('image').files[0];
         const imageUrl = document.getElementById('image_url_input').value.trim();
+        const hasImage = (imageSource === 'local' && imageFile) || (imageSource === 'url' && imageUrl);
 
-        if ((imageSource === 'local' && !imageFile) || (imageSource === 'url' && !imageUrl)) {
-            missing.push("Image de couverture");
+        const activeVideoBtn = document.querySelector('.media-toggle[data-for="video"] .toggle-btn.active');
+        const videoSource = activeVideoBtn.dataset.type;
+        const videoFile = document.getElementById('video').files[0];
+        const videoUrl = document.getElementById('video_url_input').value.trim();
+        const hasVideo = (videoSource === 'local' && videoFile) || (videoSource === 'url' && videoUrl);
+
+        if (!hasImage && !hasVideo) {
+            missing.push("Image de couverture ou Vidéo de présentation");
         }
 
         return missing;

@@ -41,6 +41,15 @@ const EnrollmentService = {
      */
     markAsDone: async (courseId) => {
         return await apiRequest(`enrollments/mark-done/${courseId}`, 'PUT');
+    },
+
+    /**
+     * Send enrollment confirmation email to a student
+     * @param {number} studentId 
+     * @param {number} courseId 
+     */
+    sendNotification: async (studentId, courseId) => {
+        return await apiRequest('enrollments/notify', 'POST', { student_id: studentId, course_id: courseId });
     }
 };
 

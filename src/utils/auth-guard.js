@@ -74,6 +74,54 @@ function updateSidebar(admin) {
         sidebarAvatar.src = resolveAssetPath(admin.avatar_url);
     }
 
+    // Adapt Sidebar for SuperAdmin if on an admin page
+    if (admin.type === 'SUPER_ADMIN') {
+        const sidebarBrand = document.querySelector('.sidebar-brand span');
+        if (sidebarBrand && sidebarBrand.textContent === 'ADMINISTRATION') {
+            sidebarBrand.textContent = 'SUPER ADMIN';
+        }
+
+        const navLinks = document.querySelector('.nav-links');
+        const isActualitePage = window.location.pathname.includes('actualite');
+
+        if (navLinks && (window.location.pathname.includes('/admin/'))) {
+            navLinks.innerHTML = `
+                <a href="../superadmin/dashboard.html" class="nav-item">
+                    <i class="fas fa-th-large"></i> <span>Tableau de bord</span>
+                </a>
+                <div style="padding: 12px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">Gestion Globale</div>
+                <a href="../superadmin/administrators.html" class="nav-item">
+                    <i class="fas fa-user-shield"></i> <span>Administrateurs</span>
+                </a>
+                <a href="../superadmin/instructors.html" class="nav-item">
+                    <i class="fas fa-chalkboard-teacher"></i> <span>Instructeurs</span>
+                </a>
+                <a href="../superadmin/categories.html" class="nav-item">
+                    <i class="fas fa-folder-open"></i> <span>Catégories</span>
+                </a>
+                <a href="../superadmin/courses.html" class="nav-item">
+                    <i class="fas fa-book-open"></i> <span>Tous les Cours</span>
+                </a>
+                <a href="actualites.html" class="nav-item ${isActualitePage ? 'active' : ''}">
+                    <i class="fas fa-newspaper"></i> <span>Actualités</span>
+                </a>
+                <div style="padding: 16px 20px 6px; font-size: 0.7rem; text-transform: uppercase; color: #6B7280; letter-spacing: 1px;">Mon Espace</div>
+                <a href="../superadmin/my-courses.html" class="nav-item">
+                    <i class="fas fa-graduation-cap"></i> <span>Mes Cours</span>
+                </a>
+                <a href="../superadmin/students.html" class="nav-item">
+                    <i class="fas fa-users"></i> <span>Étudiants</span>
+                </a>
+                <a href="../superadmin/statistics.html" class="nav-item">
+                    <i class="fas fa-chart-pie"></i> <span>Statistiques</span>
+                </a>
+                <a href="../superadmin/settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i> <span>Paramètres</span>
+                </a>
+            `;
+        }
+    }
+
     // Welcome message often found in dashboards
     const welcomeName = document.getElementById('welcomeName');
     if (welcomeName) welcomeName.textContent = admin.first_name;

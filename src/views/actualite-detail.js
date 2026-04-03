@@ -46,9 +46,15 @@ function renderNewsDetail(item) {
 
     if (item.video_url) {
         const embedUrl = getEmbedUrl(item.video_url);
+
         if (embedUrl) {
             // YouTube/Vimeo → use iframe
             videoPlayer.style.display = 'none';
+
+            // Supprimer l'ancien iframe s'il existe
+            const oldIframe = videoContainer.querySelector('iframe');
+            if (oldIframe) oldIframe.remove();
+
             const iframe = document.createElement('iframe');
             iframe.src = embedUrl;
             iframe.className = 'video-player';
@@ -58,14 +64,127 @@ function renderNewsDetail(item) {
             videoContainer.appendChild(iframe);
         } else {
             // Local file → use <video>
-            videoPlayer.src = resolveAssetPath(item.video_url);
-            videoPlayer.autoplay = true;
-            if (item.image_url) {
-                videoPlayer.poster = resolveAssetPath(item.image_url);
+            // Supprimer l'ancien iframe s'il existe
+            const oldIframe = videoContainer.querySelector('iframe');
+            if (oldIframe) oldIframe.remove();
+
+            // Résoudre le chemin complet de la vidéo
+            const videoPath = resolveAssetPath(item.video_url);
+            console.log('Video path:', videoPath);
+
+            // Vérifier si le format est supporté par le navigateur
+            const ext = item.video_url.split('.').pop().toLowerCase();
+            const supportedFormats = ['mp4', 'webm', 'ogg'];
+
+            if (supportedFormats.includes(ext)) {
+                // Format supporté → lecture normale
+                videoPlayer.style.display = 'block';
+                videoPlayer.src = videoPath;
+
+                if (item.image_url) {
+                    videoPlayer.poster = resolveAssetPath(item.image_url);
+                }
+
+                videoPlayer.load();
+
+                const playPromise = videoPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => console.log('Video playing successfully'))
+                        .catch(error => {
+                            console.log('Autoplay prevented:', error);
+                            showPlayButton(videoContainer, videoPlayer);
+                        });
+                }
+
+                // Gestion erreur de chargement
+                videoPlayer.onerror = () => {
+                    console.error('Video load error for:', videoPath);
+                    showVideoFallback(videoContainer, videoPath, item.image_url);
+                };
+            } else {
+                // Format non supporté (MKV, AVI, etc.) → afficher un message + téléchargement
+                videoPlayer.style.display = 'none';
+                showVideoFallback(videoContainer, videoPath, item.image_url);
             }
-            videoPlayer.play().catch(e => console.warn("Detail autoplay prevented:", e));
         }
+    } else {
+        // Aucune vidéo disponible
+        videoContainer.innerHTML = `
+            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f3f4f6; color:#6B7280;">
+                <i class="fas fa-video-slash" style="font-size:4rem; margin-bottom:1rem;"></i>
+                <p style="font-size:1.2rem;">Aucune vidéo disponible pour cette actualité</p>
+            </div>
+        `;
     }
+}
+
+// Fonction pour ajouter un bouton de lecture manuelle
+function showPlayButton(container, videoPlayer) {
+    const playButton = document.createElement('button');
+    playButton.innerHTML = '<i class="fas fa-play"></i> Lecture';
+    playButton.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 700;
+        cursor: pointer;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+        transition: all 0.3s;
+    `;
+
+    playButton.onmouseover = () => {
+        playButton.style.transform = 'translate(-50%, -50%) scale(1.05)';
+        playButton.style.boxShadow = '0 6px 20px rgba(255,107,53,0.4)';
+    };
+
+    playButton.onmouseout = () => {
+        playButton.style.transform = 'translate(-50%, -50%) scale(1)';
+        playButton.style.boxShadow = '0 4px 15px rgba(255,107,53,0.3)';
+    };
+
+    playButton.onclick = () => {
+        videoPlayer.play();
+        playButton.remove();
+    };
+
+    container.style.position = 'relative';
+    container.appendChild(playButton);
+}
+
+// Fallback pour les formats vidéo non supportés par le navigateur
+function showVideoFallback(container, videoPath, imageUrl) {
+    const bgImage = imageUrl ? resolveAssetPath(imageUrl) : '';
+    const bgStyle = bgImage 
+        ? `background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${bgImage}'); background-size: cover; background-position: center;`
+        : 'background: linear-gradient(135deg, #1F2937, #111827);';
+
+    container.innerHTML = `
+        <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; ${bgStyle} color:white; text-align:center; padding:2rem;">
+            <i class="fas fa-film" style="font-size:4rem; margin-bottom:1.5rem; opacity:0.8;"></i>
+            <p style="font-size:1.3rem; font-weight:700; margin-bottom:0.5rem;">Vidéo disponible</p>
+            <p style="font-size:0.95rem; opacity:0.8; margin-bottom:2rem; max-width:400px;">
+                Le format de cette vidéo n'est pas lisible directement dans le navigateur. Vous pouvez la télécharger pour la regarder avec votre lecteur vidéo.
+            </p>
+            <a href="${videoPath}" download target="_blank" 
+               style="display:inline-flex; align-items:center; gap:0.75rem; background:var(--primary, #FF6B00); color:white; text-decoration:none; padding:1rem 2rem; border-radius:50px; font-weight:700; font-size:1.1rem; box-shadow:0 4px 15px rgba(255,107,53,0.3); transition:all 0.3s;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255,107,53,0.4)'"
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255,107,53,0.3)'">
+                <i class="fas fa-download"></i> Télécharger la vidéo
+            </a>
+        </div>
+    `;
 }
 
 /**
@@ -74,12 +193,16 @@ function renderNewsDetail(item) {
  */
 function getEmbedUrl(url) {
     if (!url) return null;
-    // YouTube
+
+    // Vérifier si c'est une URL YouTube
     let match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
-    if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1`;
-    // Vimeo
+    if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1`;
+
+    // Vérifier si c'est une URL Vimeo
     match = url.match(/vimeo\.com\/(\d+)/);
-    if (match) return `https://player.vimeo.com/video/${match[1]}?autoplay=1`;
+    if (match) return `https://player.vimeo.com/video/${match[1]}?autoplay=1&muted=1&controls=1&title=0&byline=0&portrait=0`;
+
+    // Si ce n'est ni YouTube ni Vimeo, c'est probablement une vidéo locale
     return null;
 }
 

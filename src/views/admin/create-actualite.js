@@ -11,22 +11,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. Logout Logic
     setupLogout();
 
-    // 3. Load Admin's Courses only
+    // 3. Load Courses (Admin's only, or all if superadmin)
     const coursesList = document.getElementById('coursesList');
     try {
-        // Filter courses by the current admin
-        const response = await CourseService.getByAdmin(admin.id);
+        // Filter courses by the current admin, or get all if SUPER_ADMIN
+        const loadId = admin.type === 'SUPER_ADMIN' ? null : admin.id;
+        const response = await CourseService.getByAdmin(loadId);
         const courses = response.data || response || [];
 
         if (courses.length === 0) {
             coursesList.innerHTML = '<div style="padding: 10px; color: #9CA3AF;">Vous n\'avez aucun cours à associer.</div>';
         } else {
-            coursesList.innerHTML = courses.map(course => `
-                <div class="course-option">
-                    <input type="checkbox" name="course_links" value="${course.id}" id="course_${course.id}">
-                    <label for="course_${course.id}">${course.title}</label>
-                </div>
-            `).join('');
+            coursesList.innerHTML = courses.map(course => {
+                const isDraft = course.status === 'DRAFT';
+                return `
+                    <div class="course-option" style="justify-content: space-between; display: flex; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" name="course_links" value="${course.id}" id="course_${course.id}">
+                            <label for="course_${course.id}">${course.title}</label>
+                        </div>
+                        <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: ${isDraft ? '#FEF3C7' : '#D1FAE5'}; color: ${isDraft ? '#D97706' : '#059669'}; font-weight: 600;">
+                            ${isDraft ? 'Brouillon' : 'Publié'}
+                        </span>
+                    </div>
+                `;
+            }).join('');
         }
     } catch (error) {
         console.error(error);

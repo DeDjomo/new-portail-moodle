@@ -9,11 +9,30 @@
     <link rel="icon" href="public/images/enspy-logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        .navbar-transparent {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border-bottom: none !important;
+        }
+
+        .navbar-transparent .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .navbar-transparent .nav-link:hover,
+        .navbar-transparent .nav-link.active {
+            color: #fff;
+        }
+
+        .navbar-transparent .brand-name {
+            color: #fff;
+        }
+
         .news-carousel-section {
             position: relative;
-            height: calc(100vh - 80px);
-            /* Adjust for navbar */
-            min-height: 500px;
+            height: 100vh;
+            min-height: 600px;
             background: #000;
             overflow: hidden;
         }
@@ -64,9 +83,11 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end;
             color: #fff;
             padding: 0 5%;
+            padding-top: 120px;
+            padding-bottom: 6rem;
         }
 
         .news-tag {
@@ -90,11 +111,16 @@
         }
 
         .news-desc {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             max-width: 600px;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             color: rgba(255, 255, 255, 0.9);
             line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .news-play-btn {
@@ -118,7 +144,6 @@
             color: #fff;
         }
 
-        /* Dots */
         .news-dots {
             position: absolute;
             bottom: 3rem;
@@ -143,13 +168,160 @@
             transform: scale(1.3);
         }
 
+        /* Styles pour le modal de suppression */
+        .delete-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .delete-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 15px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .delete-modal-content h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .delete-modal-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .delete-modal-content strong {
+            color: var(--primary);
+        }
+
+        .delete-modal-content input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .delete-modal-content input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+        }
+
+        .delete-modal-content input.error {
+            border-color: #ff4444;
+        }
+
+        .delete-modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .delete-modal-buttons button {
+            padding: 0.8rem 1.8rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .delete-modal-buttons button:first-child {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .delete-modal-buttons button:first-child:hover {
+            background: #e0e0e0;
+        }
+
+        .delete-modal-buttons button:last-child {
+            background: var(--primary);
+            color: #fff;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .delete-modal-buttons button:last-child.active {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .delete-modal-buttons button:last-child.active:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        .validation-text {
+            font-size: 0.9rem;
+            margin: 0.5rem 0 0 0;
+            color: #ff4444;
+            font-weight: 500;
+        }
+
+        .validation-text.success {
+            color: #00C851;
+        }
+
+        .actualite-title-highlight {
+            background: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-weight: 600;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+        }
+
         @media (max-width: 768px) {
+            .news-slide-content {
+                padding-top: 100px;
+                padding-bottom: 5rem;
+            }
+
             .news-title {
-                font-size: 2.5rem;
+                font-size: 2rem;
             }
 
             .news-desc {
-                font-size: 1.1rem;
+                font-size: 1rem;
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+            }
+
+            .news-play-btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+
+            .delete-modal-content {
+                padding: 1.5rem;
+            }
+
+            .delete-modal-content h3 {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -161,7 +333,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar navbar-transparent">
         <div class="container nav-container">
             <a href="index.html" class="brand">
                 <img src="public/images/enspy-logo.png" alt="Logo ENSPY">
@@ -187,6 +359,29 @@
             <!-- Dynamic dots injected here -->
         </div>
     </section>
+
+
+
+    <!-- Modal de suppression -->
+    <div id="deleteModal" class="delete-modal">
+        <div class="delete-modal-content">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #ff4444; margin-right: 10px;"></i>Confirmer la
+                suppression</h3>
+            <p>Vous êtes sur le point de supprimer l'actualité :</p>
+            <div id="deleteActualiteTitle" class="actualite-title-highlight"></div>
+            <p>Pour confirmer, veuillez saisir <strong>"supprimer"</strong> dans le champ ci-dessous :</p>
+            <input type="text" id="deleteValidationInput" placeholder="Saisissez 'supprimer'" autocomplete="off">
+            <div id="deleteValidationMessage" class="validation-text">Veuillez saisir "supprimer" pour confirmer</div>
+            <div class="delete-modal-buttons">
+                <button onclick="closeDeleteModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button id="confirmDeleteBtn" onclick="confirmDelete()" disabled>
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">

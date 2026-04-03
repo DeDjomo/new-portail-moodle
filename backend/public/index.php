@@ -192,8 +192,10 @@ try {
 
         case 'instructors':
             $controller = new InstructorController($db);
-            if ($method === 'POST') $controller->create($input_data);
-            elseif ($method === 'GET') {
+            if ($method === 'POST') {
+                if ($id) $controller->update($id, $input_data);
+                else $controller->create($input_data);
+            } elseif ($method === 'GET') {
                 if ($id) $controller->show($id);
                 else $controller->index();
             } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
@@ -203,8 +205,10 @@ try {
 
         case 'categories':
             $controller = new CategoryController($db);
-            if ($method === 'POST') $controller->create($input_data);
-            elseif ($method === 'GET') {
+            if ($method === 'POST') {
+                if ($id) $controller->update($id, $input_data);
+                else $controller->create($input_data);
+            } elseif ($method === 'GET') {
                 if ($id) $controller->show($id);
                 else $controller->index();
             } elseif ($method === 'PUT' && $id) $controller->update($id, $input_data);
@@ -214,8 +218,10 @@ try {
 
         case 'courses':
             $controller = new CourseController($db);
-            if ($method === 'POST') $controller->create($input_data);
-            elseif ($method === 'GET') {
+            if ($method === 'POST') {
+                if ($id) $controller->update($id, $input_data);
+                else $controller->create($input_data);
+            } elseif ($method === 'GET') {
                 if (isset($_GET['action']) && $_GET['action'] === 'getAdminCourses' && isset($_GET['admin_id'])) {
                     $controller->getAdminCourses($_GET['admin_id']);
                 } elseif (isset($path_parts[1])) {
@@ -244,8 +250,11 @@ try {
 
         case 'enrollments':
             $controller = new EnrollmentController($db);
-            if ($method === 'POST') $controller->enroll($input_data);
-            elseif ($method === 'GET') {
+            if ($method === 'POST' && isset($path_parts[1]) && $path_parts[1] === 'notify') {
+                $controller->sendEnrollmentEmail($input_data);
+            } elseif ($method === 'POST') {
+                $controller->enroll($input_data);
+            } elseif ($method === 'GET') {
                 if (isset($_GET['action']) && $_GET['action'] === 'getAdminEnrollments' && isset($_GET['admin_id'])) {
                     $controller->getAdminEnrollments($_GET['admin_id']);
                 } elseif (isset($_GET['action']) && $_GET['action'] === 'getAdminStats' && isset($_GET['admin_id'])) {
@@ -270,8 +279,10 @@ try {
 
         case 'actualites':
             $controller = new ActualiteController($db);
-            if ($method === 'POST') $controller->create($input_data);
-            elseif ($method === 'GET') {
+            if ($method === 'POST') {
+                if ($id) $controller->update($id, $input_data);
+                else $controller->create($input_data);
+            } elseif ($method === 'GET') {
                 if ($id) $controller->show($id);
                 else $controller->index();
             } elseif ($method === 'DELETE' && $id) {

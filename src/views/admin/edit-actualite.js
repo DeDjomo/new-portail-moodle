@@ -33,8 +33,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. Load Data
     try {
+        const loadId = admin.type === 'SUPER_ADMIN' ? null : admin.id;
         const [coursesResponse, newsResponse] = await Promise.all([
-            CourseService.getByAdmin(admin.id),
+            CourseService.getByAdmin(loadId),
             ActualiteService.getById(newsId)
         ]);
 
@@ -93,12 +94,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (courses.length === 0) {
             coursesContainer.innerHTML = '<div style="padding: 10px; color: #9CA3AF;">Aucun cours disponible</div>';
         } else {
-            coursesContainer.innerHTML = courses.map(course => `
-                <div class="course-option">
-                    <input type="checkbox" name="course_links" value="${course.id}" id="course_${course.id}" ${linkedCourseIds.includes(course.id) ? 'checked' : ''}>
-                    <label for="course_${course.id}">${course.title}</label>
-                </div>
-            `).join('');
+            coursesContainer.innerHTML = courses.map(course => {
+                const isDraft = course.status === 'DRAFT';
+                const isChecked = linkedCourseIds.includes(course.id);
+                return `
+                    <div class="course-option" style="justify-content: space-between; display: flex; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" name="course_links" value="${course.id}" id="course_${course.id}" ${isChecked ? 'checked' : ''}>
+                            <label for="course_${course.id}">${course.title}</label>
+                        </div>
+                        <span style="font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: ${isDraft ? '#FEF3C7' : '#D1FAE5'}; color: ${isDraft ? '#D97706' : '#059669'}; font-weight: 600;">
+                            ${isDraft ? 'Brouillon' : 'Publié'}
+                        </span>
+                    </div>
+                `;
+            }).join('');
         }
     } catch (error) {
         console.error(error);

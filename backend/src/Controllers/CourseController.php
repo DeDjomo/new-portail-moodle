@@ -215,7 +215,7 @@ class CourseController {
         $newStatus = $data['status'] ?? $existing['status'];
 
         $this->courseModel->id = $id;
-        $this->courseModel->administrator_id = $data['administrator_id'] ?? $existing['administrator_id'];
+        $this->courseModel->administrator_id = $existing['administrator_id'];
         $this->courseModel->category_id = $data['category_id'] ?? $existing['category_id'];
         $this->courseModel->title = $data['title'] ?? $existing['title'];
         $this->courseModel->slug = $data['slug'] ?? $existing['slug'];
@@ -280,7 +280,7 @@ class CourseController {
     /**
      * Internal logic for state machine
      */
-    private function determineStatus($data, $imageUrl) {
+    private function determineStatus($data, $imageUrl, $videoUrl = null) {
         $requiredForPublish = [
             'short_synopsis', 'full_description', 'pedagogical_objectives', 
             'level', 'language', 'format', 'total_duration_minutes'
@@ -291,7 +291,7 @@ class CourseController {
             if (empty($data[$field]) || $data[$field] === '[]' || $data[$field] === 'null') return 'DRAFT';
         }
 
-        if (empty($imageUrl)) return 'DRAFT';
+        if (empty($imageUrl) && empty($videoUrl)) return 'DRAFT';
 
         return 'PUBLISHED';
     }
