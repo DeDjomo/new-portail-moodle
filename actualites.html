@@ -346,6 +346,7 @@
                 <li><a href="actualites.html" class="nav-link active">Actualités</a></li>
                 <li><a href="about.html" class="nav-link">À propos</a></li>
             </ul>
+            <div id="navStudentArea"></div>
         </div>
     </nav>
 
@@ -393,6 +394,10 @@
     </footer>
 
     <script type="module" src="src/views/actualites.js"></script>
+    <script type="module">
+        import { injectNavbarStudentArea } from './src/utils/student-auth.js';
+        injectNavbarStudentArea();
+    </script>
 </body>
 
 </html>

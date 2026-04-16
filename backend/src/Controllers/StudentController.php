@@ -3,6 +3,7 @@
 namespace Controllers;
 
 require_once __DIR__ . '/../Models/Student.php';
+require_once __DIR__ . '/../Services/MoodleApiService.php';
 
 use Models\Student;
 
@@ -51,19 +52,21 @@ class StudentController {
      */
     public function create($data) {
         // 1. Validation
-        $required = ['last_name', 'first_name', 'email'];
+        $required = ['last_name', 'first_name', 'email', 'password'];
         foreach ($required as $field) {
             if (empty($data[$field])) {
-                return $this->jsonResponse(['message' => "Field '$field' is required"], 400);
+                return $this->jsonResponse(['message' => "Le champ '$field' est obligatoire."], 400);
             }
         }
 
-        // Default password if not provided
-        $password = $data['password'] ?? 'EnspyTraining2026';
+        // Password minimum length
+        if (strlen($data['password']) < 8) {
+            return $this->jsonResponse(['message' => 'Le mot de passe doit contenir au moins 8 caractères.'], 400);
+        }
 
         // 2. Email Uniqueness
         if ($this->studentModel->findByEmail($data['email'])) {
-            return $this->jsonResponse(['message' => 'Email already in use'], 400);
+            return $this->jsonResponse(['message' => 'Email already in use'], 409);
         }
 
         // 3. Map to Model
@@ -75,6 +78,15 @@ class StudentController {
         $this->studentModel->phone = $data['phone'] ?? null;
         $this->studentModel->password = password_hash($data['password'], PASSWORD_BCRYPT);
         $this->studentModel->status = 'ACTIVE';
+
+        // Synchroniser avec Moodle AVANT de créer en base, ou l'inverse ?
+        // On crée en base Moodle. Si ça échoue, on continue quand même (ça loguera l'erreur)
+        \MoodleApiService::createUser(
+            $data['first_name'], 
+            $data['last_name'], 
+            $data['email'], 
+            $data['password']
+        );
 
         if ($this->studentModel->create()) {
             return $this->jsonResponse([
@@ -96,23 +108,37 @@ class StudentController {
 
         $student = $this->studentModel->findByEmail($data['email']);
 
-        if (!$student || !password_verify($data['password'], $student['password'])) {
+        if (!$student) {
             return $this->jsonResponse(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Check account status
+        if ($student['status'] === 'SUSPENDED') {
+            return $this->jsonResponse(['message' => 'Account suspended. Please contact an administrator.'], 403);
+        }
+
+        if (!password_verify($data['password'], $student['password'])) {
+            return $this->jsonResponse(['message' => 'Invalid credentials'], 401);
+        }
+
+        // Fetch Moodle user token (for SSO)
+        $moodleTokenData = \MoodleApiService::getUserPersonalToken($data['email'], $data['password']);
+        $moodleTokens = null;
+        
+        if ($moodleTokenData && isset($moodleTokenData['token']) && isset($moodleTokenData['privatetoken'])) {
+            $moodleTokens = [
+                'token' => $moodleTokenData['token'],
+                'privatetoken' => $moodleTokenData['privatetoken']
+            ];
         }
 
         // Remove sensitive info
         unset($student['password']);
 
-        // Start session if not started
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-        $_SESSION['student_id'] = $student['id'];
-        $_SESSION['user_type'] = 'STUDENT';
-
         return $this->jsonResponse([
             'message' => 'Login successful',
-            'student' => $student
+            'student' => $student,
+            'moodle_keys' => $moodleTokens
         ], 200);
     }
 

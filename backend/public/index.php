@@ -33,6 +33,7 @@ require_once __DIR__ . '/../src/Controllers/CourseController.php';
 require_once __DIR__ . '/../src/Controllers/StudentController.php';
 require_once __DIR__ . '/../src/Controllers/EnrollmentController.php';
 require_once __DIR__ . '/../src/Controllers/ActualiteController.php';
+require_once __DIR__ . '/../src/Controllers/SSOController.php';
 
 use Controllers\AdminController;
 use Controllers\InstructorController;
@@ -248,6 +249,14 @@ try {
             else routeNotFound();
             break;
 
+        case 'sso':
+            $controller = new \Controllers\SSOController();
+            if ($method === 'POST') {
+                if ($id === 'moodle') $controller->getMoodleSSOUrl($input_data);
+                else routeNotFound();
+            } else routeNotFound();
+            break;
+            
         case 'enrollments':
             $controller = new EnrollmentController($db);
             if ($method === 'POST' && isset($path_parts[1]) && $path_parts[1] === 'notify') {

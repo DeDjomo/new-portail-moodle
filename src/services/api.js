@@ -1,5 +1,5 @@
 const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:8000'
+    ? 'http://localhost:9080'
     : 'https://portal.enspy.training/backend/public';
 
 const apiRequest = async (endpoint, method = 'GET', data = null, isMultipart = false, onProgress = null) => {

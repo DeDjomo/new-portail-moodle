@@ -11,7 +11,10 @@ const StudentService = {
 
     update: (id, studentData) => apiRequest(`students/${id}`, 'PUT', studentData),
 
-    delete: (id) => apiRequest(`students/${id}`, 'DELETE')
+    delete: (id) => apiRequest(`students/${id}`, 'DELETE'),
+
+    // SSO Moodle route
+    getMoodleSSOUrl: (moodleKeys) => apiRequest('sso/moodle', 'POST', moodleKeys)
 };
 
 export default StudentService;

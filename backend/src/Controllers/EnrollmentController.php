@@ -72,7 +72,7 @@ class EnrollmentController {
         // 5. Create Enrollment
         $this->enrollmentModel->student_id = $studentId;
         $this->enrollmentModel->course_id = $courseId;
-        $this->enrollmentModel->status = 'PENDING';
+        $this->enrollmentModel->status = 'DONE';
 
         if ($this->enrollmentModel->create()) {
             // 6. Post-enrollment actions
@@ -81,7 +81,7 @@ class EnrollmentController {
             // 7. SEND RESPONSE FIRST (to free up the student's browser)
             $this->jsonResponse([
                 'message' => 'Enrollment successful. Confirmation email sent.',
-                'status' => 'PENDING'
+                'status' => 'DONE'
             ], 201, true); // True = finish request
 
             // 8. Notification (Admin + Student) - Happens in background

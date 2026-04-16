@@ -2,11 +2,16 @@
 import CourseService from '../services/courseService.js';
 import EnrollmentService from '../services/enrollmentService.js';
 import AuthService from '../services/authService.js';
+import StudentService from '../services/studentService.js';
 import { resolveAssetPath } from '../services/api.js';
+import { getStudent, isStudentLoggedIn, setStudent, injectNavbarStudentArea, getMoodleKeys, setMoodleKeys } from '../utils/student-auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const courseId = urlParams.get('id');
+
+    // Inject student area in navbar
+    injectNavbarStudentArea();
 
     if (!courseId) {
         window.location.href = 'catalog.html';
@@ -30,8 +35,9 @@ async function loadCourseDetails(courseId) {
 
         renderCourseDetails(course);
 
-        // Check Enrollment Status if email is stored
-        const studentEmail = localStorage.getItem('student_email');
+        // Check Enrollment Status: prefer logged-in student, fallback to stored email
+        const student = getStudent();
+        const studentEmail = student?.email || localStorage.getItem('student_email');
         if (studentEmail) {
             try {
                 const res = await EnrollmentService.checkStatus(studentEmail, courseId);
@@ -248,9 +254,33 @@ function updateEnrollmentButton(status, moodleUrl) {
     } else if (status === 'DONE') {
         newBtn.textContent = 'Accéder au cours ↗';
         newBtn.style.background = '#10B981'; // Green
-        newBtn.href = moodleUrl || '#';
-        newBtn.target = '_blank';
-        newBtn.onclick = null;
+        newBtn.href = 'javascript:void(0)';
+        newBtn.onclick = async (e) => {
+            e.preventDefault();
+            const keys = getMoodleKeys();
+            if (!keys) {
+                // Pas de clés SSO, on ouvre l'URL brute
+                window.open(moodleUrl, '_blank');
+                return;
+            }
+            
+            const oldText = newBtn.textContent;
+            newBtn.textContent = 'Connexion à Moodle...';
+            try {
+                const ssoRes = await StudentService.getMoodleSSOUrl(keys);
+                if (ssoRes.autologinurl) {
+                    const finalUrl = ssoRes.autologinurl + '?key=' + ssoRes.key + '&wantsurl=' + encodeURIComponent(moodleUrl);
+                    window.location.href = finalUrl;
+                } else {
+                    window.open(moodleUrl, '_blank');
+                }
+            } catch (error) {
+                console.error("Erreur SSO:", error);
+                window.open(moodleUrl, '_blank'); // fallback
+            } finally {
+                newBtn.textContent = oldText;
+            }
+        };
     }
 }
 
@@ -288,17 +318,7 @@ function setupEnrollmentLogic(course) {
 
     // Helper: Show Moodle Button
     const showMoodleButton = () => {
-        const btnEnroll = document.getElementById('btnEnroll');
-        if (btnEnroll) {
-            btnEnroll.textContent = 'Accéder au cours ↗';
-            btnEnroll.style.background = '#007bff';
-            btnEnroll.href = moodleUrl;
-            btnEnroll.target = '_blank';
-
-            // Remove click listeners by cloning
-            const newBtn = btnEnroll.cloneNode(true);
-            btnEnroll.parentNode.replaceChild(newBtn, btnEnroll);
-        }
+        updateEnrollmentButton('DONE', moodleUrl);
     };
 
     // 2. Global Close Handlers
@@ -386,41 +406,83 @@ function setupEnrollmentLogic(course) {
 
     // 5. Registration Submit Logic
     if (registerForm) {
+        // Password toggle icons
+        document.getElementById('toggleRegPw')?.addEventListener('click', () => {
+            const input = document.getElementById('regPassword');
+            const icon = document.getElementById('toggleRegPw');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+        document.getElementById('toggleRegPwConfirm')?.addEventListener('click', () => {
+            const input = document.getElementById('regPasswordConfirm');
+            const icon = document.getElementById('toggleRegPwConfirm');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // Pre-fill email if logged in student
+        const loggedStudent = getStudent();
+        if (loggedStudent) {
+            const emailInput = registerForm.querySelector('[name="email"]');
+            if (emailInput) emailInput.value = loggedStudent.email;
+        }
+
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = registerForm.querySelector('button');
+            const btn = registerForm.querySelector('button[type="submit"]');
             const originalText = btn.textContent;
-
-            btn.disabled = true;
-            btn.textContent = 'Création du compte...';
+            const pwError = document.getElementById('regPwError');
 
             // Collect Data
             const formData = new FormData(registerForm);
             const data = Object.fromEntries(formData.entries());
 
-            // Add default password for backend compatibility (if backend doesn't handle it)
-            if (!data.password) {
-                data.password = 'EnspyTraining2026';
+            // Validate passwords match
+            if (data.password !== data.password_confirm) {
+                if (pwError) pwError.style.display = 'block';
+                return;
             }
+            if (pwError) pwError.style.display = 'none';
+
+            btn.disabled = true;
+            btn.textContent = 'Création du compte...';
+
+            // Remove confirm field before sending
+            delete data.password_confirm;
 
             try {
                 // Step A: Register
                 await AuthService.register(data);
 
-                // Step B: Auto-Enroll
+                // Step B: Auto-login
+                btn.textContent = 'Connexion...';
+                const loginRes = await StudentService.login({ email: data.email, password: data.password });
+                setStudent(loginRes.student);
+                if (loginRes.moodle_keys) {
+                    setMoodleKeys(loginRes.moodle_keys);
+                }
+                localStorage.setItem('student_email', data.email);
+
+                // Step C: Auto-Enroll
                 btn.textContent = 'Inscription au cours...';
                 await EnrollmentService.enroll(data.email, courseId);
-
-                localStorage.setItem('student_email', data.email);
 
                 closeModal('registerModal');
                 showMessage('success', 'Compte Créé & Inscrit !', 'Bienvenue sur ENSPY Training. Vous pouvez maintenant accéder à vos cours.');
 
                 updateEnrollmentButton('PENDING', null);
+                // Refresh navbar to show student name
+                injectNavbarStudentArea();
 
             } catch (error) {
                 console.error(error);
-                alert(error.message || "Erreur lors de l'enregistrement");
+                let msg = error.message || "Erreur lors de l'enregistrement";
+                if (msg.includes('Email already in use') || msg.includes('409')) {
+                    msg = 'Cet email est déjà utilisé. <a href="student-login.html">Connectez-vous</a> à la place.';
+                }
+                alert(msg);
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;

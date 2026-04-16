@@ -1351,3 +1351,102 @@ body:not(:has(.hero-carousel)) .main-content {
 video:focus {
     outline: none;
 }
+
+/* ── Student Navbar Area ─────────────────────────────────── */
+#navStudentArea {
+    display: flex;
+    align-items: center;
+}
+
+.btn-student-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.55rem 1.4rem;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.btn-student-login:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+.nav-student-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nav-student-name {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.nav-student-name i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.nav-btn-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-full);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.nav-btn-logout:hover {
+    border-color: #EF4444;
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* On transparent navbars (actualites, etc.) */
+.navbar-transparent .nav-student-name {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.navbar-transparent .nav-btn-logout {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-transparent .nav-btn-logout:hover {
+    border-color: #ff8080;
+    color: #ff8080;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+    .nav-student-name span:last-child {
+        display: none;
+    }
+    .btn-student-login span {
+        display: none;
+    }
+    .btn-student-login {
+        padding: 0.55rem 0.9rem;
+    }
+}

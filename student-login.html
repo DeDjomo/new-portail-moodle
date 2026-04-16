@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Étudiant | ENSPY TRAINING</title>
+    <meta name="description" content="Connectez-vous à votre espace étudiant ENSPY Training pour accéder à vos cours.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="public/images/enspy-logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ── Student Login Page Styles ─────────────────────────────── */
+        .student-auth-body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1rem;
+        }
+
+        .student-auth-body::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.12) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            pointer-events: none;
+        }
+
+        .student-auth-body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+            bottom: -50px;
+            left: -50px;
+            pointer-events: none;
+        }
+
+        .student-auth-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .student-auth-logo {
+            display: block;
+            height: 56px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .student-auth-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .student-auth-subtitle {
+            color: rgba(255,255,255,0.55);
+            text-align: center;
+            font-size: 0.93rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Tab Toggle */
+        .auth-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 2rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 0.65rem;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .auth-tab.active {
+            background: var(--primary, #FF6B35);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(255,107,53,0.35);
+        }
+
+        /* Form */
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+
+        .s-form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .s-form-label {
+            display: block;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .s-input-wrapper {
+            position: relative;
+        }
+
+        .s-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.3);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .s-form-input {
+            width: 100%;
+            padding: 0.85rem 2.8rem;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .s-form-input::placeholder {
+            color: rgba(255,255,255,0.25);
+        }
+
+        .s-form-input:focus {
+            outline: none;
+            border-color: var(--primary, #FF6B35);
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.15);
+        }
+
+        .s-toggle-pw {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.35);
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .s-toggle-pw:hover { color: rgba(255,255,255,0.7); }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .s-btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #FF6B35, #e85520);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .s-btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(255,107,53,0.4);
+        }
+
+        .s-btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Password strength */
+        .pw-strength-bar {
+            height: 3px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .pw-strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .pw-strength-text {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 4px;
+        }
+
+        /* Alert */
+        .s-alert {
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .s-alert.show { display: flex; }
+
+        .s-alert.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .s-alert.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        /* Footer links */
+        .auth-back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .auth-back-link:hover { color: rgba(255,255,255,0.7); }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .auth-divider span {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body class="student-auth-body">
+
+    <div class="student-auth-card">
+        <img src="public/images/enspy-logo.png" alt="Logo ENSPY" class="student-auth-logo">
+        <h1 class="student-auth-title">Espace Étudiant</h1>
+        <p class="student-auth-subtitle">Accédez à vos cours et formations ENSPY Training</p>
+
+        <!-- Tab Toggle -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">
+                <i class="fas fa-sign-in-alt"></i> Connexion
+            </button>
+            <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">
+                <i class="fas fa-user-plus"></i> Inscription
+            </button>
+        </div>
+
+        <!-- ── LOGIN FORM ──────────────────────────────────────── -->
+        <form class="auth-form active" id="loginForm">
+            <div class="s-alert" id="loginAlert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="loginAlertText"></span>
+            </div>
+
+            <div class="s-form-group">
+                <label class="s-form-label">Adresse email</label>
+                <div class="s-input-wrapper">
+                    <i class="fas fa-envelope s-input-icon"></i>
+                    <input type="email" id="loginEmail" class="s-form-input"
+                        placeholder="votre@email.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="s-form-group">
+                <label class="s-form-label">Mot de passe</label>
+                <div class="s-input-wrapper">
+                    <i class="fas fa-lock s-input-icon"></i>
+                    <input type="password" id="loginPassword" class="s-form-input"
+                        placeholder="••••••••" required autocomplete="current-password"
+                        style="padding-right: 3rem;">
+                    <button type="button" class="s-toggle-pw" onclick="togglePw('loginPassword', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="s-btn-submit" id="btnLogin">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </button>
+        </form>
+
+        <!-- ── REGISTER FORM ───────────────────────────────────── -->
+        <form class="auth-form" id="registerForm">
+            <div class="s-alert" id="registerAlert">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="registerAlertText"></span>
+            </div>
+
+            <div class="form-row-2">
+                <div class="s-form-group">
+                    <label class="s-form-label">Nom(s)</label>
+                    <div class="s-input-wrapper">
+                        <i class="fas fa-user s-input-icon"></i>
+                        <input type="text" name="last_name" class="s-form-input"
+                            placeholder="Nom" required autocomplete="family-name">
+                    </div>
+                </div>
+                <div class="s-form-group">
+                    <label class="s-form-label">Prénom(s)</label>
+                    <div class="s-input-wrapper">
+                        <i class="fas fa-user s-input-icon"></i>
+                        <input type="text" name="first_name" class="s-form-input"
+                            placeholder="Prénom" required autocomplete="given-name">
+                    </div>
+                </div>
+            </div>
+
+            <div class="s-form-group">
+                <label class="s-form-label">Email</label>
+                <div class="s-input-wrapper">
+                    <i class="fas fa-envelope s-input-icon"></i>
+                    <input type="email" name="email" id="regEmail" class="s-form-input"
+                        placeholder="votre@email.com" required autocomplete="email">
+                </div>
+            </div>
+
+            <div class="s-form-group">
+                <label class="s-form-label">Mot de passe</label>
+                <div class="s-input-wrapper">
+                    <i class="fas fa-lock s-input-icon"></i>
+                    <input type="password" name="password" id="regPassword" class="s-form-input"
+                        placeholder="Minimum 8 caractères" required
+                        minlength="8" autocomplete="new-password"
+                        style="padding-right: 3rem;">
+                    <button type="button" class="s-toggle-pw" onclick="togglePw('regPassword', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="pw-strength-bar">
+                    <div class="pw-strength-fill" id="pwStrengthFill"></div>
+                </div>
+                <p class="pw-strength-text" id="pwStrengthText"></p>
+            </div>
+
+            <div class="s-form-group">
+                <label class="s-form-label">Confirmer le mot de passe</label>
+                <div class="s-input-wrapper">
+                    <i class="fas fa-lock s-input-icon"></i>
+                    <input type="password" name="password_confirm" id="regPasswordConfirm"
+                        class="s-form-input" placeholder="••••••••" required
+                        autocomplete="new-password" style="padding-right: 3rem;">
+                    <button type="button" class="s-toggle-pw" onclick="togglePw('regPasswordConfirm', this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="s-btn-submit" id="btnRegister">
+                <i class="fas fa-user-plus"></i> Créer mon compte
+            </button>
+        </form>
+
+        <a href="index.html" class="auth-back-link">
+            <i class="fas fa-arrow-left"></i> Retour à l'accueil
+        </a>
+    </div>
+
+    <script type="module">
+        import StudentService from './src/services/studentService.js';
+        import { setStudent, setMoodleKeys } from './src/utils/student-auth.js';
+
+        // ── Tab Switch ──────────────────────────────────────────────
+        window.switchTab = function (tab) {
+            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+            document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+            document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+            document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+        };
+
+        // ── Password Toggle ─────────────────────────────────────────
+        window.togglePw = function (inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        };
+
+        // ── Password Strength ───────────────────────────────────────
+        document.getElementById('regPassword').addEventListener('input', function () {
+            const val = this.value;
+            const fill = document.getElementById('pwStrengthFill');
+            const text = document.getElementById('pwStrengthText');
+
+            let score = 0;
+            if (val.length >= 8) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { pct: '0%',   color: '',          label: '' },
+                { pct: '25%',  color: '#ef4444',   label: 'Faible' },
+                { pct: '50%',  color: '#f59e0b',   label: 'Moyen' },
+                { pct: '75%',  color: '#3b82f6',   label: 'Bon' },
+                { pct: '100%', color: '#10b981',   label: 'Excellent' },
+            ];
+
+            const level = levels[score] || levels[0];
+            fill.style.width = level.pct;
+            fill.style.background = level.color;
+            text.textContent = level.label;
+            text.style.color = level.color;
+        });
+
+        // ── Alert Helpers ───────────────────────────────────────────
+        const showAlert = (id, textId, msg, type = 'error') => {
+            const el = document.getElementById(id);
+            el.className = `s-alert show ${type}`;
+            el.querySelector('i').className = type === 'error'
+                ? 'fas fa-exclamation-circle'
+                : 'fas fa-check-circle';
+            document.getElementById(textId).textContent = msg;
+        };
+        const hideAlert = (id) => {
+            document.getElementById(id).classList.remove('show');
+        };
+
+        // ── Redirect after login ────────────────────────────────────
+        const urlParams = new URLSearchParams(window.location.search);
+        const nextPage = urlParams.get('next') || 'index.html';
+
+        // ── LOGIN ───────────────────────────────────────────────────
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert('loginAlert');
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('btnLogin');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion...';
+
+            try {
+                const res = await StudentService.login({ email, password });
+                setStudent(res.student);
+                if (res.moodle_keys) setMoodleKeys(res.moodle_keys);
+                // Store email for legacy enrollment checks
+                localStorage.setItem('student_email', res.student.email);
+                // Redirect
+                window.location.href = nextPage;
+            } catch (err) {
+                let msg = 'Email ou mot de passe incorrect.';
+                if (err.message?.includes('Email and password')) msg = 'Veuillez remplir tous les champs.';
+                else if (err.message?.includes('suspended')) msg = 'Votre compte est suspendu. Contactez un administrateur.';
+                showAlert('loginAlert', 'loginAlertText', msg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Se connecter';
+            }
+        });
+
+        // ── REGISTER ────────────────────────────────────────────────
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert('registerAlert');
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const btn = document.getElementById('btnRegister');
+
+            // Validate passwords match
+            if (data.password !== data.password_confirm) {
+                showAlert('registerAlert', 'registerAlertText', 'Les mots de passe ne correspondent pas.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
+
+            // Remove confirm field before sending
+            delete data.password_confirm;
+
+            try {
+                await StudentService.register(data);
+                // Auto-login after registration
+                const res = await StudentService.login({ email: data.email, password: data.password });
+                setStudent(res.student);
+                if (res.moodle_keys) setMoodleKeys(res.moodle_keys);
+                localStorage.setItem('student_email', res.student.email);
+                showAlert('registerAlert', 'registerAlertText', 'Compte créé avec succès ! Redirection...', 'success');
+                setTimeout(() => { window.location.href = nextPage; }, 1200);
+            } catch (err) {
+                let msg = err.message || 'Erreur lors de la création du compte.';
+                if (msg.includes('Email already in use')) msg = 'Cet email est déjà utilisé. Essayez de vous connecter.';
+                showAlert('registerAlert', 'registerAlertText', msg, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-user-plus"></i> Créer mon compte';
+            }
+        });
+
+        // If already logged in, redirect
+        import('./src/utils/student-auth.js').then(({ isStudentLoggedIn }) => {
+            if (isStudentLoggedIn()) {
+                window.location.href = nextPage;
+            }
+        });
+    </script>
+</body>
+
+</html>
