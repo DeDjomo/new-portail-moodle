@@ -1,0 +1,37 @@
+<script>
+(function() {
+    // Fonction principale de gestion de l'accordéon
+    const handleAccordion = function(event) {
+        const btn = event.target.closest('[data-toggle="collapse"]');
+        if (!btn) return;
+
+        const targetId = btn.getAttribute('href') || btn.getAttribute('data-target');
+        if (!targetId || !targetId.startsWith('#')) return;
+
+        const targetElement = document.querySelector(targetId);
+        if (!targetElement || targetElement.classList.contains('show')) return;
+
+        // On cible TOUS les éléments collapse ouverts sur la page, 
+        // peu importe la classe spécifique au cours.
+        const allOpen = document.querySelectorAll('.collapse.show');
+
+        allOpen.forEach(function(openSection) {
+            // Logique de parenté : On ne ferme que si ce n'est pas un parent
+            if ('#' + openSection.id !== targetId && !openSection.contains(targetElement)) {
+                
+                // Utilisation de l'API Bootstrap si disponible, sinon repli sur classList
+                if (window.jQuery && $(openSection).collapse) {
+                    $(openSection).collapse('hide');
+                } else {
+                    openSection.classList.remove('show');
+                    const otherBtn = document.querySelector(`[href="#${openSection.id}"], [data-target="#${openSection.id}"]`);
+                    if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    };
+
+    // On attache l'événement au document pour qu'il soit valable partout et tout le temps
+    document.addEventListener('click', handleAccordion, true);
+})();
+</script>

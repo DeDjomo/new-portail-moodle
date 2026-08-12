@@ -79,14 +79,22 @@ class StudentController {
         $this->studentModel->password = password_hash($data['password'], PASSWORD_BCRYPT);
         $this->studentModel->status = 'ACTIVE';
 
-        // Synchroniser avec Moodle AVANT de créer en base, ou l'inverse ?
-        // On crée en base Moodle. Si ça échoue, on continue quand même (ça loguera l'erreur)
-        \MoodleApiService::createUser(
+        // Synchroniser avec Moodle
+        $moodleResponse = \MoodleApiService::createUser(
             $data['first_name'], 
             $data['last_name'], 
             $data['email'], 
             $data['password']
         );
+
+        if (isset($moodleResponse['exception'])) {
+            error_log("[Moodle] REGISTRATION FAILED for " . $data['email'] . ". Error: " . ($moodleResponse['message'] ?? 'Unknown'));
+
+            $cleanMsg = strip_tags($moodleResponse['message'] ?? 'Erreur lors de la création sur Moodle.');
+            return $this->jsonResponse(['message' => 'Moodle Error: ' . $cleanMsg], 400);
+        }
+
+        error_log("[Moodle] REGISTRATION SUCCESS for " . $data['email']);
 
         if ($this->studentModel->create()) {
             return $this->jsonResponse([
@@ -130,6 +138,9 @@ class StudentController {
                 'token' => $moodleTokenData['token'],
                 'privatetoken' => $moodleTokenData['privatetoken']
             ];
+            error_log("[Moodle] SUCCESS: Tokens retrieved for " . $data['email']);
+        } else {
+            error_log("[Moodle] FAILED: Tokens for " . $data['email'] . ". Response: " . json_encode($moodleTokenData));
         }
 
         // Remove sensitive info

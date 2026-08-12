@@ -1,0 +1,290 @@
+/* ============================================================================
+   ENSPY TRAINING — Boost (à coller dans Moodle)
+   Chemin :
+   Administration du site → Présentation → Thèmes → Boost
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   A) SCSS INITIAL (onglet "Réglages avancés" → "Raw initial SCSS")
+   Colle UNIQUEMENT ce bloc dans "Raw initial SCSS"
+   -------------------------------------------------------------------------- */
+/*
+$primary: #FF6B00;
+$secondary: #0F1419;
+$font-family-sans-serif: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+$border-radius: 0.75rem;
+$border-radius-lg: 1rem;
+$body-bg: #FFFFFF;
+$body-color: #0F1419;
+$link-color: #FF6B00;
+$link-hover-color: #EA580C;
+*/
+
+/* --------------------------------------------------------------------------
+   B) SCSS BRUT (onglet "Réglages avancés" → "Raw SCSS")
+   Colle le reste de ce fichier (sans le bloc A) dans "Raw SCSS"
+   -------------------------------------------------------------------------- */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* —— Global ENSPY —— */
+body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+a {
+    color: #FF6B00;
+}
+a:hover {
+    color: #EA580C;
+}
+
+/* Navbar top Boost */
+#page-navbar,
+.navbar.fixed-top,
+.navbar.navbar-light,
+.navbar.navbar-dark {
+    background: #0F1419 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 2px 12px rgba(15, 20, 25, 0.18) !important;
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .usermenu .dropdown-toggle,
+.navbar .editmode-switch-form,
+.navbar a {
+    color: #E2E8F0 !important;
+}
+
+.navbar .nav-link:hover,
+.navbar a:hover {
+    color: #FF6B00 !important;
+}
+
+/* Boutons */
+.btn-primary,
+input[type="submit"].btn-primary,
+#page-footer .btn-primary {
+    background-color: #FF6B00 !important;
+    border-color: #EA580C !important;
+    color: #fff !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.22) !important;
+}
+
+.btn-primary:hover,
+input[type="submit"].btn-primary:hover {
+    background-color: #EA580C !important;
+    border-color: #c2410c !important;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    border-radius: 9999px !important;
+    font-weight: 600 !important;
+}
+
+/* Cartes / cours */
+.card,
+.coursebox,
+.dashboard-card {
+    border-radius: 16px !important;
+    border: 1px solid #EFF3F4 !important;
+    box-shadow: 0 4px 12px rgba(15, 20, 25, 0.04) !important;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover,
+.coursebox:hover,
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    border-color: #FF6B00 !important;
+    box-shadow: 0 12px 24px rgba(255, 107, 0, 0.12) !important;
+}
+
+.badge-primary,
+.badge-info,
+.tag {
+    background-color: #FF6B00 !important;
+    color: #fff !important;
+}
+
+.progress-bar {
+    background-color: #FF6B00 !important;
+}
+
+/* ==========================================================================
+   PAGE D'ACCUEIL SEULEMENT (.pagelayout-frontpage)
+   ========================================================================== */
+
+/* Hero / bandeau principal */
+.pagelayout-frontpage #page-header {
+    background: linear-gradient(135deg, #0F1419 0%, #1a1a1a 45%, #EA580C 100%) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 3.5rem 1.5rem 3rem !important;
+    margin: 0 0 2rem 0 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+}
+
+.pagelayout-frontpage #page-header .page-header-headings h1,
+.pagelayout-frontpage #page-header h1,
+.pagelayout-frontpage .page-context-header h1 {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: clamp(1.75rem, 3vw, 2.5rem) !important;
+    letter-spacing: -0.03em !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.pagelayout-frontpage #page-header .page-header-headings h1::after {
+    content: "";
+    display: block;
+    width: 64px;
+    height: 4px;
+    margin-top: 0.85rem;
+    border-radius: 999px;
+    background: #FF6B00;
+}
+
+.pagelayout-frontpage #page-header .breadcrumb,
+.pagelayout-frontpage #page-header .breadcrumb a,
+.pagelayout-frontpage #page-header .breadcrumb-item,
+.pagelayout-frontpage #page-header .breadcrumb-item.active {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Zone centrale accueil */
+.pagelayout-frontpage #region-main {
+    background: transparent;
+}
+
+.pagelayout-frontpage #region-main .card,
+.pagelayout-frontpage .block .card {
+    border-radius: 16px !important;
+}
+
+.pagelayout-frontpage .block .card-title,
+.pagelayout-frontpage .block h3,
+.pagelayout-frontpage .block .card-header {
+    font-weight: 700 !important;
+    color: #0F1419 !important;
+    border-bottom: 2px solid #EFF3F4;
+}
+
+/* ==========================================================================
+   ACCUEIL : liste "Available courses" → grille de CARTES
+   (comme "Vue d'ensemble des cours" en mode Carte)
+   ========================================================================== */
+
+/* Grille responsive 2–3 colonnes */
+.pagelayout-frontpage #frontpage-available-course-list .courses,
+.pagelayout-frontpage #frontpage-course-list .courses,
+.pagelayout-frontpage .course-list,
+.pagelayout-frontpage .courses {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 1.5rem !important;
+}
+
+/* Chaque cours = une carte */
+.pagelayout-frontpage .coursebox {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    float: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    background: #fff !important;
+    overflow: hidden !important;
+}
+
+/* Masquer résumé HTML (bannière, texte long, vidéo) + liste managers/teachers */
+.pagelayout-frontpage .coursebox .summary,
+.pagelayout-frontpage .coursebox .content .summary,
+.pagelayout-frontpage .coursebox .teachers,
+.pagelayout-frontpage .coursebox .customfields-container,
+.pagelayout-frontpage .coursebox .moreinfo,
+.pagelayout-frontpage .coursebox .coursedetailscollapsible {
+    display: none !important;
+}
+
+/* Image de cours en haut de carte (comme le dashboard) */
+.pagelayout-frontpage .coursebox .content {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+}
+
+.pagelayout-frontpage .coursebox .courseimage,
+.pagelayout-frontpage .coursebox .content .courseimage {
+    display: block !important;
+    order: -1;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+
+.pagelayout-frontpage .coursebox .courseimage img,
+.pagelayout-frontpage .coursebox .content .courseimage img {
+    display: block !important;
+    width: 100% !important;
+    height: 180px !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+}
+
+/* Titre sous l'image */
+.pagelayout-frontpage .coursebox .info {
+    padding: 1rem 1.1rem 1.25rem !important;
+    float: none !important;
+    width: 100% !important;
+}
+
+.pagelayout-frontpage .coursebox .coursename {
+    margin: 0 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.35 !important;
+}
+
+.pagelayout-frontpage .coursebox .coursename a {
+    color: #0F1419 !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+}
+
+.pagelayout-frontpage .coursebox .coursename a:hover {
+    color: #FF6B00 !important;
+}
+
+/* Bouton "Se connecter" / CTA visibles sur accueil */
+.pagelayout-frontpage .btn-primary,
+.pagelayout-frontpage input[type="submit"] {
+    text-transform: uppercase;
+    font-size: 0.85rem !important;
+    padding: 0.65rem 1.5rem !important;
+}
+
+/* Footer accueil */
+.pagelayout-frontpage #page-footer {
+    background: #0F1419 !important;
+    color: #E2E8F0 !important;
+    border-top: 3px solid #FF6B00 !important;
+}
+
+.pagelayout-frontpage #page-footer a {
+    color: #FF9D5C !important;
+}
+
+.pagelayout-frontpage #page-footer a:hover {
+    color: #FFFFFF !important;
+}

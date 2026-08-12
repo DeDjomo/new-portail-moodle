@@ -401,7 +401,7 @@
                 <div class="pw-strength-bar">
                     <div class="pw-strength-fill" id="pwStrengthFill"></div>
                 </div>
-                <p class="pw-strength-text" id="pwStrengthText"></p>
+                <p class="pw-strength-text" id="pwStrengthText">Requis : 8 car. min, 1 majuscule, 1 chiffre, 1 caractère spécial</p>
             </div>
 
             <div class="s-form-group">
@@ -542,6 +542,16 @@
                 return;
             }
 
+            // Moodle Password Policy Enforcement
+            const hasUpper = /[A-Z]/.test(data.password);
+            const hasSpecial = /[^A-Za-z0-9]/.test(data.password);
+            const hasNumber = /[0-9]/.test(data.password);
+
+            if (!hasUpper || !hasSpecial || !hasNumber || data.password.length < 8) {
+                showAlert('registerAlert', 'registerAlertText', 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.', 'error');
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
 
@@ -560,6 +570,7 @@
             } catch (err) {
                 let msg = err.message || 'Erreur lors de la création du compte.';
                 if (msg.includes('Email already in use')) msg = 'Cet email est déjà utilisé. Essayez de vous connecter.';
+                if (msg.includes('Moodle Error:')) msg = msg.replace('Moodle Error:', '⚠️ Exigence Moodle :');
                 showAlert('registerAlert', 'registerAlertText', msg, 'error');
             } finally {
                 btn.disabled = false;

@@ -238,21 +238,10 @@ class EnrollmentController {
         if ($admin) {
             $adminName = $admin['first_name'] . ' ' . $admin['last_name'];
             $studentName = $student['first_name'] . ' ' . $student['last_name'];
-            
-            // Generate CSV
-            $csvData = "username,firstname,lastname,password,email\r\n";
-            $csvData .= "\"{$student['email']}\",\"{$student['first_name']}\",\"{$student['last_name']}\",\"studentpassword\",\"{$student['email']}\"\r\n";
-            
-            $attachmentName = "inscription_" . preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($studentName)) . ".csv";
-            
-            $attachment = [
-                'name' => $attachmentName,
-                'data' => base64_encode($csvData)
-            ];
 
-            // Email to Admin
+            // Email to Admin (without attachment)
             $bodyAdmin = $this->emailService->getNewEnrollmentTemplate($adminName, $studentName, $course['title']);
-            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $bodyAdmin, $attachment);
+            $this->emailService->send($admin['email'], "Nouvelle Inscription : " . $course['title'], $bodyAdmin);
         }
 
         // Email to Student

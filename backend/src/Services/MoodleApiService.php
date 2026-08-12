@@ -28,7 +28,13 @@ class MoodleApiService {
             'users[0][email]' => strtolower($email),
         ];
 
-        return self::curlPost($url, $data);
+        $response = self::curlPost($url, $data);
+        
+        if (isset($response['exception'])) {
+            error_log("Moodle User Creation Failed: " . ($response['message'] ?? 'Unknown error'));
+        }
+        
+        return $response;
     }
 
     /**
@@ -42,7 +48,13 @@ class MoodleApiService {
             'service'  => 'moodle_mobile_app'
         ];
 
-        return self::curlPost($url, $data);
+        $response = self::curlPost($url, $data);
+        
+        if (isset($response['error'])) {
+            error_log("Moodle Token Retrieval Failed for $email: " . $response['error']);
+        }
+        
+        return $response;
     }
 
     /**
@@ -61,12 +73,29 @@ class MoodleApiService {
     }
 
     /**
+     * Récupère les informations d'un utilisateur par son email.
+     */
+    public static function getUserByEmail($email) {
+        $url = MOODLE_URL . '/webservice/rest/server.php';
+        $data = [
+            'wstoken' => MOODLE_TOKEN_PORTAL_API,
+            'moodlewsrestformat' => 'json',
+            'wsfunction' => 'core_user_get_users_by_field',
+            'field' => 'email',
+            'values[0]' => strtolower($email)
+        ];
+
+        return self::curlPost($url, $data);
+    }
+
+    /**
      * Helper pour faire des requêtes POST cURL
      */
-    private static function curlPost($url, $postData, $headers = []) {
+    public static function curlPost($url, $postData, $headers = []) {
         $options = [
             'http' => [
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                'header'  => "Content-type: application/x-www-form-urlencoded\r\n" .
+                             "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36\r\n",
                 'method'  => 'POST',
                 'content' => http_build_query($postData),
                 'ignore_errors' => true // to fetch HTTP error contents as well

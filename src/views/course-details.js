@@ -42,7 +42,7 @@ async function loadCourseDetails(courseId) {
             try {
                 const res = await EnrollmentService.checkStatus(studentEmail, courseId);
                 console.log('[DEBUG] Enrollment Status:', res.status);
-                updateEnrollmentButton(res.status, course.moodle_url);
+                updateEnrollmentButton(res.status, course.moodle_url || '#');
             } catch (err) {
                 console.error('Status check failed', err);
             }
@@ -241,17 +241,8 @@ function updateEnrollmentButton(status, moodleUrl) {
     btnEnroll.parentNode.replaceChild(newBtn, btnEnroll);
 
     // Status Logic
-    if (status === 'PENDING') {
-        newBtn.textContent = 'En attente de validation';
-        newBtn.style.background = '#F59E0B'; // Orange/Yellow
-        newBtn.style.cursor = 'default';
-        newBtn.href = '#';
-        newBtn.onclick = (e) => e.preventDefault();
-
-        // Add info icon
-        newBtn.innerHTML = '<i class="fas fa-clock"></i> En attente de validation';
-
-    } else if (status === 'DONE') {
+    if (status === 'DONE' || status === 'PENDING') {
+        // Force l'accès direct même si par erreur le statut est encore PENDING en bdd
         newBtn.textContent = 'Accéder au cours ↗';
         newBtn.style.background = '#10B981'; // Green
         newBtn.href = 'javascript:void(0)';
@@ -269,7 +260,7 @@ function updateEnrollmentButton(status, moodleUrl) {
             try {
                 const ssoRes = await StudentService.getMoodleSSOUrl(keys);
                 if (ssoRes.autologinurl) {
-                    const finalUrl = ssoRes.autologinurl + '?key=' + ssoRes.key + '&wantsurl=' + encodeURIComponent(moodleUrl);
+                    const finalUrl = ssoRes.autologinurl + '?userid=' + (ssoRes.moodle_userid || '') + '&key=' + ssoRes.key + '&wantsurl=' + encodeURIComponent(moodleUrl);
                     window.location.href = finalUrl;
                 } else {
                     window.open(moodleUrl, '_blank');
@@ -372,7 +363,7 @@ function setupEnrollmentLogic(course) {
                 closeModal('enrollModal');
                 showMessage('success', 'Inscription Réussie !', 'Un email de confirmation vous a été envoyé.');
 
-                updateEnrollmentButton('PENDING', null); // Update UI immediately
+                updateEnrollmentButton('DONE', moodleUrl); // Update UI immediately
 
             } catch (error) {
                 const msg = error.message || '';
@@ -472,7 +463,7 @@ function setupEnrollmentLogic(course) {
                 closeModal('registerModal');
                 showMessage('success', 'Compte Créé & Inscrit !', 'Bienvenue sur ENSPY Training. Vous pouvez maintenant accéder à vos cours.');
 
-                updateEnrollmentButton('PENDING', null);
+                updateEnrollmentButton('DONE', moodleUrl);
                 // Refresh navbar to show student name
                 injectNavbarStudentArea();
 

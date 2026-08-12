@@ -1,0 +1,172 @@
+/* ==========================================================================
+   DESIGN PREMIUM - ENSPY TRAINING (THEME ADAPTABLE)
+   ========================================================================== */
+
+/* 1. TYPOGRAPHIE & APPARENCE GLOBALE */
+body, h1, h2, h3, h4, h5, h6, 
+.navbar, .navbar-brand, .brand-name, .nav-link, 
+#page-header h1, .coursebox, .block h3 {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* 2. ZONE DE RECHERCHE DANS LE HEADER (Toujours ouverte & moderne) */
+#searchform, .search-box-container, .nav-search {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+#search-icon, #search-icon-toggle {
+    display: none !important; /* Cache la loupe à cliquer d'origine */
+}
+#searchform input[type="text"], 
+.search-box input[type="text"], 
+#coursesearch input[type="text"] {
+    width: 200px !important;
+    padding: 8px 16px 8px 32px !important;
+    border-radius: 50px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    background: rgba(0, 0, 0, 0.15) !important;
+    color: #FFFFFF !important;
+    font-size: 0.85rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+#searchform input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+#searchform input[type="text"]:focus, 
+.search-box input[type="text"]:focus {
+    width: 260px !important;
+    background: #FFFFFF !important;
+    color: #0F1419 !important;
+    border-color: #FFFFFF !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* 3. HEADER PRINCIPAL (Hauteur ajustée & Dégradé chaleureux) */
+#page-header, #header, .header-main, #logo, .logo, .logo-container, .header-hero {
+    height: auto !important;
+    min-height: 65px !important;
+    max-height: 85px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    background: linear-gradient(135deg, #a03700 0%, #cc4d00 100%) !important; /* Orange foncé noble */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), inset 0 -3px 0 rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+}
+
+/* Alignement du logo et ajustement taille */
+#page-header img, #header img, .navbar-brand img, .logo img {
+    height: 44px !important;
+    max-height: 44px !important;
+    width: auto !important;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+#page-header img:hover, #header img:hover {
+    transform: scale(1.06) rotate(1deg) !important;
+}
+
+/* Titre principal dans le header */
+#page-header h1, .header-main h1, .brand-name {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+    color: #FFFFFF !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* 4. CARTES DE COURS ET BLOCS (Look Moderne) */
+.card.dashboard-card, .coursebox, .block_myoverview .course-summaryitem {
+    border-radius: 16px !important;
+    border: 1px solid #EFF3F4 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(15, 20, 25, 0.04) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin-bottom: 1.5rem !important;
+    overflow: hidden !important;
+}
+.card.dashboard-card:hover, .coursebox:hover {
+    transform: translateY(-6px) !important;
+    border-color: #cc4d00 !important;
+    box-shadow: 0 12px 24px rgba(204, 77, 0, 0.12) !important;
+}
+
+/* Image de couverture des cours */
+.card-img-top, .course-image, .coursebox .image {
+    border-radius: 15px 15px 0 0 !important;
+    transition: transform 0.5s ease !important;
+}
+.card.dashboard-card:hover .card-img-top {
+    transform: scale(1.03) !important;
+}
+
+/* Badges de cours et tags */
+.badge-info, .badge-primary, .tag-info {
+    background-color: #cc4d00 !important;
+    color: #FFFFFF !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    padding: 0.3em 0.8em !important;
+}
+
+/* Barre de progression des cours */
+.progress-bar {
+    background-color: #cc4d00 !important;
+}
+.progress {
+    height: 6px !important;
+    border-radius: 10px !important;
+}
+
+/* 5. BOUTONS PREMIUM ARRONDIS */
+.btn-primary, input[type="submit"], .btn-login, .navbar .btn-secondary {
+    background-color: #cc4d00 !important;
+    border-color: #a03700 !important;
+    color: #FFFFFF !important;
+    border-radius: 50px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+    padding: 8px 24px !important;
+    box-shadow: 0 4px 10px rgba(204, 77, 0, 0.15) !important;
+    transition: all 0.2s ease !important;
+    text-transform: uppercase;
+    font-size: 0.85rem !important;
+}
+.btn-primary:hover, input[type="submit"]:hover, .btn-login:hover {
+    background-color: #a03700 !important;
+    box-shadow: 0 6px 18px rgba(204, 77, 0, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 6. BARRE DE NAVIGATION INFÉRIEURE / MENU DU COMPTE (NavBar Top) */
+.navbar.navbar-light {
+    background-color: #0F1419 !important; /* Noir moderne */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+.navbar.navbar-light .nav-link {
+    color: #E2E8F0 !important;
+}
+.navbar.navbar-light .nav-link:hover {
+    color: #cc4d00 !important;
+}
+.navbar .usermenu .dropdown-toggle {
+    color: #FFFFFF !important;
+}
+
+/* 7. BLOCS D'INFORMATION ET ACCORDÉONS */
+.block .card-body {
+    padding: 1.25rem !important;
+}
+.block .card-title {
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    border-bottom: 2px solid #EFF3F4 !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+}
+.collapse-card {
+    border-radius: 12px !important;
+    border: 1px solid #EFF3F4 !important;
+}

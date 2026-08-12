@@ -13,15 +13,26 @@ class SSOController {
      * Attend dans payload: { "moodle_token": "...", "moodle_privatetoken": "..." }
      */
     public function getMoodleSSOUrl($data) {
-        if (empty($data['moodle_token']) || empty($data['moodle_privatetoken'])) {
+        if (empty($data['token']) || empty($data['privatetoken'])) {
             return $this->jsonResponse(['message' => 'Jetons manquants pour le SSO'], 400);
         }
 
-        $ssoData = \MoodleApiService::getAutologinUrl($data['moodle_token'], $data['moodle_privatetoken']);
+        $ssoData = \MoodleApiService::getAutologinUrl($data['token'], $data['privatetoken']);
+
+        // Récupérer l'ID utilisateur Moodle (indispensable pour l'URL finale)
+        $siteInfo = \MoodleApiService::curlPost(MOODLE_URL . '/webservice/rest/server.php', [
+            'wstoken' => $data['token'],
+            'moodlewsrestformat' => 'json',
+            'wsfunction' => 'core_webservice_get_site_info'
+        ]);
 
         if (!$ssoData || !isset($ssoData['autologinurl']) || !isset($ssoData['key'])) {
+            $errorMsg = 'Impossible de générer le lien de connexion Moodle';
+            if (isset($ssoData['message'])) {
+                $errorMsg .= ' : ' . $ssoData['message'];
+            }
             return $this->jsonResponse([
-                'message' => 'Impossible de générer le lien de connexion Moodle',
+                'message' => $errorMsg,
                 'details' => $ssoData
             ], 500);
         }
@@ -29,7 +40,8 @@ class SSOController {
         return $this->jsonResponse([
             'message' => 'SSO URL Generated',
             'autologinurl' => $ssoData['autologinurl'],
-            'key' => $ssoData['key']
+            'key' => $ssoData['key'],
+            'moodle_userid' => $siteInfo['userid'] ?? null
         ], 200);
     }
     

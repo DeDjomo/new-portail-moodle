@@ -1,0 +1,186 @@
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ENSPY TRAINING — Classic (coller dans HTML additionnel → Dans l'en-tête) */
+
+body, h1, h2, h3, h4, h5, h6, .navbar, .nav-link, .block, .coursebox {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+a { color: #FF6B00 !important; }
+a:hover { color: #EA580C !important; }
+
+.btn-primary, input[type="submit"] {
+    background-color: #FF6B00 !important;
+    border-color: #EA580C !important;
+    color: #fff !important;
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+}
+.btn-primary:hover, input[type="submit"]:hover {
+    background-color: #EA580C !important;
+}
+
+/* Navbar sombre ENSPY */
+.navbar, .navbar-inner, #page-navbar {
+    background-color: #0F1419 !important;
+}
+.navbar a, .navbar .nav-link, .usermenu .dropdown-toggle {
+    color: #E2E8F0 !important;
+}
+.navbar a:hover, .navbar .nav-link:hover {
+    color: #FF6B00 !important;
+}
+
+/* Supprimer la bande blanche vide (#page-header) sur l'accueil */
+.pagelayout-frontpage #page-header,
+body#page-site-index #page-header {
+    display: none !important;
+}
+
+/* Sur les autres pages : header compact, sans carte blanche énorme */
+#page-header {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.5rem 0 !important;
+    margin: 0 !important;
+}
+#page-header .card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0.25rem 0 !important;
+}
+#page-header .breadcrumb,
+#page-navbar .breadcrumb {
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0.35rem 0 !important;
+}
+
+/* Cours en grille de cartes */
+#frontpage-available-course-list .courses,
+#frontpage-course-list .courses,
+.pagelayout-frontpage .courses,
+body#page-site-index .courses {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
+    gap: 1.5rem !important;
+    clear: both !important;
+}
+
+#frontpage-available-course-list .coursebox,
+#frontpage-course-list .coursebox,
+.pagelayout-frontpage .coursebox,
+body#page-site-index .coursebox {
+    display: flex !important;
+    flex-direction: column !important;
+    float: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: 1px solid #EFF3F4 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 12px rgba(15, 20, 25, 0.06) !important;
+    overflow: hidden !important;
+}
+
+#frontpage-available-course-list .coursebox:hover,
+#frontpage-course-list .coursebox:hover,
+.pagelayout-frontpage .coursebox:hover,
+body#page-site-index .coursebox:hover {
+    transform: translateY(-4px) !important;
+    border-color: #FF6B00 !important;
+    box-shadow: 0 12px 24px rgba(255, 107, 0, 0.14) !important;
+}
+
+/* Masquer résumé long + teachers */
+#frontpage-available-course-list .coursebox .summary,
+#frontpage-available-course-list .coursebox .content .summary,
+#frontpage-available-course-list .coursebox .teachers,
+#frontpage-available-course-list .coursebox .customfields-container,
+#frontpage-available-course-list .coursebox .moreinfo,
+#frontpage-course-list .coursebox .summary,
+#frontpage-course-list .coursebox .content .summary,
+#frontpage-course-list .coursebox .teachers,
+.pagelayout-frontpage .coursebox .summary,
+.pagelayout-frontpage .coursebox .content .summary,
+.pagelayout-frontpage .coursebox .teachers,
+body#page-site-index .coursebox .summary,
+body#page-site-index .coursebox .teachers {
+    display: none !important;
+}
+
+#frontpage-available-course-list .coursebox .content,
+#frontpage-course-list .coursebox .content,
+.pagelayout-frontpage .coursebox .content,
+body#page-site-index .coursebox .content {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    float: none !important;
+    width: 100% !important;
+}
+
+#frontpage-available-course-list .coursebox .courseimage,
+#frontpage-course-list .coursebox .courseimage,
+.pagelayout-frontpage .coursebox .courseimage,
+body#page-site-index .coursebox .courseimage,
+#frontpage-available-course-list .coursebox .content .courseimage,
+#frontpage-course-list .coursebox .content .courseimage {
+    display: block !important;
+    order: -1 !important;
+    width: 100% !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#frontpage-available-course-list .coursebox .courseimage img,
+#frontpage-course-list .coursebox .courseimage img,
+.pagelayout-frontpage .coursebox .courseimage img,
+body#page-site-index .coursebox .courseimage img,
+#frontpage-available-course-list .coursebox .content .courseimage img,
+#frontpage-course-list .coursebox .content .courseimage img {
+    display: block !important;
+    width: 100% !important;
+    height: 170px !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+}
+
+#frontpage-available-course-list .coursebox .info,
+#frontpage-course-list .coursebox .info,
+.pagelayout-frontpage .coursebox .info,
+body#page-site-index .coursebox .info {
+    float: none !important;
+    width: 100% !important;
+    padding: 1rem 1.1rem 1.25rem !important;
+}
+
+#frontpage-available-course-list .coursebox .coursename a,
+#frontpage-course-list .coursebox .coursename a,
+.pagelayout-frontpage .coursebox .coursename a,
+body#page-site-index .coursebox .coursename a {
+    color: #0F1419 !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+}
+
+#frontpage-available-course-list .coursebox .coursename a:hover,
+#frontpage-course-list .coursebox .coursename a:hover,
+.pagelayout-frontpage .coursebox .coursename a:hover,
+body#page-site-index .coursebox .coursename a:hover {
+    color: #FF6B00 !important;
+}
+
+#page-footer {
+    background: #0F1419 !important;
+    color: #E2E8F0 !important;
+    border-top: 3px solid #FF6B00 !important;
+}
+#page-footer a { color: #FF9D5C !important; }
+</style>

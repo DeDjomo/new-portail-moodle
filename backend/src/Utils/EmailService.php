@@ -163,16 +163,16 @@ class EmailService {
         <html>
         <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
             <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
-                <h2 style='color: #004a99; text-align: center;'>Nouvelle Inscription</h2>
+                <h2 style='color: #004a99; text-align: center;'>Nouvelle Inscription Réussie</h2>
                 <hr style='border: 0; border-top: 10px solid #004a99;'>
                 <p>Bonjour <strong>{$adminName}</strong>,</p>
-                <p>Un nouvel étudiant vient de s'inscrire à l'un de vos cours :</p>
+                <p>Un nouvel étudiant vient de s'inscrire automatiquement à votre cours de la plateforme :</p>
                 <div style='background: #f4f8ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 5px solid #004a99;'>
                     <p style='margin: 5px 0;'><strong>Cours :</strong> {$courseTitle}</p>
                     <p style='margin: 5px 0;'><strong>Étudiant :</strong> {$studentName}</p>
                     <p style='margin: 5px 0;'><strong>Date :</strong> " . date('d/m/Y H:i') . "</p>
                 </div>
-                <p>Vous pouvez consulter la liste complète des participants depuis votre tableau de bord.</p>
+                <p>Aucune action manuelle n'est requise de votre part. Le compte de l'étudiant a été automatiquement activé et synchronisé.</p>
                 <br>
                 <p>Cordialement,<br><strong>L'équipe Portail Moodle</strong></p>
                 <hr style='border: 0; border-top: 1px solid #eee;'>
@@ -187,20 +187,18 @@ class EmailService {
         <html>
         <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
             <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>
-                <h2 style='color: #F59E0B; text-align: center;'>Inscription en attente de validation</h2>
-                <hr style='border: 0; border-top: 10px solid #F59E0B;'>
+                <h2 style='color: #10B981; text-align: center;'>🎉 Inscription Validée</h2>
+                <hr style='border: 0; border-top: 10px solid #10B981;'>
                 <p>Bonjour <strong>{$studentName}</strong>,</p>
-                <p>Votre demande d'inscription au cours suivant a bien été reçue :</p>
-                <div style='background: #fffbeb; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #F59E0B;'>
-                    <h3 style='margin: 0; color: #92400e;'>{$courseTitle}</h3>
+                <p>Votre inscription au cours est confirmée. Vous faites désormais partie des apprenants :</p>
+                <div style='background: #ECFDF5; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px dashed #10B981;'>
+                    <h3 style='margin: 0; color: #065F46;'>{$courseTitle}</h3>
                     <p style='margin: 5px 0;'><strong>Date :</strong> " . date('d/m/Y') . "</p>
-                    <p style='margin: 5px 0;'><strong>Statut :</strong> <span style='color: #F59E0B; font-weight: bold;'>En attente</span></p>
+                    <p style='margin: 5px 0;'><strong>Statut :</strong> <span style='color: #10B981; font-weight: bold;'>✅ Accès Actif</span></p>
                 </div>
-                <p>Votre inscription est actuellement en cours de validation par l'administrateur du cours.</p>
-                <p>Vous recevrez une notification dès que votre accès sera validé.</p>
-                <p>Pensez à consulter régulièrement vos e-mails (et vos spams) dans les 2 jours qui suivent votre inscription.</p>
+                <p>Vous pouvez dès maintenant accéder librement à vos cours directement depuis votre espace personnel (Portail) via le bouton <strong>Accéder au cours</strong>.</p>
                 <br>
-                <p>Cordialement,<br><strong>L'équipe ENSPY Training</strong></p>
+                <p>Bonne formation !<br><strong>L'équipe ENSPY Training</strong></p>
                 <hr style='border: 0; border-top: 1px solid #eee;'>
             </div>
         </body>
